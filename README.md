@@ -1,4 +1,4 @@
-StudioSlot
+# StudioSlot
 
 [![CI](https://github.com/uncodegen-beep/studio-slot-course/actions/workflows/ci.yml/badge.svg)](https://github.com/uncodegen-beep/studio-slot-course/actions/workflows/ci.yml)
 
