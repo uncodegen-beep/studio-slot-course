@@ -14,6 +14,7 @@
         "test": "ng test",
         "test:run": "ng test --watch=false",
         "test:ci": "ng test --watch=false --coverage",
+        "test:task": "node scripts/test-task.mjs",
         "lint:ts": "ng lint",
         "lint:ts:fix": "ng lint --fix",
         "lint": "npm run lint:ts",
