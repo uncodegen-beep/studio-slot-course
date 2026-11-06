@@ -1,5 +1,15 @@
 <app-header />
 
 <main>
+    <input
+        #query
+        type="search"
+        placeholder="Поиск студии"
+        aria-label="Поиск студии"
+        (keyup.enter)="search(query.value)"
+    />
+
+    <app-studio-card />
+
     <router-outlet />
 </main>

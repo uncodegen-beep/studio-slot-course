@@ -18,4 +18,13 @@ describe('AppComponent', () => {
         const logo = (fixture.nativeElement as HTMLElement).querySelector('app-header .logo');
         expect(logo?.textContent).toContain('StudioSlot');
     });
+
+    it('показывает карточку студии с названием и ценой', () => {
+        const fixture = TestBed.createComponent(AppComponent);
+        fixture.detectChanges();
+
+        const card = (fixture.nativeElement as HTMLElement).querySelector('app-studio-card');
+        expect(card?.querySelector('.card__title')?.textContent).toContain('Sound Garden');
+        expect(card?.querySelector('.card__meta')?.textContent).toContain('1500 ₽/час');
+    });
 });
