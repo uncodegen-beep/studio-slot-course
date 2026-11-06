@@ -1,0 +1,2 @@
+# Lock-файл форматирует npm: иначе каждый PR от Dependabot падает на format:check
+package-lock.json

@@ -1,0 +1,61 @@
+{
+    "$schema": "https://json.schemastore.org/prettierrc",
+    "printWidth": 100,
+    "tabWidth": 4,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": true,
+    "quoteProps": "as-needed",
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "bracketSameLine": false,
+    "arrowParens": "always",
+    "endOfLine": "lf",
+    "htmlWhitespaceSensitivity": "css",
+    "singleAttributePerLine": true,
+    "plugins": ["@trivago/prettier-plugin-sort-imports"],
+    "importOrder": [
+        "^@angular/(.*)$",
+        "^@nestjs/(.*)$",
+        "<THIRD_PARTY_MODULES>",
+        "^@app/(.*)$",
+        "^@pages/(.*)$",
+        "^@widgets/(.*)$",
+        "^@features/(.*)$",
+        "^@entities/(.*)$",
+        "^@shared/(.*)$",
+        "^[./]"
+    ],
+    "importOrderSeparation": true,
+    "importOrderSortSpecifiers": true,
+    "importOrderParserPlugins": ["typescript", "decorators-legacy"],
+    "overrides": [
+        {
+            "files": "*.html",
+            "options": {
+                "parser": "angular",
+                "printWidth": 120,
+                "singleQuote": false
+            }
+        },
+        {
+            "files": ["*.json", "*.jsonc"],
+            "options": {
+                "parser": "json"
+            }
+        },
+        {
+            "files": ["*.yaml", "*.yml"],
+            "options": {
+                "parser": "yaml"
+            }
+        },
+        {
+            "files": "*.md",
+            "options": {
+                "parser": "markdown",
+                "proseWrap": "always"
+            }
+        }
+    ]
+}

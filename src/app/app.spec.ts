@@ -1,21 +1,19 @@
-import { TestBed } from "@angular/core/testing";
+import { TestBed } from '@angular/core/testing';
 
-import { App } from "./app";
+import { AppComponent } from './app';
 
-describe("App", () => {
+describe('App', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [App],
+            imports: [AppComponent],
         }).compileComponents();
     });
 
-    it("создаётся и показывает название проекта", () => {
-        const fixture = TestBed.createComponent(App);
+    it('создаётся и показывает название проекта', () => {
+        const fixture = TestBed.createComponent(AppComponent);
         fixture.detectChanges();
 
-        const title = (fixture.nativeElement as HTMLElement).querySelector(
-            "h1",
-        );
-        expect(title?.textContent).toContain("StudioSlot");
+        const title = (fixture.nativeElement as HTMLElement).querySelector('h1');
+        expect(title?.textContent).toContain('StudioSlot');
     });
 });
