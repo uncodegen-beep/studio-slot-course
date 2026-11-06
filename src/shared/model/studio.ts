@@ -4,7 +4,16 @@ export interface Studio {
     name: string;
     city: string;
     pricePerHour: number;
+    /** Обложка: путь от корня сайта или https-ссылка */
+    coverUrl: string;
+    /** Принимает ли бронирования сейчас */
+    isOpen: boolean;
+    /** Рейтинг 0–5 */
     rating?: number;
+    /** Подборка «Рекомендуем» */
+    featured?: boolean;
+    /** Появилась в каталоге недавно */
+    isNew?: boolean;
 }
 
 /** Карточка в списке: только то, что показываем */

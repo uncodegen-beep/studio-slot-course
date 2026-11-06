@@ -1,0 +1,62 @@
+:host {
+    display: block;
+    max-width: 320px;
+}
+
+.card {
+    overflow: hidden;
+    border: 1px solid #d0d4e0;
+    border-radius: 12px;
+
+    &--featured {
+        border-color: #6b5bd6;
+    }
+
+    &--closed {
+        opacity: 0.6;
+    }
+}
+
+.card__cover {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.card__body {
+    padding: 12px 16px 16px;
+}
+
+.card__title {
+    margin: 0 0 4px;
+}
+
+.card__meta {
+    margin: 0 0 12px;
+    color: #5b6275;
+}
+
+.card__rating {
+    height: 6px;
+    margin-bottom: 12px;
+    border-radius: 3px;
+    background: #e6e8ef;
+}
+
+.card__rating-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: #f2b01e;
+}
+
+.card__actions {
+    display: flex;
+    gap: 8px;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}

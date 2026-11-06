@@ -1,0 +1,53 @@
+<article
+    class="card"
+    [class.card--closed]="!studio.isOpen"
+    [class.card--featured]="studio.featured"
+    [class.card--new]="studio.isNew"
+>
+    <img
+        class="card__cover"
+        [src]="studio.coverUrl"
+        [alt]="studio.name"
+    />
+
+    <div class="card__body">
+        <h3 class="card__title">{{ studio.name }}</h3>
+        <p class="card__meta">{{ studio.city }} · от {{ studio.pricePerHour }} ₽/час</p>
+
+        <!-- ?? 0 — rating необязательный, а строгий TS не даёт умножать undefined -->
+        <div
+            class="card__rating"
+            role="img"
+            [attr.aria-label]="'Рейтинг ' + studio.rating + ' из 5'"
+        >
+            <div
+                class="card__rating-bar"
+                [style.width.%]="(studio.rating ?? 0) * 20"
+            ></div>
+        </div>
+
+        <div class="card__actions">
+            <button
+                type="button"
+                [disabled]="!studio.isOpen"
+            >
+                Забронировать
+            </button>
+            <button
+                type="button"
+                [attr.aria-label]="'Добавить ' + studio.name + ' в избранное'"
+                (click)="toggleFavorite(studio.id)"
+            >
+                <!-- aria-hidden: подпись для скринридера — aria-label на кнопке.
+                     Путь без «/» в начале — работает и с base href GitHub Pages -->
+                <svg
+                    class="icon"
+                    aria-hidden="true"
+                    focusable="false"
+                >
+                    <use href="icons/sprite.svg#heart" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</article>
