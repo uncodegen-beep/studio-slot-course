@@ -1,0 +1,17 @@
+# Зависимости и сборка
+node_modules/
+dist/
+.angular/
+coverage/
+
+# Окружение и секреты
+.env
+.env.*
+!.env.example
+
+# Системное и редакторы (кроме общих настроек проекта)
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
