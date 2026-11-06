@@ -14,6 +14,7 @@
         <h3 class="card__title">{{ studio.name }}</h3>
         <p class="card__meta">{{ studio.city }} · от {{ studio.pricePerHour }} ₽/час</p>
 
+        <!-- ?? 0 — rating необязательный, а строгий TS не даёт умножать undefined -->
         <div
             class="card__rating"
             role="img"
@@ -21,7 +22,6 @@
         >
             <div
                 class="card__rating-bar"
-                // ?? 0 — rating необязательный, а строгий TS не даёт умножать undefined
                 [style.width.%]="(studio.rating ?? 0) * 20"
             ></div>
         </div>
@@ -38,9 +38,10 @@
                 [attr.aria-label]="'Добавить ' + studio.name + ' в избранное'"
                 (click)="toggleFavorite(studio.id)"
             >
+                <!-- aria-hidden: подпись для скринридера — aria-label на кнопке.
+                     Путь без «/» в начале — работает и с base href GitHub Pages -->
                 <svg
                     class="icon"
-                    /* aria-hidden: подпись для скринридера — aria-label на кнопке */
                     aria-hidden="true"
                     focusable="false"
                 >
