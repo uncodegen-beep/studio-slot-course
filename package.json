@@ -11,6 +11,7 @@
         "start:dev": "ng serve",
         "build:prod": "ng build",
         "watch:dev": "ng build --watch --configuration development",
+        "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.spec.json",
         "test": "ng test",
         "test:run": "ng test --watch=false",
         "test:ci": "ng test --watch=false --coverage",
