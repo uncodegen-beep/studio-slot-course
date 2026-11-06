@@ -15,7 +15,7 @@ describe('AppComponent', () => {
         const fixture = TestBed.createComponent(AppComponent);
         fixture.detectChanges();
 
-        const logo = (fixture.nativeElement as HTMLElement).querySelector('h1');
-        expect(logo?.textContent).toContain('app-header .logo');
+        const logo = (fixture.nativeElement as HTMLElement).querySelector('app-header .logo');
+        expect(logo?.textContent).toContain('StudioSlot');
     });
 });

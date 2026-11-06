@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { HeaderComponent } from '@widgets/header/header.component';
+import { HeaderComponent } from '@widgets/header/ui/header.component';
 
 @Component({
     selector: 'app-root',
