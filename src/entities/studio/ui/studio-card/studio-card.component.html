@@ -21,6 +21,7 @@
         >
             <div
                 class="card__rating-bar"
+                // ?? 0 — rating необязательный, а строгий TS не даёт умножать undefined
                 [style.width.%]="(studio.rating ?? 0) * 20"
             ></div>
         </div>
@@ -39,9 +40,11 @@
             >
                 <svg
                     class="icon"
+                    /* aria-hidden: подпись для скринридера — aria-label на кнопке */
                     aria-hidden="true"
                     focusable="false"
                 >
+                    <!-- Путь без «/» в начале — работает и с base href GitHub Pages -->
                     <use href="icons/sprite.svg#heart" />
                 </svg>
             </button>

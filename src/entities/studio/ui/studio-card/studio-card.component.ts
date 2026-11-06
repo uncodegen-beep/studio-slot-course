@@ -9,6 +9,7 @@ import { Studio } from '@shared/model';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudioCardComponent {
+    /** Пока данные прямо в компоненте — в уроке 16 придут через @Input */
     protected readonly studio: Studio = {
         id: 'sound-garden',
         name: 'Sound Garden',
