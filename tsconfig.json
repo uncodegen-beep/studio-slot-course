@@ -8,17 +8,41 @@
         "noFallthroughCasesInSwitch": true,
         "skipLibCheck": true,
         "isolatedModules": true,
+        "useDefineForClassFields": true,
         "experimentalDecorators": true,
         "importHelpers": true,
         "target": "ES2022",
         "module": "preserve",
-        "rootDir": "."
+        "moduleResolution": "bundler",
+        "lib": ["es2022", "dom", "dom.iterable"],
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noUncheckedIndexedAccess": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+
+        "rootDir": ".",
+        "paths": {
+            "@app/*": ["./src/app/*"],
+            "@pages/*": ["./src/pages/*"],
+            "@widgets/*": ["./src/widgets/*"],
+            "@features/*": ["./src/features/*"],
+            "@entities/*": ["./src/entities/*"],
+            "@shared/*": ["./src/shared/*"]
+        }
     },
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,
         "strictInjectionParameters": true,
         "strictInputAccessModifiers": true,
-        "strictTemplates": true
+        "strictTemplates": true,
+        "strictAttributeTypes": true,
+        "strictOutputEventTypes": true,
+        "strictNullInputTypes": true,
+        "extendedDiagnostics": {
+            "defaultCategory": "error"
+        }
     },
     "files": [],
     "references": [
