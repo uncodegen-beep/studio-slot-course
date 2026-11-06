@@ -15,7 +15,29 @@
                     "changeDetection": "OnPush",
                     "displayBlock": true,
                     "standalone": true,
-                    "skipTests": true
+                    "skipTests": true,
+                    "type": "component"
+                },
+                "@schematics/angular:directive": {
+                    "type": "directive"
+                },
+                "@schematics/angular:service": {
+                    "type": "service"
+                },
+                "@schematics/angular:pipe": {
+                    "typeSeparator": "."
+                },
+                "@schematics/angular:module": {
+                    "typeSeparator": "."
+                },
+                "@schematics/angular:guard": {
+                    "typeSeparator": "."
+                },
+                "@schematics/angular:interceptor": {
+                    "typeSeparator": "."
+                },
+                "@schematics/angular:resolver": {
+                    "typeSeparator": "."
                 }
             },
             "root": "",

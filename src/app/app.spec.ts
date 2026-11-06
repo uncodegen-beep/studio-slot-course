@@ -1,19 +1,21 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { AppComponent } from './app';
 
-describe('App', () => {
+describe('AppComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [AppComponent],
+            providers: [provideRouter([])],
         }).compileComponents();
     });
 
-    it('создаётся и показывает название проекта', () => {
+    it('показывает шапку с названием проекта', () => {
         const fixture = TestBed.createComponent(AppComponent);
         fixture.detectChanges();
 
-        const title = (fixture.nativeElement as HTMLElement).querySelector('h1');
-        expect(title?.textContent).toContain('StudioSlot');
+        const logo = (fixture.nativeElement as HTMLElement).querySelector('h1');
+        expect(logo?.textContent).toContain('app-header .logo');
     });
 });
