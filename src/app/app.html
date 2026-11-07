@@ -11,5 +11,21 @@
 
     <app-studio-card />
 
+    <h2>Студии</h2>
+    <app-studio-list [studios]="studios" />
+
+    <h2>Компактно: свой шаблон элемента</h2>
+    <app-studio-list
+        [studios]="studios"
+        [itemTemplate]="compactItem"
+    />
+
+    <ng-template
+        #compactItem
+        let-studio
+    >
+        <strong>{{ studio.name }} · {{ studio.city }}, от {{ studio.pricePerHour }} ₽/час </strong>
+    </ng-template>
+
     <router-outlet />
 </main>
