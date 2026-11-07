@@ -1,31 +1,8 @@
 <app-header />
 
 <main>
-    <input
-        #query
-        type="search"
-        placeholder="Поиск студии"
-        aria-label="Поиск студии"
-        (keyup.enter)="search(query.value)"
-    />
-
-    <app-studio-card />
-
-    <h2>Студии</h2>
-    <app-studio-list [studios]="studios" />
-
-    <h2>Компактно: свой шаблон элемента</h2>
-    <app-studio-list
-        [studios]="studios"
-        [itemTemplate]="compactItem"
-    />
-
-    <ng-template
-        #compactItem
-        let-studio
-    >
-        <strong>{{ studio.name }}</strong> · {{ studio.city }}, от {{ studio.pricePerHour }} ₽/час
-    </ng-template>
+    <!-- Пока каталог — единственная страница; маршруты страниц — модуль 04 -->
+    <app-catalog-page />
 
     <router-outlet />
 </main>
