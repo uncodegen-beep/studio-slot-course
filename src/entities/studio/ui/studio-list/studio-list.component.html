@@ -1,0 +1,27 @@
+<!-- Без @if (урок 12): выбираем, какой шаблон вывести, прямо в ngTemplateOutlet -->
+<ng-container [ngTemplateOutlet]="studios.length ? list : emptyState" />
+
+<ng-template #list>
+    <ul class="list">
+        @for (studio of studios; track studio.id; let i = $index) {
+            <li>
+                <ng-container
+                    [ngTemplateOutlet]="itemTemplate ?? defaultItem"
+                    [ngTemplateOutletContext]="{ $implicit: studio, index: i }"
+                />
+            </li>
+        }
+    </ul>
+</ng-template>
+
+<ng-template
+    #defaultItem
+    let-studio
+    let-i="index"
+>
+    {{ i + 1 }}. {{ studio.name }}
+</ng-template>
+
+<ng-template #emptyState>
+    <p class="empty">Студий не найдено. Попробуйте изменить фильтры.</p>
+</ng-template>
