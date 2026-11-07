@@ -1,23 +1,15 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { HeaderComponent } from '@widgets/header/ui/header.component';
+import { CatalogPageComponent } from '@pages/catalog/ui/catalog-page.component';
 
-import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
-import { StudioCardComponent } from '@entities/studio/ui/studio-card/studio-card.component';
-import { StudioListComponent } from '@entities/studio/ui/studio-list/studio-list.component';
+import { HeaderComponent } from '@widgets/header/ui/header.component';
 
 @Component({
     selector: 'app-root',
-    imports: [HeaderComponent, RouterOutlet, StudioCardComponent, StudioListComponent],
+    imports: [HeaderComponent, RouterOutlet, CatalogPageComponent],
     templateUrl: './app.html',
     styleUrl: './app.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
-    protected readonly studios = DEMO_STUDIOS;
-
-    protected search(query: string): void {
-        console.warn('поиск', query);
-    }
-}
+export class AppComponent {}

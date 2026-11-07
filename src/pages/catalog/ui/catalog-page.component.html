@@ -1,0 +1,46 @@
+<h1>Каталог студий</h1>
+
+<input
+    #query
+    type="search"
+    placeholder="Поиск студии"
+    aria-label="Поиск студии"
+    (keyup.enter)="search(query.value)"
+/>
+
+<!-- Демо: переключаем состояние экрана вручную, пока нет настоящей загрузки -->
+<div
+    class="demo-states"
+    role="group"
+    aria-label="Состояние каталога"
+>
+    @for (state of demoStates; track state.value) {
+        <button
+            type="button"
+            (click)="showState(state.value)"
+        >
+            {{ state.label }}
+        </button>
+    }
+</div>
+
+@if (loading) {
+    <app-spinner />
+} @else if (error) {
+    <p role="alert">Не удалось загрузить студии: {{ error }}</p>
+} @else if (studios.length === 0) {
+    <ng-container [ngTemplateOutlet]="emptyState"></ng-container>
+} @else {
+    <!-- as сужает тип: внутри блока studio — Studio, а не Studio | undefined -->
+    @if (featured; as studio) {
+        <h2>Рекомендуем: {{ studio.name }}</h2>
+        <app-studio-card />
+    }
+
+    <h2>Все студии</h2>
+    <app-studio-list [studios]="studios" />
+}
+
+<ng-template #emptyState>
+    <p class="empty">Каталог пока пуст: студии появятся, как только владельцы их добавят.</p>
+</ng-template>
