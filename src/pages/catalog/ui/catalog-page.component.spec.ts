@@ -59,7 +59,7 @@ describe('CatalogPageComponent', () => {
         await showState('Пусто');
 
         expect(root.querySelector('.empty')?.textContent).toContain('Каталог пока пуст');
-    }); // ← этой строки не хватает
+    });
 
     it('track: новые объекты с теми же id не пересоздают <li>', async () => {
         const { items, listAction } = setup();
