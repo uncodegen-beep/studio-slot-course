@@ -29,7 +29,7 @@
 } @else if (error) {
     <p role="alert">Не удалось загрузить студии: {{ error }}</p>
 } @else if (studios.length === 0) {
-    <ng-container [ngTemplateOutlet]="emptyState"></ng-container>
+    <ng-container [ngTemplateOutlet]="emptyState" />
 } @else {
     <!-- as сужает тип: внутри блока studio — Studio, а не Studio | undefined -->
     @if (featured; as studio) {
@@ -38,6 +38,27 @@
     }
 
     <h2>Все студии</h2>
+
+    <!-- Демо track: следите в DevTools → Elements, пересоздаются ли <li> -->
+    <div
+        class="list-actions"
+        role="group"
+        aria-label="Действия со списком"
+    >
+        <button
+            type="button"
+            (click)="reverse()"
+        >
+            Обратный порядок
+        </button>
+        <button
+            type="button"
+            (click)="refresh()"
+        >
+            Обновить данные
+        </button>
+    </div>
+
     <app-studio-list [studios]="studios" />
 }
 

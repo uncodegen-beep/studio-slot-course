@@ -2,20 +2,32 @@ import { TestBed } from '@angular/core/testing';
 
 import { CatalogPageComponent } from './catalog-page.component';
 
-function setup(): { root: HTMLElement; showState: (label: string) => Promise<void> } {
+interface Setup {
+    root: HTMLElement;
+    showState: (label: string) => Promise<void>;
+    listAction: (label: string) => Promise<void>;
+    items: () => HTMLLIElement[];
+}
+
+function setup(): Setup {
     const fixture = TestBed.createComponent(CatalogPageComponent);
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
 
-    const showState = async (label: string): Promise<void> => {
-        const button = [...root.querySelectorAll<HTMLButtonElement>('.demo-states button')].find(
+    const clickIn = async (group: string, label: string): Promise<void> => {
+        const button = [...root.querySelectorAll<HTMLButtonElement>(`${group} button`)].find(
             (b) => b.textContent?.trim() === label,
         );
         button?.click();
         await fixture.whenStable();
     };
 
-    return { root, showState };
+    return {
+        root,
+        showState: (label) => clickIn('.demo-states', label),
+        listAction: (label) => clickIn('.list-actions', label),
+        items: () => [...root.querySelectorAll<HTMLLIElement>('app-studio-list li')],
+    };
 }
 
 describe('CatalogPageComponent', () => {
@@ -43,8 +55,30 @@ describe('CatalogPageComponent', () => {
 
     it('пустой каталог — шаблон emptyState', async () => {
         const { root, showState } = setup();
+
         await showState('Пусто');
 
         expect(root.querySelector('.empty')?.textContent).toContain('Каталог пока пуст');
+    }); // ← этой строки не хватает
+
+    it('track: новые объекты с теми же id не пересоздают <li>', async () => {
+        const { items, listAction } = setup();
+        const before = items();
+
+        await listAction('Обновить данные');
+
+        expect(items()).toHaveLength(before.length);
+        items().forEach((item, i) => expect(item).toBe(before[i]));
+    });
+
+    it('track: при смене порядка <li> переставляются, а не создаются', async () => {
+        const { items, listAction } = setup();
+        const [first, , last] = items();
+
+        await listAction('Обратный порядок');
+
+        expect(items()[0]).toBe(last);
+        expect(items()[2]).toBe(first);
+        expect(items()[0]?.textContent).toContain('Volga Records');
     });
 });
