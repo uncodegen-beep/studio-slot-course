@@ -1,18 +1,17 @@
-<!-- Без @if (урок 12): выбираем, какой шаблон вывести, прямо в ngTemplateOutlet -->
-<ng-container [ngTemplateOutlet]="studios.length ? list : emptyState" />
-
-<ng-template #list>
-    <ul class="list">
-        @for (studio of studios; track studio.id; let i = $index) {
-            <li>
-                <ng-container
-                    [ngTemplateOutlet]="itemTemplate ?? defaultItem"
-                    [ngTemplateOutletContext]="{ $implicit: studio, index: i }"
-                />
-            </li>
-        }
-    </ul>
-</ng-template>
+<ul class="list">
+    <!-- track studio.id: по ключу Angular узнаёт студию после обновления массива -->
+    @for (studio of studios; track studio.id; let i = $index, even = $even) {
+        <li [class.even]="even">
+            <ng-container
+                [ngTemplateOutlet]="itemTemplate ?? defaultItem"
+                [ngTemplateOutletContext]="{ $implicit: studio, index: i }"
+            />
+        </li>
+    } @empty {
+        <!-- @empty выводится, когда массив пуст: отдельный @if не нужен -->
+        <li class="empty">Студий не найдено. Попробуйте изменить фильтры.</li>
+    }
+</ul>
 
 <ng-template
     #defaultItem
@@ -20,8 +19,4 @@
     let-i="index"
 >
     {{ i + 1 }}. {{ studio.name }}
-</ng-template>
-
-<ng-template #emptyState>
-    <p class="empty">Студий не найдено. Попробуйте изменить фильтры.</p>
 </ng-template>

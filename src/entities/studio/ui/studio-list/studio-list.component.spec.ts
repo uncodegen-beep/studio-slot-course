@@ -57,10 +57,18 @@ describe('StudioListComponent', () => {
         expect(names[1]?.textContent).toBe('Nevsky Beat');
     });
 
-    it('пустой список показывает emptyState', () => {
-        const root = render();
+    it('чётные по $even элементы получают класс even', () => {
+        const items = render().querySelectorAll('.default li');
 
-        expect(root.querySelector('.none .empty')?.textContent).toContain('Студий не найдено');
-        expect(root.querySelector('.none li')).toBeNull();
+        expect(items[0]?.classList).toContain('even');
+        expect(items[1]?.classList).not.toContain('even');
+    });
+
+    it('пустой список показывает блок @empty', () => {
+        const items = render().querySelectorAll('.none li');
+
+        expect(items).toHaveLength(1);
+        expect(items[0]?.classList).toContain('empty');
+        expect(items[0]?.textContent).toContain('Студий не найдено');
     });
 });

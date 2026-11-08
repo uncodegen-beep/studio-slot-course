@@ -41,7 +41,17 @@ export class CatalogPageComponent {
         this.studios = state === 'data' ? DEMO_STUDIOS : [];
     }
 
+    /** Тот же набор студий в обратном порядке: с track studio.id элементы переставляются, а не создаются */
+    protected reverse(): void {
+        this.studios = [...this.studios].reverse();
+    }
+
+    /** Новые объекты с теми же id — как ответ сервера: с track studio.id DOM переиспользуется */
+    protected refresh(): void {
+        this.studios = this.studios.map((studio) => ({ ...studio }));
+    }
+
     protected search(query: string): void {
-        console.warn('поиск: ', query);
+        console.warn('поиск:', query);
     }
 }

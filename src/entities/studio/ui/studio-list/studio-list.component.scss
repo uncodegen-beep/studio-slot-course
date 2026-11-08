@@ -8,6 +8,15 @@
     list-style: none;
 }
 
+.list > li {
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+.even {
+    background: #f4f5f9;
+}
+
 .empty {
     color: #5b6275;
 }
