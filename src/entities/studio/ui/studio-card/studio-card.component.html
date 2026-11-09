@@ -33,7 +33,8 @@
             </button>
             <button
                 type="button"
-                [attr.aria-label]="'Добавить ' + studio.name + ' в избранное'"
+                app-icon-button
+                [label]="'Добавить ' + studio.name + ' в избранное'"
                 [attr.aria-pressed]="favorite"
                 (click)="toggleFavorite()"
             >

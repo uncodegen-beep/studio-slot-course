@@ -2,6 +2,7 @@ import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 import type { Studio } from '@shared/model';
+import { IconButtonComponent } from '@shared/ui/icon-button/icon-button.component';
 import { IconComponent } from '@shared/ui/icon/icon.component';
 
 /**
@@ -10,7 +11,7 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
  */
 @Component({
     selector: 'app-studio-card',
-    imports: [CurrencyPipe, DecimalPipe, IconComponent],
+    imports: [CurrencyPipe, DecimalPipe, IconComponent, IconButtonComponent],
     templateUrl: './studio-card.component.html',
     styleUrl: './studio-card.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
