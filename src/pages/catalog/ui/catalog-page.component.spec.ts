@@ -81,4 +81,24 @@ describe('CatalogPageComponent', () => {
         expect(items()[2]).toBe(first);
         expect(items()[0]?.textContent).toContain('Volga Records');
     });
+
+    it('избранное: событие карточки обрабатывает страница, обе карточки студии обновляются', async () => {
+        const fixture = TestBed.createComponent(CatalogPageComponent);
+        fixture.detectChanges();
+        const root = fixture.nativeElement as HTMLElement;
+        const favoriteButtons = (): HTMLButtonElement[] => [
+            ...root.querySelectorAll<HTMLButtonElement>(
+                'app-studio-card [aria-label="Добавить Sound Garden в избранное"]',
+            ),
+        ];
+
+        favoriteButtons()[0]?.click();
+        await fixture.whenStable();
+
+        expect(root.querySelector('.favorites-count')?.textContent).toContain('В избранном: 1');
+        expect(favoriteButtons().map((b) => b.getAttribute('aria-pressed'))).toEqual([
+            'true',
+            'true',
+        ]);
+    });
 });

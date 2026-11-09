@@ -34,7 +34,11 @@
     <!-- as сужает тип: внутри блока studio — Studio, а не Studio | undefined -->
     @if (featured; as studio) {
         <h2>Рекомендуем: {{ studio.name }}</h2>
-        <app-studio-card />
+        <app-studio-card
+            [studio]="studio"
+            [favorite]="favorites.has(studio.id)"
+            (favoriteToggle)="toggleFavorite($event)"
+        />
     }
 
     <h2>Все студии</h2>
@@ -59,7 +63,25 @@
         </button>
     </div>
 
-    <app-studio-list [studios]="studios" />
+    <p class="favorites-count">В избранном: {{ favorites.size }}</p>
+
+    <!-- Шаблон элемента из урока 11: список раскладывает, карточку рисует страница -->
+    <app-studio-list
+        [studios]="studios"
+        [itemTemplate]="cardItem"
+    />
+
+    <ng-template
+        #cardItem
+        let-studio
+    >
+        <app-studio-card
+            class="compact"
+            [studio]="studio"
+            [favorite]="favorites.has(studio.id)"
+            (favoriteToggle)="toggleFavorite($event)"
+        />
+    </ng-template>
 }
 
 <ng-template #emptyState>
