@@ -1,9 +1,15 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { Studio } from '@shared/model';
+import type { Studio } from '@shared/model';
+import { IconComponent } from '@shared/ui/icon/icon.component';
 
+/**
+ * Презентационный компонент: данные — только через входы, о действиях сообщает через выходы.
+ * Что делать по клику, решает родитель
+ */
 @Component({
     selector: 'app-studio-card',
+    imports: [IconComponent],
     templateUrl: './studio-card.component.html',
     styleUrl: './studio-card.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -14,20 +20,14 @@ import { Studio } from '@shared/model';
     },
 })
 export class StudioCardComponent {
-    /** Пока данные прямо в компоненте — в уроке 16 придут через @Input */
-    protected readonly studio: Studio = {
-        id: 'sound-garden',
-        name: 'Sound Garden',
-        city: 'Москва',
-        pricePerHour: 1500,
-        coverUrl: 'images/studio-placeholder.svg',
-        isOpen: true,
-        rating: 4.6,
-        featured: true,
-        isNew: false,
-    };
+    /** required: Angular не скомпилирует шаблон, где [studio] не передан */
+    @Input({ required: true }) studio!: Studio;
+    @Input() favorite = false;
 
-    protected toggleFavorite(id: string): void {
-        console.warn('избранное', id);
+    /** Сообщаем родителю id студии — что сделать с избранным, решает он */
+    @Output() favoriteToggle = new EventEmitter<string>();
+
+    protected toggleFavorite(): void {
+        this.favoriteToggle.emit(this.studio.id);
     }
 }

@@ -32,17 +32,10 @@
             <button
                 type="button"
                 [attr.aria-label]="'Добавить ' + studio.name + ' в избранное'"
-                (click)="toggleFavorite(studio.id)"
+                [attr.aria-pressed]="favorite"
+                (click)="toggleFavorite()"
             >
-                <!-- aria-hidden: подпись для скринридера — aria-label на кнопке.
-                     Путь без «/» в начале — работает и с base href GitHub Pages -->
-                <svg
-                    class="icon"
-                    aria-hidden="true"
-                    focusable="false"
-                >
-                    <use href="icons/sprite.svg#heart" />
-                </svg>
+                <app-icon [name]="favorite ? 'heart-filled' : 'heart'" />
             </button>
         </div>
     </div>
