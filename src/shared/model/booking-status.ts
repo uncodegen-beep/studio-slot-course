@@ -1,4 +1,4 @@
-/* Union строк вместо enum: меньше кода в бандле, тот же контроль компилятора*/
+/* Union строк вместо enum: меньше кода в бандле, тот же контроль компилятора */
 export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELED';
 
 /**
@@ -7,6 +7,6 @@ export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELED';
  */
 export const STATUS_LABELS = {
     PENDING: 'Ожидает',
-    CONFIRMED: 'Подтверждаю',
+    CONFIRMED: 'Подтверждено',
     CANCELED: 'Отменено',
 } satisfies Record<BookingStatus, string>;

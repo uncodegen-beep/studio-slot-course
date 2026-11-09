@@ -1,0 +1,54 @@
+:host {
+    display: block;
+    margin-top: 32px;
+}
+
+.bookings {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.booking {
+    padding: 12px 16px;
+    border: 1px solid #d0d4e0;
+    border-radius: 12px;
+}
+
+.booking__studio {
+    margin: 0 0 4px;
+}
+
+.booking__time,
+.booking__price {
+    margin: 0 0 8px;
+    color: #5b6275;
+}
+
+.booking__price s {
+    margin-right: 8px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 14px;
+
+    &--ok {
+        background: #dcf5e3;
+        color: #1d6b35;
+    }
+
+    &--wait {
+        background: #fff2cc;
+        color: #7a5600;
+    }
+
+    &--off {
+        background: #eceef3;
+        color: #5b6275;
+    }
+}

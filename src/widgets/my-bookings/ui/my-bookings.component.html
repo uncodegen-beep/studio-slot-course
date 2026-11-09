@@ -1,0 +1,39 @@
+<h2>Мои бронирования</h2>
+
+<ul class="bookings">
+    @for (booking of bookings; track booking.id) {
+        <!-- @let — локальная переменная шаблона: считаем один раз, используем дважды -->
+        @let total = booking.hours * booking.pricePerHour;
+        @let discounted = total * (1 - booking.discount);
+
+        <li class="booking">
+            <h3 class="booking__studio">{{ booking.studioName }}</h3>
+            <p class="booking__time">{{ booking.startsAt }}, часов: {{ booking.hours }}</p>
+
+            @if (booking.discount > 0) {
+                <p class="booking__price">
+                    <s>{{ total }} ₽</s>
+                    <strong>{{ discounted }} ₽</strong>
+                </p>
+            } @else {
+                <p class="booking__price">{{ total }} ₽</p>
+            }
+
+            <!-- Сравнение строгое (===), break не нужен: проваливания между @case нет.
+                 @default never: новый статус в BookingStatus — и шаблон не скомпилируется,
+                 пока его не обработают -->
+            @switch (booking.status) {
+                @case ("CONFIRMED") {
+                    <span class="badge badge--ok">{{ labels.CONFIRMED }}</span>
+                }
+                @case ("PENDING") {
+                    <span class="badge badge--wait">{{ labels.PENDING }}</span>
+                }
+                @case ("CANCELED") {
+                    <span class="badge badge--off">{{ labels.CANCELED }}</span>
+                }
+                @default never;
+            }
+        </li>
+    }
+</ul>
