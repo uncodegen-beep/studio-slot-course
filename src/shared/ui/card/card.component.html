@@ -1,0 +1,17 @@
+<article class="card">
+    <header class="card__header">
+        <!-- Запасное содержимое: показывается, если заголовок не передали -->
+        <ng-content select="[cardTitle]">
+            <span class="card__untitled">Без названия</span>
+        </ng-content>
+    </header>
+
+    <div class="card__body">
+        <!-- Слот без select: всё, что не подошло под другие селекторы -->
+        <ng-content />
+    </div>
+
+    <footer class="card__actions">
+        <ng-content select="[cardActions]" />
+    </footer>
+</article>
