@@ -39,6 +39,20 @@ describe('StudioCardComponent', () => {
         );
     });
 
+    it('ngOnChanges: полоса рейтинга пересчитывается при новой студии на входе', () => {
+        const fixture = render(OPEN_STUDIO);
+        const bar = (): string | undefined =>
+            (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('.card__rating-bar')
+                ?.style.width;
+
+        expect(bar()).toBe('92%');
+
+        fixture.componentRef.setInput('studio', { ...OPEN_STUDIO, rating: 4 });
+        fixture.detectChanges();
+
+        expect(bar()).toBe('80%');
+    });
+
     it('host в декораторе ставит классы состояния на сам тег', () => {
         expect((render(OPEN_STUDIO).nativeElement as HTMLElement).classList).toContain('featured');
         expect((render(CLOSED_STUDIO).nativeElement as HTMLElement).classList).toContain('closed');
