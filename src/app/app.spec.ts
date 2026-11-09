@@ -1,13 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
+
 import { AppComponent } from './app';
 
 describe('AppComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [AppComponent],
-            providers: [provideRouter([])],
+            providers: [provideRouter([]), provideRuLocale()],
         }).compileComponents();
     });
 
@@ -25,6 +27,6 @@ describe('AppComponent', () => {
 
         const card = (fixture.nativeElement as HTMLElement).querySelector('app-studio-card');
         expect(card?.querySelector('.card__title')?.textContent).toContain('Sound Garden');
-        expect(card?.querySelector('.card__meta')?.textContent).toContain('1500 ₽/час');
+        expect(card?.querySelector('.card__meta')?.textContent).toMatch(/1\s500\s₽\/час/);
     });
 });

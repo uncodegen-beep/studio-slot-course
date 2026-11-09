@@ -1,14 +1,16 @@
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 import type { Booking } from '@entities/booking/model/booking';
 import { DEMO_BOOKINGS } from '@entities/booking/model/bookings.demo';
 
+import { PluralPipe } from '@shared/lib/plural/plural.pipe';
 import { STATUS_LABELS } from '@shared/model';
 import { CardComponent } from '@shared/ui/card/card.component';
 
 @Component({
     selector: 'app-my-bookings',
-    imports: [CardComponent],
+    imports: [CardComponent, CurrencyPipe, DatePipe, PluralPipe],
     templateUrl: './my-bookings.component.html',
     styleUrl: './my-bookings.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

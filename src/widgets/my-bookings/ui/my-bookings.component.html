@@ -16,15 +16,20 @@
                     {{ booking.studioName }}
                 </h3>
 
-                <p class="booking__time">{{ booking.startsAt }}, часов: {{ booking.hours }}</p>
+                <p class="booking__time">
+                    {{ booking.startsAt | date: "d MMMM, HH:mm" }} ·
+                    {{ booking.hours | plural: ["час", "часа", "часов"] }}
+                </p>
 
                 @if (booking.discount > 0) {
                     <p class="booking__price">
-                        <s>{{ total }} ₽</s>
-                        <strong>{{ discounted }} ₽</strong>
+                        <s>{{ total | currency: "RUB" : "symbol-narrow" : "1.0-0" }}</s>
+                        <strong>{{ discounted | currency: "RUB" : "symbol-narrow" : "1.0-0" }}</strong>
                     </p>
                 } @else {
-                    <p class="booking__price">{{ total }} ₽</p>
+                    <p class="booking__price">
+                        {{ total | currency: "RUB" : "symbol-narrow" : "1.0-0" }}
+                    </p>
                 }
 
                 <!-- Сравнение строгое (===), break не нужен: проваливания между @case нет.
