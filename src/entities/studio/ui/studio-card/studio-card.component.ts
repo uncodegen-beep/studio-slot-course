@@ -7,6 +7,12 @@ import { Studio } from '@shared/model';
     templateUrl: './studio-card.component.html',
     styleUrl: './studio-card.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
+
+    host: {
+        '[class.closed]': '!studio.isOpen',
+        '[class.featured]': 'studio.featured',
+        '[class.new]': 'studio.isNew',
+    },
 })
 export class StudioCardComponent {
     /** Пока данные прямо в компоненте — в уроке 16 придут через @Input */

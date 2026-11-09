@@ -1,9 +1,5 @@
-<article
-    class="card"
-    [class.card--closed]="!studio.isOpen"
-    [class.card--featured]="studio.featured"
-    [class.card--new]="studio.isNew"
->
+<!-- Классы состояния — на самом теге <app-studio-card> через host в декораторе -->
+<article class="card">
     <img
         class="card__cover"
         [src]="studio.coverUrl"

@@ -1,20 +1,33 @@
+// Публичные настройки карточки: потребитель меняет их снаружи без ::ng-deep
 :host {
+    --card-max-width: 320px;
+    --card-padding: 12px 16px 16px;
+    --card-radius: 12px;
+    --card-border: #d0d4e0;
+    --card-accent: #f2b01e;
+
     display: block;
-    max-width: 320px;
+    max-width: var(--card-max-width);
+}
+
+// Классы ставит host в декораторе
+:host(.featured) {
+    --card-border: #6b5bd6;
+}
+
+:host(.closed) {
+    opacity: 0.6;
+}
+
+// Компактный вариант: <app-studio-card class="compact" />
+:host(.compact) {
+    --card-padding: 8px 12px;
 }
 
 .card {
     overflow: hidden;
-    border: 1px solid #d0d4e0;
-    border-radius: 12px;
-
-    &--featured {
-        border-color: #6b5bd6;
-    }
-
-    &--closed {
-        opacity: 0.6;
-    }
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
 }
 
 .card__cover {
@@ -25,7 +38,7 @@
 }
 
 .card__body {
-    padding: 12px 16px 16px;
+    padding: var(--card-padding);
 }
 
 .card__title {
@@ -47,7 +60,7 @@
 .card__rating-bar {
     height: 100%;
     border-radius: 3px;
-    background: #f2b01e;
+    background: var(--card-accent);
 }
 
 .card__actions {
