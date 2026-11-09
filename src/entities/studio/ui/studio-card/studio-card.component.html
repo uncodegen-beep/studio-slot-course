@@ -31,7 +31,8 @@
             </button>
             <button
                 type="button"
-                [attr.aria-label]="favorite"
+                [attr.aria-label]="'Добавить ' + studio.name + ' в избранное'"
+                [attr.aria-pressed]="favorite"
                 (click)="toggleFavorite()"
             >
                 <app-icon [name]="favorite ? 'heart-filled' : 'heart'" />
