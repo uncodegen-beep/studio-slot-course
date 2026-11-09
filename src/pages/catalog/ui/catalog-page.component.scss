@@ -13,3 +13,9 @@
 .empty {
     color: #5b6275;
 }
+
+// Настройка карточки снаружи — через её CSS-переменные, инкапсуляция не нарушается
+app-studio-card {
+    --card-max-width: 360px;
+    --card-radius: 16px;
+}
