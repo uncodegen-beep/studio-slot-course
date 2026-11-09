@@ -12,7 +12,6 @@
             {{ studio.city }} · от {{ studio.pricePerHour | currency: "RUB" : "symbol-narrow" : "1.0-0" }}/час
         </p>
 
-        <!-- ?? 0 — rating необязательный, а строгий TS не даёт умножать undefined -->
         <div
             class="card__rating"
             role="img"
@@ -20,7 +19,7 @@
         >
             <div
                 class="card__rating-bar"
-                [style.width.%]="(studio.rating ?? 0) * 20"
+                [style.width.%]="ratingPercent"
             ></div>
         </div>
 
