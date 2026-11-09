@@ -1,6 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 
+import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
+
 import { MyBookingsComponent } from './my-bookings.component';
+
+// \s в ожиданиях: русская локаль разделяет разряды и ₽ неразрывным пробелом
 
 function render(): HTMLElement {
     const fixture = TestBed.createComponent(MyBookingsComponent);
@@ -9,6 +13,10 @@ function render(): HTMLElement {
 }
 
 describe('MyBookingsComponent', () => {
+    beforeEach(() => {
+        TestBed.configureTestingModule({ providers: [provideRuLocale()] });
+    });
+
     it('@switch выбирает бейдж по статусу', () => {
         const badges = [...render().querySelectorAll('.badge')];
 
@@ -27,15 +35,27 @@ describe('MyBookingsComponent', () => {
     it('@let: цена со скидкой считается от общей суммы', () => {
         const [first] = render().querySelectorAll('.booking__price');
 
-        expect(first?.querySelector('s')?.textContent).toBe('4500 ₽');
-        expect(first?.querySelector('strong')?.textContent).toBe('4050 ₽');
+        expect(first?.querySelector('s')?.textContent).toMatch(/^4\s500\s₽$/);
+        expect(first?.querySelector('strong')?.textContent).toMatch(/^4\s050\s₽$/);
     });
 
     it('без скидки показывается только общая сумма', () => {
         const prices = render().querySelectorAll('.booking__price');
 
-        expect(prices[1]?.textContent?.trim()).toBe('2400 ₽');
+        expect(prices[1]?.textContent?.trim()).toMatch(/^2\s400\s₽$/);
         expect(prices[1]?.querySelector('s')).toBeNull();
+    });
+
+    it('date и plural: дата по-русски и склонение часов', () => {
+        const times = [...render().querySelectorAll('.booking__time')].map((p) =>
+            p.textContent?.replace(/\s+/g, ' ').trim(),
+        );
+
+        expect(times).toEqual([
+            '14 ноября, 18:00 · 3 часа',
+            '21 ноября, 12:00 · 2 часа',
+            '2 ноября, 10:00 · 1 час',
+        ]);
     });
 
     it('ng-content: название студии попадает в слот заголовка карточки', () => {

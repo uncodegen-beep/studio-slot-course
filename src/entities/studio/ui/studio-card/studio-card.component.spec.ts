@@ -2,6 +2,7 @@ import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
+import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
 import type { Studio } from '@shared/model';
 
 import { StudioCardComponent } from './studio-card.component';
@@ -18,11 +19,24 @@ function render(studio: Studio, favorite = false): ComponentFixture<StudioCardCo
 }
 
 describe('StudioCardComponent', () => {
+    beforeEach(() => {
+        TestBed.configureTestingModule({ providers: [provideRuLocale()] });
+    });
+
     it('@Input: рисует переданную студию', () => {
         const host = render(OPEN_STUDIO).nativeElement as HTMLElement;
 
         expect(host.querySelector('.card__title')?.textContent).toContain('Sound Garden');
-        expect(host.querySelector('.card__meta')?.textContent).toContain('1500 ₽/час');
+
+        expect(host.querySelector('.card__meta')?.textContent).toMatch(/от 1\s500\s₽\/час/);
+    });
+
+    it('number: рейтинг в подписи с одним знаком после запятой', () => {
+        const host = render(OPEN_STUDIO).nativeElement as HTMLElement;
+
+        expect(host.querySelector('.card__rating')?.getAttribute('aria-label')).toBe(
+            'Рейтинг 4,6 из 5',
+        );
     });
 
     it('host в декораторе ставит классы состояния на сам тег', () => {

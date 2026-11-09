@@ -8,13 +8,15 @@
 
     <div class="card__body">
         <h3 class="card__title">{{ studio.name }}</h3>
-        <p class="card__meta">{{ studio.city }} · от {{ studio.pricePerHour }} ₽/час</p>
+        <p class="card__meta">
+            {{ studio.city }} · от {{ studio.pricePerHour | currency: "RUB" : "symbol-narrow" : "1.0-0" }}/час
+        </p>
 
         <!-- ?? 0 — rating необязательный, а строгий TS не даёт умножать undefined -->
         <div
             class="card__rating"
             role="img"
-            [attr.aria-label]="'Рейтинг ' + studio.rating + ' из 5'"
+            [attr.aria-label]="'Рейтинг ' + (studio.rating ?? 0 | number: '1.1-1') + ' из 5'"
         >
             <div
                 class="card__rating-bar"
