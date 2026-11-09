@@ -1,0 +1,12 @@
+// Подсказка TooltipDirective живёт в <body>, поэтому стиль глобальный
+.app-tooltip {
+    position: fixed;
+    z-index: 1000;
+    max-width: 240px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: #1f2433;
+    color: #fff;
+    font-size: 13px;
+    pointer-events: none;
+}

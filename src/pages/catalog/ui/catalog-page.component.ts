@@ -5,6 +5,7 @@ import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 import { StudioCardComponent } from '@entities/studio/ui/studio-card/studio-card.component';
 import { StudioListComponent } from '@entities/studio/ui/studio-list/studio-list.component';
 
+import { AutofocusDirective } from '@shared/lib/autofocus/autofocus.directive';
 import type { Studio } from '@shared/model';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 
@@ -13,7 +14,13 @@ type DemoState = 'loading' | 'error' | 'empty' | 'data';
 
 @Component({
     selector: 'app-catalog-page',
-    imports: [NgTemplateOutlet, SpinnerComponent, StudioCardComponent, StudioListComponent],
+    imports: [
+        AutofocusDirective,
+        NgTemplateOutlet,
+        SpinnerComponent,
+        StudioCardComponent,
+        StudioListComponent,
+    ],
     templateUrl: './catalog-page.component.html',
     styleUrl: './catalog-page.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
