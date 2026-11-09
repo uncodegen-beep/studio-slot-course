@@ -1,4 +1,4 @@
-/* Union строка вместо enum: меньше кода в бандле, тот же контроль компилятора */
+/* Union строк вместо enum: меньше кода в бандле, тот же контроль компилятора */
 export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELED';
 
 /**

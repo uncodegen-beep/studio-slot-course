@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import type { Booking } from '@entities/booking/model/booking';
 import { DEMO_BOOKINGS } from '@entities/booking/model/bookings.demo';
 
-import { STATUS_LABELS } from '@shared/model/booking-status';
+import { STATUS_LABELS } from '@shared/model';
 
 @Component({
     selector: 'app-my-bookings',
