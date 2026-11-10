@@ -2,7 +2,13 @@ import { TestBed } from '@angular/core/testing';
 
 import { FavoritesStore } from './favorites.store';
 
+const KEY = 'studioslot.favorites';
+
 describe('FavoritesStore', () => {
+    beforeEach(() => {
+        localStorage.clear();
+    });
+
     it('toggle добавляет и убирает студию', () => {
         const store = TestBed.inject(FavoritesStore);
 
@@ -27,5 +33,24 @@ describe('FavoritesStore', () => {
         const store = TestBed.inject(FavoritesStore);
 
         expect('set' in store.favorites).toBe(false);
+    });
+
+    it('effect сохраняет избранное в localStorage', () => {
+        const store = TestBed.inject(FavoritesStore);
+
+        store.toggle('sound-garden');
+        // эффекты выполняются асинхронно — TestBed.tick() прогоняет их сейчас
+        TestBed.tick();
+
+        expect(JSON.parse(localStorage.getItem(KEY) ?? '[]')).toEqual(['sound-garden']);
+    });
+
+    it('при создании читает сохранённое, битые данные не ломают стор', () => {
+        localStorage.setItem(KEY, JSON.stringify(['nevsky-beat', 42]));
+        expect(TestBed.inject(FavoritesStore).favorites()).toEqual(new Set(['nevsky-beat']));
+
+        TestBed.resetTestingModule();
+        localStorage.setItem(KEY, '{не json');
+        expect(TestBed.inject(FavoritesStore).favorites().size).toBe(0);
     });
 });
