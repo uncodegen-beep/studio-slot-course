@@ -1,32 +1,44 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 
 import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
 
 import { AppComponent } from './app';
+import { routes } from './app.routes';
 
 describe('AppComponent', () => {
-    beforeEach(async () => {
-        await TestBed.configureTestingModule({
+    beforeEach(() => {
+        TestBed.configureTestingModule({
             imports: [AppComponent],
-            providers: [provideRouter([]), provideRuLocale()],
-        }).compileComponents();
+            providers: [provideRouter(routes), provideRuLocale()],
+        });
     });
 
-    it('показывает шапку с названием проекта', () => {
+    it('лэйаут: шапка, основная часть и подвал', () => {
         const fixture = TestBed.createComponent(AppComponent);
         fixture.detectChanges();
+        const root = fixture.nativeElement as HTMLElement;
 
-        const logo = (fixture.nativeElement as HTMLElement).querySelector('app-header .logo');
-        expect(logo?.textContent).toContain('StudioSlot');
+        expect(root.querySelector('app-header .logo')?.textContent).toContain('StudioSlot');
+        expect(root.querySelector('main router-outlet')).not.toBeNull();
+        expect(root.querySelector('app-footer')?.textContent).toContain('Современный Angular');
     });
 
-    it('показывает карточку студии с названием и ценой', () => {
-        const fixture = TestBed.createComponent(AppComponent);
-        fixture.detectChanges();
+    it('корень перенаправляет на каталог студий', async () => {
+        const harness = await RouterTestingHarness.create('/');
 
-        const card = (fixture.nativeElement as HTMLElement).querySelector('app-studio-card');
-        expect(card?.querySelector('.card__title')?.textContent).toContain('Sound Garden');
-        expect(card?.querySelector('.card__meta')?.textContent).toMatch(/1\s500\s₽\/час/);
+        expect(TestBed.inject(Router).url).toBe('/studios');
+        expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain(
+            'Каталог студий',
+        );
+    });
+
+    it('у бронирований своя страница', async () => {
+        const harness = await RouterTestingHarness.create('/bookings');
+
+        expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain(
+            'Мои бронирования',
+        );
     });
 });

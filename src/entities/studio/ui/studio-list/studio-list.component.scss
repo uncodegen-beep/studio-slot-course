@@ -2,7 +2,11 @@
     display: block;
 }
 
+// Адаптивная сетка без медиазапросов: колонок столько, сколько влезает карточек от 280px
 .list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
     margin: 0;
     padding-left: 0;
     list-style: none;

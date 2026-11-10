@@ -6,8 +6,25 @@
         {{ appName }}
     </a>
 
-    <nav aria-label="Основная навигация">
-        <a routerLink="/studios">Студии</a>
+    <nav
+        class="nav"
+        aria-label="Основная навигация"
+    >
+        <!-- routerLinkActive — класс у ссылки текущей страницы, aria-current — для скринридера -->
+        <a
+            routerLink="/studios"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+        >
+            Студии
+        </a>
+        <a
+            routerLink="/bookings"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+        >
+            Мои бронирования
+        </a>
     </nav>
 
     <app-clock />
