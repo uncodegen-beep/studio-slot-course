@@ -1,13 +1,19 @@
 <h1>Каталог студий</h1>
 
+<!-- (input) на каждый символ: сигнал хранит строку, шаблон обновляется без markForCheck -->
 <input
-    #query
+    #queryInput
     appAutofocus
     type="search"
     placeholder="Поиск студии"
     aria-label="Поиск студии"
-    (keyup.enter)="search(query.value)"
+    [value]="query()"
+    (input)="query.set(queryInput.value)"
 />
+
+@if (query()) {
+    <p class="query-hint">Ищем «{{ query() }}» — фильтрация появится в уроке 25</p>
+}
 
 <!-- Демо: переключаем состояние экрана вручную, пока нет настоящей загрузки -->
 <div
@@ -37,8 +43,8 @@
         <h2>Рекомендуем: {{ studio.name }}</h2>
         <app-studio-card
             [studio]="studio"
-            [favorite]="favorites.has(studio.id)"
-            (favoriteToggle)="toggleFavorite($event)"
+            [favorite]="favoritesStore.favorites().has(studio.id)"
+            (favoriteToggle)="favoritesStore.toggle($event)"
         />
     }
 
@@ -64,7 +70,7 @@
         </button>
     </div>
 
-    <p class="favorites-count">В избранном: {{ favorites.size }}</p>
+    <p class="favorites-count">В избранном: {{ favoritesStore.favorites().size }}</p>
 
     <!-- Шаблон элемента из урока 11: список раскладывает, карточку рисует страница -->
     <app-studio-list
@@ -79,8 +85,8 @@
         <app-studio-card
             compact
             [studio]="studio"
-            [favorite]="favorites.has(studio.id)"
-            (favoriteToggle)="toggleFavorite($event)"
+            [favorite]="favoritesStore.favorites().has(studio.id)"
+            (favoriteToggle)="favoritesStore.toggle($event)"
         />
     </ng-template>
 }

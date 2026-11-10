@@ -24,3 +24,11 @@
     text-decoration: underline;
     text-underline-offset: 4px;
 }
+
+.meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #5b6275;
+    font-size: 14px;
+}

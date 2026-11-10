@@ -12,7 +12,7 @@ describe('ClockComponent', () => {
         vi.useRealTimers();
     });
 
-    it('показывает время и обновляет его каждую секунду через markForCheck', () => {
+    it('показывает время и обновляет его каждую секунду', () => {
         const fixture = TestBed.createComponent(ClockComponent);
         fixture.detectChanges();
         const time = (): string | null | undefined =>
@@ -21,7 +21,7 @@ describe('ClockComponent', () => {
         expect(time()).toBe('18:00:00');
 
         vi.advanceTimersByTime(2000);
-        // markForCheck пометил компонент: проверка перерисует его, хотя входы не менялись
+        // сигнал изменился — компонент помечен к обновлению
         fixture.detectChanges();
 
         expect(time()).toBe('18:00:02');
