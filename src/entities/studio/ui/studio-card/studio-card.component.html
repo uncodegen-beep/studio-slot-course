@@ -1,44 +1,62 @@
-<!-- Классы состояния — на самом теге <app-studio-card> через host в декораторе -->
-<article class="card">
-    <img
-        class="card__cover"
-        [src]="studio.coverUrl"
-        [alt]="studio.name"
-    />
+<!-- Рамку и раскладку даёт app-card, карточка студии решает только, что положить в слоты -->
+<app-card>
+    @if (!compact) {
+        <img
+            cardMedia
+            class="card__cover"
+            loading="lazy"
+            [src]="studio.coverUrl"
+            [alt]="'Студия ' + studio.name"
+        />
+    }
 
-    <div class="card__body">
-        <h3 class="card__title">{{ studio.name }}</h3>
-        <p class="card__meta">
-            {{ studio.city }} · от {{ studio.pricePerHour | currency: "RUB" : "symbol-narrow" : "1.0-0" }}/час
-        </p>
+    <h3
+        cardTitle
+        class="card__title"
+    >
+        {{ studio.name }}
+    </h3>
 
-        <div
-            class="card__rating"
-            role="img"
-            [attr.aria-label]="'Рейтинг ' + (studio.rating ?? 0 | number: '1.1-1') + ' из 5'"
+    <p class="card__meta">
+        {{ studio.city }} · от {{ studio.pricePerHour | currency: "RUB" : "symbol-narrow" : "1.0-0" }}/час
+    </p>
+
+    <!-- Полоса — украшение (aria-hidden), значение для всех — текстом рядом -->
+    <p class="card__rating">
+        <span
+            class="card__rating-track"
+            aria-hidden="true"
         >
-            <div
+            <span
                 class="card__rating-bar"
                 [style.width.%]="ratingPercent"
-            ></div>
-        </div>
+            ></span>
+        </span>
+        Рейтинг {{ studio.rating ?? 0 | number: "1.1-1" }} из 5
+    </p>
 
-        <div class="card__actions">
-            <button
-                type="button"
-                [disabled]="!studio.isOpen"
-            >
-                Забронировать
-            </button>
-            <button
-                type="button"
-                app-icon-button
-                [label]="'Добавить ' + studio.name + ' в избранное'"
-                [attr.aria-pressed]="favorite"
-                (click)="toggleFavorite()"
-            >
-                <app-icon [name]="favorite ? 'heart-filled' : 'heart'" />
-            </button>
-        </div>
+    @if (!studio.isOpen) {
+        <p class="card__closed">Сейчас не принимает бронирования</p>
+    }
+
+    <div
+        cardActions
+        class="card__actions"
+    >
+        <button
+            type="button"
+            [disabled]="!studio.isOpen"
+        >
+            Забронировать
+        </button>
+        <button
+            type="button"
+            app-icon-button
+            [label]="favorite ? 'Убрать ' + studio.name + ' из избранного' : 'Добавить ' + studio.name + ' в избранное'"
+            [attr.aria-pressed]="favorite"
+            (click)="toggleFavorite()"
+        >
+            <app-icon [name]="favorite ? 'heart-filled' : 'heart'" />
+        </button>
     </div>
-</article>
+</app-card>

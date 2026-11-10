@@ -1,4 +1,7 @@
 <article class="card">
+    <!-- Обложка, если передали: <img cardMedia … /> -->
+    <ng-content select="[cardMedia]" />
+
     <header class="card__header">
         <!-- Запасное содержимое: показывается, если заголовок не передали -->
         <ng-content select="[cardTitle]">
