@@ -1,3 +1,10 @@
+/** Зал студии: у каждого своя цена */
+export interface StudioRoom {
+    readonly id: string;
+    name: string;
+    pricePerHour: number;
+}
+
 /** Студия звукозаписи в каталоге */
 export interface Studio {
     readonly id: string;
@@ -14,6 +21,8 @@ export interface Studio {
     featured?: boolean;
     /** Появилась в каталоге недавно */
     isNew?: boolean;
+    /** Залы; цена студии — минимальная из них */
+    rooms?: readonly StudioRoom[];
 }
 
 /** Карточка в списке: только то, что показываем */

@@ -182,4 +182,23 @@ describe('CatalogPageComponent', () => {
         await appRef.whenStable();
         expect(searches()).toBe(initial + 1);
     });
+
+    it('linkedSignal: первый зал по умолчанию, ручной выбор переживает обновление данных', async () => {
+        const { root, listAction } = setup();
+        const appRef = TestBed.inject(ApplicationRef);
+        const radios = (): HTMLInputElement[] => [
+            ...root.querySelectorAll<HTMLInputElement>('.rooms input[type="radio"]'),
+        ];
+        const checked = (): number => radios().findIndex((radio) => radio.checked);
+
+        expect(checked()).toBe(0); // по умолчанию — первый зал
+
+        radios()[1]?.click();
+        await appRef.whenStable();
+        expect(checked()).toBe(1);
+
+        // новые объекты студий: зал с тем же id есть в списке — выбор сохранился
+        await listAction('Обновить данные');
+        expect(checked()).toBe(1);
+    });
 });

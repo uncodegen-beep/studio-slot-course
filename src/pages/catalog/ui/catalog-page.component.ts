@@ -1,10 +1,11 @@
-import { NgTemplateOutlet } from '@angular/common';
+import { CurrencyPipe, NgTemplateOutlet } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     Component,
     computed,
     effect,
     inject,
+    linkedSignal,
     signal,
     untracked,
 } from '@angular/core';
@@ -23,7 +24,7 @@ import { StudioListComponent } from '@entities/studio/ui/studio-list/studio-list
 
 import { AnalyticsService } from '@shared/lib/analytics/analytics.service';
 import { AutofocusDirective } from '@shared/lib/autofocus/autofocus.directive';
-import type { Studio } from '@shared/model';
+import type { Studio, StudioRoom } from '@shared/model';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 
 /** Состояние, которое показываем кнопками демо — пока нет настоящей загрузки (модуль 06) */
@@ -37,6 +38,7 @@ type DemoState = 'loading' | 'error' | 'empty' | 'data';
         SpinnerComponent,
         StudioCardComponent,
         StudioListComponent,
+        CurrencyPipe,
     ],
     templateUrl: './catalog-page.component.html',
     styleUrl: './catalog-page.component.scss',
@@ -67,6 +69,16 @@ export class CatalogPageComponent {
 
     /** Первая студия из подборки «Рекомендуем»; может не найтись — тип Studio | undefined */
     protected readonly featured = computed(() => this.studios().find((studio) => studio.featured));
+
+    /**
+     * Выбранный зал рекомендуемой студии. linkedSignal: пользователь выбирает вручную (set),
+     * а при смене списка залов выбор пересчитывается: тот же зал, если он ещё есть, иначе первый
+     */
+    protected readonly selectedRoom = linkedSignal<readonly StudioRoom[], StudioRoom | null>({
+        source: () => this.featured()?.rooms ?? [],
+        computation: (rooms, previous) =>
+            rooms.find((room) => room.id === previous?.value?.id) ?? rooms[0] ?? null,
+    });
 
     /** Города для фильтра — из самих данных, без повторов */
     protected readonly cities = computed(() =>

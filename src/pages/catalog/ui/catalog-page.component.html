@@ -87,6 +87,23 @@
             [favorite]="favoritesStore.favorites().has(studio.id)"
             (favoriteToggle)="favoritesStore.toggle($event)"
         />
+
+        @if (studio.rooms?.length) {
+            <fieldset class="rooms">
+                <legend>Зал</legend>
+                @for (room of studio.rooms; track room.id) {
+                    <label>
+                        <input
+                            type="radio"
+                            name="featured-room"
+                            [checked]="selectedRoom()?.id === room.id"
+                            (change)="selectedRoom.set(room)"
+                        />
+                        {{ room.name }} — {{ room.pricePerHour | currency: "RUB" : "symbol-narrow" : "1.0-0" }}/час
+                    </label>
+                }
+            </fieldset>
+        }
     }
 
     <h2>Все студии</h2>
