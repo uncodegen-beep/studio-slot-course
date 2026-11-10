@@ -1,0 +1,23 @@
+:host {
+    display: block;
+}
+
+.picker {
+    display: flex;
+    gap: 4px;
+}
+
+button {
+    min-width: 44px;
+    min-height: 36px;
+    border: 1px solid #d0d4e0;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+}
+
+button[aria-pressed='true'] {
+    border-color: #6b5bd6;
+    background: #ece9fb;
+    font-weight: 600;
+}

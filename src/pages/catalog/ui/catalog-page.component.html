@@ -104,6 +104,20 @@
                 }
             </fieldset>
         }
+
+        @if (selectedRoom()) {
+            <div class="estimate">
+                <!-- [(value)] — то же, что [value]="hours()" (valueChange)="hours.set($event)" -->
+                <app-duration-picker
+                    label="Длительность сессии"
+                    [(value)]="hours"
+                />
+                <p class="total">
+                    Итого за {{ hours() | plural: ["час", "часа", "часов"] }}:
+                    {{ total() | currency: "RUB" : "symbol-narrow" : "1.0-0" }}
+                </p>
+            </div>
+        }
     }
 
     <h2>Все студии</h2>

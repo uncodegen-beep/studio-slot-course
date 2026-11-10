@@ -201,4 +201,19 @@ describe('CatalogPageComponent', () => {
         await listAction('Обновить данные');
         expect(checked()).toBe(1);
     });
+
+    it('model(): пикер длительности меняет итоговую стоимость', async () => {
+        const { root } = setup();
+        const appRef = TestBed.inject(ApplicationRef);
+        const total = (): string =>
+            root.querySelector('.total')?.textContent?.replace(/\s+/g, ' ') ?? '';
+
+        expect(total()).toContain('2 часа');
+
+        [...root.querySelectorAll<HTMLButtonElement>('app-duration-picker button')][2]?.click();
+        await appRef.whenStable();
+
+        expect(total()).toContain('3 часа');
+        expect(total()).toMatch(/4[\s,]?500/); // первый зал 1500 ₽ × 3 часа
+    });
 });

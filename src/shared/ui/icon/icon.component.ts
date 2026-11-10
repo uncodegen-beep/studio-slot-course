@@ -17,5 +17,6 @@ export class IconComponent {
     readonly name = input.required<IconName>();
     readonly size = input(20);
 
+    /** Путь без «/» в начале — работает и с base href GitHub Pages */
     protected readonly href = computed(() => `icons/sprite.svg#${this.name()}`);
 }
