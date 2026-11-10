@@ -1,3 +1,4 @@
+import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { CatalogPageComponent } from './catalog-page.component';
@@ -100,5 +101,37 @@ describe('CatalogPageComponent', () => {
             'true',
             'true',
         ]);
+    });
+
+    it('computed: поиск фильтрует список и обновляет счётчик', async () => {
+        const { root, items } = setup();
+        const input = root.querySelector<HTMLInputElement>('input[type="search"]');
+        if (!input) {
+            throw new Error('Нет поля поиска');
+        }
+
+        input.value = 'казань';
+        input.dispatchEvent(new Event('input'));
+        await TestBed.inject(ApplicationRef).whenStable();
+
+        expect(items()).toHaveLength(1);
+        expect(items()[0]?.textContent).toContain('Volga Records');
+        expect(root.querySelector('.found')?.textContent).toContain('Найдено: 1');
+    });
+
+    it('по запросу без совпадений список показывает @empty', async () => {
+        const { root, items } = setup();
+        const input = root.querySelector<HTMLInputElement>('input[type="search"]');
+        if (!input) {
+            throw new Error('Нет поля поиска');
+        }
+
+        input.value = 'нет такой студии';
+        input.dispatchEvent(new Event('input'));
+        await TestBed.inject(ApplicationRef).whenStable();
+
+        expect(items()).toHaveLength(1);
+        expect(items()[0]?.classList).toContain('empty');
+        expect(root.querySelector('.found')?.textContent).toContain('Найдено: 0');
     });
 });
