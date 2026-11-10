@@ -19,9 +19,4 @@
     display: flex;
     gap: 8px;
     margin-top: 8px;
-
-    // Ничего не спроецировали — футер не занимает место (комментарии :empty не мешают)
-    &:empty {
-        display: none;
-    }
 }

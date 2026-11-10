@@ -216,4 +216,25 @@ describe('CatalogPageComponent', () => {
         expect(total()).toContain('3 часа');
         expect(total()).toMatch(/4[\s,]?500/); // первый зал 1500 ₽ × 3 часа
     });
+
+    it('viewChild: «/» переводит фокус в поиск, но не перехватывается в поле ввода', async () => {
+        const fixture = TestBed.createComponent(CatalogPageComponent);
+        document.body.append(fixture.nativeElement as HTMLElement);
+        await fixture.whenStable();
+        const root = fixture.nativeElement as HTMLElement;
+        const search = root.querySelector<HTMLInputElement>('input[type="search"]');
+        const select = root.querySelector<HTMLSelectElement>('.filters select');
+        select?.focus();
+
+        const outside = new KeyboardEvent('keydown', { key: '/', bubbles: true, cancelable: true });
+        root.querySelector('h1')?.dispatchEvent(outside);
+        expect(document.activeElement).toBe(search);
+        expect(outside.defaultPrevented).toBe(true);
+
+        const inField = new KeyboardEvent('keydown', { key: '/', bubbles: true, cancelable: true });
+        search?.dispatchEvent(inField);
+        expect(inField.defaultPrevented).toBe(false);
+
+        (fixture.nativeElement as HTMLElement).remove();
+    });
 });

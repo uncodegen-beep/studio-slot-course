@@ -2,12 +2,14 @@ import { CurrencyPipe, NgTemplateOutlet } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     Component,
+    ElementRef,
     computed,
     effect,
     inject,
     linkedSignal,
     signal,
     untracked,
+    viewChild,
 } from '@angular/core';
 
 import { FavoritesStore } from '@features/toggle-favorite/model/favorites.store';
@@ -44,6 +46,10 @@ type DemoState = 'loading' | 'error' | 'empty' | 'data';
         CurrencyPipe,
         PluralPipe,
     ],
+    host: {
+        // Горячая клавиша «/» — как поиск на GitHub и YouTube
+        '(document:keydown)': 'onKeydown($event)',
+    },
     templateUrl: './catalog-page.component.html',
     styleUrl: './catalog-page.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,6 +69,9 @@ export class CatalogPageComponent {
     });
 
     private readonly analytics = inject(AnalyticsService);
+
+    /** Сигнальный запрос к своему шаблону: #queryInput. required — поле есть всегда */
+    private readonly searchInput = viewChild.required<ElementRef<HTMLInputElement>>('queryInput');
 
     protected readonly demoStates: { value: DemoState; label: string }[] = [
         { value: 'loading', label: 'Загрузка' },
@@ -113,6 +122,19 @@ export class CatalogPageComponent {
             const favorites = untracked(() => this.favoritesStore.favorites().size);
             this.analytics.track('catalog_search', { query, city, onlyOpen, favorites });
         });
+    }
+
+    protected onKeydown(event: KeyboardEvent): void {
+        const target = event.target as HTMLElement | null;
+        const typing =
+            target instanceof HTMLInputElement ||
+            target instanceof HTMLTextAreaElement ||
+            target instanceof HTMLSelectElement;
+        // В поле ввода «/» — обычный символ, перехватывать нельзя
+        if (event.key === '/' && !typing) {
+            event.preventDefault();
+            this.searchInput().nativeElement.focus();
+        }
     }
 
     protected setCity(city: string): void {
