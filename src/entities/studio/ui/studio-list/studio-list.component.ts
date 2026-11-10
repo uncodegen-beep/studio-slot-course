@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, type TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type TemplateRef, input } from '@angular/core';
 
 import type { Studio } from '@shared/model';
 
@@ -17,8 +17,9 @@ export interface StudioItemContext {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudioListComponent {
-    // Декоратор @Input подробно — в уроке 16, сигнальные input() — в модуле 02
-    @Input() studios: Studio[] = [];
+    /** Входы-сигналы: в шаблоне читаются вызовом — studios() */
+    readonly studios = input<Studio[]>([]);
+
     /** Как рисовать элемент; не передан — шаблон по умолчанию */
-    @Input() itemTemplate?: TemplateRef<StudioItemContext>;
+    readonly itemTemplate = input<TemplateRef<StudioItemContext>>();
 }

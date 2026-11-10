@@ -1,9 +1,9 @@
 <ul class="list">
     <!-- track studio.id: по ключу Angular узнаёт студию после обновления массива -->
-    @for (studio of studios; track studio.id; let i = $index, even = $even) {
+    @for (studio of studios(); track studio.id; let i = $index, even = $even) {
         <li [class.even]="even">
             <ng-container
-                [ngTemplateOutlet]="itemTemplate ?? defaultItem"
+                [ngTemplateOutlet]="itemTemplate() ?? defaultItem"
                 [ngTemplateOutletContext]="{ $implicit: studio, index: i }"
             />
         </li>
