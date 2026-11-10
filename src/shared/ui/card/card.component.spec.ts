@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { CardActionsDirective } from './card-actions.directive';
 import { CardComponent } from './card.component';
 
 @Component({
-    imports: [CardComponent],
+    imports: [CardComponent, CardActionsDirective],
     template: `
         <app-card id="full">
             <h3 cardTitle>Sound Garden</h3>
@@ -46,6 +47,8 @@ describe('CardComponent', () => {
         const card = render().querySelector('#bare');
 
         expect(card?.querySelector('.card__untitled')?.textContent).toBe('Без названия');
+        // contentChild не нашёл [cardActions] — подвала в разметке нет совсем
+        expect(card?.querySelector('.card__actions')).toBeNull();
         expect(card?.querySelector('.card__body p')?.textContent).toBe('Только содержимое');
     });
 });

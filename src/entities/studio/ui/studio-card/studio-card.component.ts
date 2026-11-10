@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 
 import type { Studio } from '@shared/model';
+import { CardActionsDirective } from '@shared/ui/card/card-actions.directive';
 import { CardComponent } from '@shared/ui/card/card.component';
 import { IconButtonComponent } from '@shared/ui/icon-button/icon-button.component';
 import { IconComponent } from '@shared/ui/icon/icon.component';
@@ -19,7 +20,14 @@ import { IconComponent } from '@shared/ui/icon/icon.component';
  */
 @Component({
     selector: 'app-studio-card',
-    imports: [CardComponent, CurrencyPipe, DecimalPipe, IconButtonComponent, IconComponent],
+    imports: [
+        CardActionsDirective,
+        CardComponent,
+        CurrencyPipe,
+        DecimalPipe,
+        IconButtonComponent,
+        IconComponent,
+    ],
     templateUrl: './studio-card.component.html',
     styleUrl: './studio-card.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

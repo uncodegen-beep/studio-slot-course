@@ -14,7 +14,10 @@
         <ng-content />
     </div>
 
-    <footer class="card__actions">
-        <ng-content select="[cardActions]" />
-    </footer>
+    <!-- Подвала нет, если кнопки не передали: это решает contentChild, а не CSS -->
+    @if (hasActions()) {
+        <footer class="card__actions">
+            <ng-content select="[cardActions]" />
+        </footer>
+    }
 </article>
