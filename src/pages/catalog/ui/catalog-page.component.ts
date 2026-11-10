@@ -1,5 +1,7 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+
+import { FavoritesStore } from '@features/toggle-favorite/model/favorites.store';
 
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 import { StudioCardComponent } from '@entities/studio/ui/studio-card/studio-card.component';
@@ -29,9 +31,10 @@ export class CatalogPageComponent {
     protected loading = false;
     protected error: string | null = null;
     protected studios: Studio[] = DEMO_STUDIOS;
-
-    /** Новый Set на каждое изменение: OnPush-детям нужна новая ссылка, мутация незаметна */
-    protected favorites: ReadonlySet<string> = new Set();
+    /** Избранное живёт в сторе: его видит и шапка, и оно переживает переход между страницами */
+    protected readonly favoritesStore = inject(FavoritesStore);
+    /** Строка поиска — сигнал: шаблон, который её читает, обновится сам */
+    protected readonly query = signal('');
 
     protected readonly demoStates: { value: DemoState; label: string }[] = [
         { value: 'loading', label: 'Загрузка' },
@@ -39,17 +42,6 @@ export class CatalogPageComponent {
         { value: 'empty', label: 'Пусто' },
         { value: 'data', label: 'Данные' },
     ];
-
-    /** Умный компонент решает, что делать с событием карточки */
-    protected toggleFavorite(id: string): void {
-        const next = new Set(this.favorites);
-        if (next.has(id)) {
-            next.delete(id);
-        } else {
-            next.add(id);
-        }
-        this.favorites = next;
-    }
 
     /** Первая студия из подборки «Рекомендуем»; может не найтись — тип Studio | undefined */
     protected get featured(): Studio | undefined {
@@ -70,9 +62,5 @@ export class CatalogPageComponent {
     /** Новые объекты с теми же id — как ответ сервера: с track studio.id DOM переиспользуется */
     protected refresh(): void {
         this.studios = this.studios.map((studio) => ({ ...studio }));
-    }
-
-    protected search(query: string): void {
-        console.warn('поиск:', query);
     }
 }

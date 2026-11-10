@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+
+import { FavoritesStore } from '@features/toggle-favorite/model/favorites.store';
 
 import { ClockComponent } from '@shared/ui/clock/clock.component';
 
@@ -12,4 +14,5 @@ import { ClockComponent } from '@shared/ui/clock/clock.component';
 })
 export class HeaderComponent {
     protected readonly appName = 'StudioSlot';
+    protected readonly favoritesStore = inject(FavoritesStore);
 }
