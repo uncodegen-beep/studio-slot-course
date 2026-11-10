@@ -11,9 +11,13 @@
     (input)="query.set(queryInput.value)"
 />
 
-@if (query()) {
-    <p class="query-hint">Ищем «{{ query() }}» — фильтрация появится в уроке 25</p>
-}
+<!-- aria-live: скринридер сообщит новое число найденных студий -->
+<p
+    class="found"
+    aria-live="polite"
+>
+    Найдено: {{ count() }}
+</p>
 
 <!-- Демо: переключаем состояние экрана вручную, пока нет настоящей загрузки -->
 <div
@@ -31,15 +35,15 @@
     }
 </div>
 
-@if (loading) {
+@if (loading()) {
     <app-spinner />
-} @else if (error) {
-    <p role="alert">Не удалось загрузить студии: {{ error }}</p>
-} @else if (studios.length === 0) {
+} @else if (error(); as message) {
+    <p role="alert">Не удалось загрузить студии: {{ message }}</p>
+} @else if (studios().length === 0) {
     <ng-container [ngTemplateOutlet]="emptyState" />
 } @else {
     <!-- as сужает тип: внутри блока studio — Studio, а не Studio | undefined -->
-    @if (featured; as studio) {
+    @if (featured(); as studio) {
         <h2>Рекомендуем: {{ studio.name }}</h2>
         <app-studio-card
             [studio]="studio"
@@ -74,7 +78,7 @@
 
     <!-- Шаблон элемента из урока 11: список раскладывает, карточку рисует страница -->
     <app-studio-list
-        [studios]="studios"
+        [studios]="filtered()"
         [itemTemplate]="cardItem"
     />
 
