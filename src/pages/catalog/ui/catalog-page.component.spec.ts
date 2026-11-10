@@ -1,5 +1,6 @@
 import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { AnalyticsService } from '@shared/lib/analytics/analytics.service';
 
@@ -34,10 +35,18 @@ function setup(): Setup {
 }
 
 describe('CatalogPageComponent', () => {
+    beforeEach(() => {
+        // в шаблоне есть routerLink — нужен роутер
+        TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    });
+
     it('по умолчанию показывает рекомендуемую студию и список', () => {
         const { root } = setup();
 
-        expect(root.querySelector('h2')?.textContent).toContain('Рекомендуем: Sound Garden');
+        expect(root.querySelector('h2')?.textContent?.replace(/\s+/g, ' ')).toContain(
+            'Рекомендуем: Sound Garden',
+        );
+
         expect(root.querySelectorAll('app-studio-list li')).toHaveLength(3);
     });
 

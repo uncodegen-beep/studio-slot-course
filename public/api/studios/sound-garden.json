@@ -1,0 +1,27 @@
+{
+    "id": "sound-garden",
+    "name": "Sound Garden",
+    "city": "Москва",
+    "pricePerHour": 1500,
+    "coverUrl": "images/studio-placeholder.svg",
+    "isOpen": true,
+    "rating": 4.6,
+    "featured": true,
+    "rooms": [
+        {
+            "id": "sound-garden-a",
+            "name": "Зал A — вокал",
+            "pricePerHour": 1500
+        },
+        {
+            "id": "sound-garden-b",
+            "name": "Зал B — группа",
+            "pricePerHour": 2200
+        },
+        {
+            "id": "sound-garden-c",
+            "name": "Зал C — сведение",
+            "pricePerHour": 1800
+        }
+    ]
+}

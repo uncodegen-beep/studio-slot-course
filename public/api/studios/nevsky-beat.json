@@ -1,0 +1,22 @@
+{
+    "id": "nevsky-beat",
+    "name": "Nevsky Beat",
+    "city": "Санкт-Петербург",
+    "pricePerHour": 1200,
+    "coverUrl": "images/studio-placeholder.svg",
+    "isOpen": true,
+    "rating": 4.2,
+    "isNew": true,
+    "rooms": [
+        {
+            "id": "nevsky-beat-main",
+            "name": "Основной зал",
+            "pricePerHour": 1200
+        },
+        {
+            "id": "nevsky-beat-small",
+            "name": "Малый зал",
+            "pricePerHour": 1400
+        }
+    ]
+}

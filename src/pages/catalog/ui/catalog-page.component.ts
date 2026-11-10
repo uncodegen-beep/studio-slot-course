@@ -11,6 +11,7 @@ import {
     untracked,
     viewChild,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { FavoritesStore } from '@features/toggle-favorite/model/favorites.store';
 
@@ -39,6 +40,7 @@ type DemoState = 'loading' | 'error' | 'empty' | 'data';
     imports: [
         AutofocusDirective,
         NgTemplateOutlet,
+        RouterLink,
         SpinnerComponent,
         StudioCardComponent,
         StudioListComponent,

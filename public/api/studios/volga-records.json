@@ -1,0 +1,16 @@
+{
+    "id": "volga-records",
+    "name": "Volga Records",
+    "city": "Казань",
+    "pricePerHour": 900,
+    "coverUrl": "images/studio-placeholder.svg",
+    "isOpen": false,
+    "rating": 3.9,
+    "rooms": [
+        {
+            "id": "volga-records-1",
+            "name": "Зал 1",
+            "pricePerHour": 900
+        }
+    ]
+}
