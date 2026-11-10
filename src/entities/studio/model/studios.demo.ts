@@ -11,6 +11,11 @@ export const DEMO_STUDIOS: Studio[] = [
         isOpen: true,
         rating: 4.6,
         featured: true,
+        rooms: [
+            { id: 'sound-garden-a', name: 'Зал A — вокал', pricePerHour: 1500 },
+            { id: 'sound-garden-b', name: 'Зал B — группа', pricePerHour: 2200 },
+            { id: 'sound-garden-c', name: 'Зал C — сведение', pricePerHour: 1800 },
+        ],
     },
     {
         id: 'nevsky-beat',
@@ -21,6 +26,10 @@ export const DEMO_STUDIOS: Studio[] = [
         isOpen: true,
         rating: 4.2,
         isNew: true,
+        rooms: [
+            { id: 'nevsky-beat-main', name: 'Основной зал', pricePerHour: 1200 },
+            { id: 'nevsky-beat-small', name: 'Малый зал', pricePerHour: 1400 },
+        ],
     },
     {
         id: 'volga-records',
@@ -30,5 +39,6 @@ export const DEMO_STUDIOS: Studio[] = [
         coverUrl: 'images/studio-placeholder.svg',
         isOpen: false,
         rating: 3.9,
+        rooms: [{ id: 'volga-records-1', name: 'Зал 1', pricePerHour: 900 }],
     },
 ];
