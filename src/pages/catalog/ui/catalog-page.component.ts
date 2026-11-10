@@ -24,7 +24,9 @@ import { StudioListComponent } from '@entities/studio/ui/studio-list/studio-list
 
 import { AnalyticsService } from '@shared/lib/analytics/analytics.service';
 import { AutofocusDirective } from '@shared/lib/autofocus/autofocus.directive';
+import { PluralPipe } from '@shared/lib/plural/plural.pipe';
 import type { Studio, StudioRoom } from '@shared/model';
+import { DurationPickerComponent } from '@shared/ui/duration-picker/duration-picker.component';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 
 /** Состояние, которое показываем кнопками демо — пока нет настоящей загрузки (модуль 06) */
@@ -38,7 +40,9 @@ type DemoState = 'loading' | 'error' | 'empty' | 'data';
         SpinnerComponent,
         StudioCardComponent,
         StudioListComponent,
+        DurationPickerComponent,
         CurrencyPipe,
+        PluralPipe,
     ],
     templateUrl: './catalog-page.component.html',
     styleUrl: './catalog-page.component.scss',
@@ -79,6 +83,13 @@ export class CatalogPageComponent {
         computation: (rooms, previous) =>
             rooms.find((room) => room.id === previous?.value?.id) ?? rooms[0] ?? null,
     });
+
+    /** Длительность сессии: меняет её пикер через [(value)] */
+    protected readonly hours = signal(2);
+    /** Стоимость: зал × часы — пересчитается при смене любого из них */
+    protected readonly total = computed(
+        () => (this.selectedRoom()?.pricePerHour ?? 0) * this.hours(),
+    );
 
     /** Города для фильтра — из самих данных, без повторов */
     protected readonly cities = computed(() =>

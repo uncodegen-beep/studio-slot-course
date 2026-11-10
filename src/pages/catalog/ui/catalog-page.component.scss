@@ -39,3 +39,14 @@ app-studio-card {
     border: 1px solid #d0d4e0;
     border-radius: 12px;
 }
+
+.estimate {
+    display: grid;
+    gap: 8px;
+    margin: 12px 0 0;
+}
+
+.total {
+    margin: 0;
+    font-weight: 600;
+}

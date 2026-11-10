@@ -2,11 +2,10 @@ import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     Component,
-    EventEmitter,
-    Output,
     booleanAttribute,
     computed,
     input,
+    output,
 } from '@angular/core';
 
 import type { Studio } from '@shared/model';
@@ -40,8 +39,8 @@ export class StudioCardComponent {
     /** <app-studio-card compact /> — атрибут без значения превращается в true */
     readonly compact = input(false, { transform: booleanAttribute });
 
-    /** Сообщаем родителю id студии — что сделать с избранным, решает он */
-    @Output() favoriteToggle = new EventEmitter<string>();
+    /** Сообщаем родителю id студии — что сделать с избранным, решает он. output() — не Observable */
+    readonly favoriteToggle = output<string>();
 
     /** Ширина полосы рейтинга в процентах: 5 звёзд — 100 %. computed вместо ngOnChanges */
     protected readonly ratingPercent = computed(() => (this.studio().rating ?? 0) * 20);
