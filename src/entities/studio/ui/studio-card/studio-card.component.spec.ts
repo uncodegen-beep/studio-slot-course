@@ -27,16 +27,24 @@ describe('StudioCardComponent', () => {
         const host = render(OPEN_STUDIO).nativeElement as HTMLElement;
 
         expect(host.querySelector('.card__title')?.textContent).toContain('Sound Garden');
-
         expect(host.querySelector('.card__meta')?.textContent).toMatch(/от 1\s500\s₽\/час/);
     });
 
-    it('number: рейтинг в подписи с одним знаком после запятой', () => {
+    it('number: рейтинг текстом с одним знаком после запятой', () => {
         const host = render(OPEN_STUDIO).nativeElement as HTMLElement;
 
-        expect(host.querySelector('.card__rating')?.getAttribute('aria-label')).toBe(
-            'Рейтинг 4,6 из 5',
-        );
+        expect(host.querySelector('.card__rating')?.textContent?.trim()).toBe('Рейтинг 4,6 из 5');
+    });
+
+    it('compact: без обложки и с классом на хосте', () => {
+        const fixture = TestBed.createComponent(StudioCardComponent);
+        fixture.componentRef.setInput('studio', OPEN_STUDIO);
+        fixture.componentRef.setInput('compact', '');
+        fixture.detectChanges();
+        const host = fixture.nativeElement as HTMLElement;
+
+        expect(host.classList).toContain('compact');
+        expect(host.querySelector('img')).toBeNull();
     });
 
     it('ngOnChanges: полоса рейтинга пересчитывается при новой студии на входе', () => {

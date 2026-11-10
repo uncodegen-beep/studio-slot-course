@@ -88,7 +88,7 @@ describe('CatalogPageComponent', () => {
         const root = fixture.nativeElement as HTMLElement;
         const favoriteButtons = (): HTMLButtonElement[] => [
             ...root.querySelectorAll<HTMLButtonElement>(
-                'app-studio-card [aria-label="Добавить Sound Garden в избранное"]',
+                'app-studio-card [aria-pressed][aria-label*="Sound Garden"]',
             ),
         ];
 
