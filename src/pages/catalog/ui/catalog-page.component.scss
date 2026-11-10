@@ -4,7 +4,8 @@
 }
 
 .demo-states,
-.list-actions {
+.list-actions,
+.filters {
     display: flex;
     gap: 8px;
     margin: 16px 0;
@@ -23,4 +24,9 @@ app-studio-card {
 .found {
     margin: 8px 0 0;
     color: #5b6275;
+}
+
+.filters {
+    flex-wrap: wrap;
+    align-items: center;
 }

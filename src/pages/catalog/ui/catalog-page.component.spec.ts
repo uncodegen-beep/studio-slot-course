@@ -1,6 +1,8 @@
 import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { AnalyticsService } from '@shared/lib/analytics/analytics.service';
+
 import { CatalogPageComponent } from './catalog-page.component';
 
 interface Setup {
@@ -133,5 +135,51 @@ describe('CatalogPageComponent', () => {
         expect(items()).toHaveLength(1);
         expect(items()[0]?.classList).toContain('empty');
         expect(root.querySelector('.found')?.textContent).toContain('Найдено: 0');
+    });
+
+    it('фильтр по городу и сброс фильтров', async () => {
+        const { root, items } = setup();
+        const select = root.querySelector<HTMLSelectElement>('.filters select');
+        if (!select) {
+            throw new Error('Нет фильтра города');
+        }
+
+        select.value = 'Казань';
+        select.dispatchEvent(new Event('change'));
+        await TestBed.inject(ApplicationRef).whenStable();
+        expect(items()).toHaveLength(1);
+
+        root.querySelector<HTMLButtonElement>('.filters button')?.click();
+        await TestBed.inject(ApplicationRef).whenStable();
+        expect(items()).toHaveLength(3);
+    });
+
+    it('аналитика: equal и untracked не дают лишних событий поиска', async () => {
+        const { root } = setup();
+        const appRef = TestBed.inject(ApplicationRef);
+        const searches = (): number =>
+            TestBed.inject(AnalyticsService)
+                .events()
+                .filter((event) => event.name === 'catalog_search').length;
+        await appRef.whenStable();
+        const initial = searches();
+
+        // фильтры уже по умолчанию: новый, но равный объект — эффект не перезапускается
+        root.querySelector<HTMLButtonElement>('.filters button')?.click();
+        await appRef.whenStable();
+        expect(searches()).toBe(initial);
+
+        // избранное прочитано через untracked — тоже не повод для события поиска
+        root.querySelector<HTMLButtonElement>('app-studio-card [aria-pressed]')?.click();
+        await appRef.whenStable();
+        expect(searches()).toBe(initial);
+
+        const input = root.querySelector<HTMLInputElement>('input[type="search"]');
+        if (input) {
+            input.value = 'volga';
+            input.dispatchEvent(new Event('input'));
+        }
+        await appRef.whenStable();
+        expect(searches()).toBe(initial + 1);
     });
 });
