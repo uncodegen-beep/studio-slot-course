@@ -1,14 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { CatalogPageComponent } from '@pages/catalog/ui/catalog-page.component';
-
+import { FooterComponent } from '@widgets/footer/ui/footer.component';
 import { HeaderComponent } from '@widgets/header/ui/header.component';
-import { MyBookingsComponent } from '@widgets/my-bookings/ui/my-bookings.component';
 
 @Component({
     selector: 'app-root',
-    imports: [HeaderComponent, RouterOutlet, CatalogPageComponent, MyBookingsComponent],
+    imports: [HeaderComponent, RouterOutlet, FooterComponent],
     templateUrl: './app.html',
     styleUrl: './app.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

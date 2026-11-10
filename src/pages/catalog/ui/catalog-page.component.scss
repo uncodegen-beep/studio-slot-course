@@ -16,6 +16,6 @@
 
 // Настройка карточки снаружи — через её CSS-переменные, инкапсуляция не нарушается
 app-studio-card {
-    --card-max-width: 360px;
+    --card-max-width: 100%;
     --card-radius: 16px;
 }
