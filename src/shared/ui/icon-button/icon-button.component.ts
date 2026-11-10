@@ -24,6 +24,6 @@ export class IconButtonComponent {
     private readonly tooltip = inject(TooltipDirective);
 
     protected get label(): string {
-        return this.tooltip.text;
+        return this.tooltip.text();
     }
 }

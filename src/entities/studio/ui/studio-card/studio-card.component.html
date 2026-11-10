@@ -1,12 +1,12 @@
 <!-- Рамку и раскладку даёт app-card, карточка студии решает только, что положить в слоты -->
 <app-card>
-    @if (!compact) {
+    @if (!compact()) {
         <img
             cardMedia
             class="card__cover"
             loading="lazy"
-            [src]="studio.coverUrl"
-            [alt]="'Студия ' + studio.name"
+            [src]="studio().coverUrl"
+            [alt]="'Студия ' + studio().name"
         />
     }
 
@@ -14,11 +14,11 @@
         cardTitle
         class="card__title"
     >
-        {{ studio.name }}
+        {{ studio().name }}
     </h3>
 
     <p class="card__meta">
-        {{ studio.city }} · от {{ studio.pricePerHour | currency: "RUB" : "symbol-narrow" : "1.0-0" }}/час
+        {{ studio().city }} · от {{ studio().pricePerHour | currency: "RUB" : "symbol-narrow" : "1.0-0" }}/час
     </p>
 
     <!-- Полоса — украшение (aria-hidden), значение для всех — текстом рядом -->
@@ -29,13 +29,13 @@
         >
             <span
                 class="card__rating-bar"
-                [style.width.%]="ratingPercent"
+                [style.width.%]="ratingPercent()"
             ></span>
         </span>
-        Рейтинг {{ studio.rating ?? 0 | number: "1.1-1" }} из 5
+        Рейтинг {{ studio().rating ?? 0 | number: "1.1-1" }} из 5
     </p>
 
-    @if (!studio.isOpen) {
+    @if (!studio().isOpen) {
         <p class="card__closed">Сейчас не принимает бронирования</p>
     }
 
@@ -45,18 +45,18 @@
     >
         <button
             type="button"
-            [disabled]="!studio.isOpen"
+            [disabled]="!studio().isOpen"
         >
             Забронировать
         </button>
         <button
             type="button"
             app-icon-button
-            [label]="favorite ? 'Убрать ' + studio.name + ' из избранного' : 'Добавить ' + studio.name + ' в избранное'"
-            [attr.aria-pressed]="favorite"
+            [label]="favoriteLabel()"
+            [attr.aria-pressed]="favorite()"
             (click)="toggleFavorite()"
         >
-            <app-icon [name]="favorite ? 'heart-filled' : 'heart'" />
+            <app-icon [name]="favorite() ? 'heart-filled' : 'heart'" />
         </button>
     </div>
 </app-card>

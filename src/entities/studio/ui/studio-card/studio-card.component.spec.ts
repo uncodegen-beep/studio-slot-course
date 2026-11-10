@@ -47,7 +47,7 @@ describe('StudioCardComponent', () => {
         expect(host.querySelector('img')).toBeNull();
     });
 
-    it('ngOnChanges: полоса рейтинга пересчитывается при новой студии на входе', () => {
+    it('computed: полоса рейтинга пересчитывается при новой студии на входе', () => {
         const fixture = render(OPEN_STUDIO);
         const bar = (): string | undefined =>
             (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('.card__rating-bar')

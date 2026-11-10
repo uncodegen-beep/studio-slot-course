@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { DestroyRef, Directive, ElementRef, Input, Renderer2, inject } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, Renderer2, inject, input } from '@angular/core';
 
 let nextId = 0;
 
@@ -20,7 +20,7 @@ let nextId = 0;
 })
 export class TooltipDirective {
     /** alias: снаружи вход называется как селектор — appTooltip="текст" */
-    @Input({ alias: 'appTooltip', required: true }) text!: string;
+    readonly text = input.required<string>({ alias: 'appTooltip' });
 
     protected visible = false;
     /** Счётчик, а не случайный id: на сервере и в браузере id совпадут (SSR) */
@@ -44,7 +44,7 @@ export class TooltipDirective {
         this.renderer.setAttribute(tooltip, 'role', 'tooltip');
         this.renderer.setAttribute(tooltip, 'id', this.tooltipId);
         this.renderer.addClass(tooltip, 'app-tooltip');
-        this.renderer.appendChild(tooltip, this.renderer.createText(this.text));
+        this.renderer.appendChild(tooltip, this.renderer.createText(this.text()));
 
         const rect = this.host.getBoundingClientRect();
         this.renderer.setStyle(tooltip, 'top', `${rect.bottom + 6}px`);
