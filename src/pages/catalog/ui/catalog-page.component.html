@@ -11,6 +11,43 @@
     (input)="query.set(queryInput.value)"
 />
 
+<div
+    class="filters"
+    role="group"
+    aria-label="Фильтры каталога"
+>
+    <label>
+        Город
+        <select
+            #citySelect
+            [value]="filters().city"
+            (change)="setCity(citySelect.value)"
+        >
+            <option value="">Любой</option>
+            @for (city of cities(); track city) {
+                <option [value]="city">{{ city }}</option>
+            }
+        </select>
+    </label>
+
+    <label>
+        <input
+            #onlyOpenBox
+            type="checkbox"
+            [checked]="filters().onlyOpen"
+            (change)="setOnlyOpen(onlyOpenBox.checked)"
+        />
+        Только открытые
+    </label>
+
+    <button
+        type="button"
+        (click)="resetFilters()"
+    >
+        Сбросить фильтры
+    </button>
+</div>
+
 <!-- aria-live: скринридер сообщит новое число найденных студий -->
 <p
     class="found"
