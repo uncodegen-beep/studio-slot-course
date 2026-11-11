@@ -1,4 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+
+import { ANALYTICS_SINKS } from './analytics-sink';
 
 export interface AnalyticsEvent {
     readonly name: string;
@@ -6,15 +8,20 @@ export interface AnalyticsEvent {
 }
 
 /**
- * Учебная аналитика: события копятся в памяти. В реальном проекте track()
- * отправлял бы их на сервер или в Яндекс Метрику — только с согласия пользователя
+ * Учебная аналитика: события копятся в памяти и уходят всем получателям из ANALYTICS_SINKS.
+ * В реальном проекте получатель отправлял бы их в Метрику — только с согласия пользователя
  */
 @Injectable({ providedIn: 'root' })
 export class AnalyticsService {
+    /** Получателей может не быть вовсе: optional вернёт null вместо ошибки (подробно — урок 40) */
+    private readonly sinks = inject(ANALYTICS_SINKS, { optional: true }) ?? [];
+
     private readonly log = signal<readonly AnalyticsEvent[]>([]);
     readonly events = this.log.asReadonly();
 
     track(name: string, params: Record<string, unknown> = {}): void {
-        this.log.update((events) => [...events, { name, params }]);
+        const event: AnalyticsEvent = { name, params };
+        this.log.update((events) => [...events, event]);
+        this.sinks.forEach((sink) => sink.send(event));
     }
 }
