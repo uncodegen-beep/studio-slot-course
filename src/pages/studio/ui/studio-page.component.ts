@@ -1,11 +1,14 @@
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
-import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+
+import { StudiosApi } from '@entities/studio/api/studios.api';
 
 import type { Studio } from '@shared/model';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 
+/** Страница студии: /studios/:id. Данные — через StudiosApi, состояния загрузки встроены в ресурс */
 /** Страница студии: /studios/:id. Данные — httpResource, состояния загрузки встроены */
 @Component({
     selector: 'app-studio-page',
@@ -18,9 +21,15 @@ export class StudioPageComponent {
     /** :id из адреса — вход компонента (withComponentInputBinding в app.config) */
     readonly id = input.required<string>();
 
+    /** Зависимости — первыми: поля инициализируются сверху вниз, studio ниже использует api */
+    private readonly api = inject(StudiosApi);
+
     /**
-     * Функция реактивна: сменился id — новый запрос, а незавершённый прошлый отменяется.
-     * Пока API нет, это JSON-заглушка из public/api — путь без «/» в начале ради GitHub Pages
+     * Адрес и HttpClient теперь в сервисе. rxResource принимает Observable из метода сервиса:
+     * сменился id — новый запрос, незавершённый прошлый отменяется (подробно о RxJS — модуль 05)
      */
-    protected readonly studio = httpResource<Studio>(() => `api/studios/${this.id()}.json`);
+    protected readonly studio = rxResource<Studio, string>({
+        params: () => this.id(),
+        stream: ({ params: id }) => this.api.getById(id),
+    });
 }
