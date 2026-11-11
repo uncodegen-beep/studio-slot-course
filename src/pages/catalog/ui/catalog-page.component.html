@@ -8,7 +8,7 @@
     placeholder="Поиск студии — нажмите /"
     aria-label="Поиск студии"
     [value]="query()"
-    (input)="query.set(queryInput.value)"
+    (input)="store.setQuery(queryInput.value)"
 />
 
 <div
@@ -21,7 +21,7 @@
         <select
             #citySelect
             [value]="filters().city"
-            (change)="setCity(citySelect.value)"
+            (change)="store.setCity(citySelect.value)"
         >
             <option value="">Любой</option>
             @for (city of cities(); track city) {
@@ -35,14 +35,14 @@
             #onlyOpenBox
             type="checkbox"
             [checked]="filters().onlyOpen"
-            (change)="setOnlyOpen(onlyOpenBox.checked)"
+            (change)="store.setOnlyOpen(onlyOpenBox.checked)"
         />
         Только открытые
     </label>
 
     <button
         type="button"
-        (click)="resetFilters()"
+        (click)="store.resetFilters()"
     >
         Сбросить фильтры
     </button>
@@ -115,9 +115,24 @@
                     label="Длительность сессии"
                     [(value)]="hours"
                 />
+                <label>
+                    Начало
+                    <select
+                        #startSelect
+                        [value]="startHour()"
+                        (change)="startHour.set(+startSelect.value)"
+                    >
+                        @for (hour of startHours; track hour) {
+                            <option [value]="hour">{{ hour }}:00</option>
+                        }
+                    </select>
+                </label>
                 <p class="total">
                     Итого за {{ hours() | plural: ["час", "часа", "часов"] }}:
-                    {{ total() | currency: "RUB" : "symbol-narrow" : "1.0-0" }}
+                    {{ price.total() | currency: "RUB" : "symbol-narrow" : "1.0-0" }}
+                    @if (price.isPeak()) {
+                        <small class="peak">вечерний тариф +20 %</small>
+                    }
                 </p>
             </div>
         }
@@ -133,13 +148,13 @@
     >
         <button
             type="button"
-            (click)="reverse()"
+            (click)="store.reverse()"
         >
             Обратный порядок
         </button>
         <button
             type="button"
-            (click)="refresh()"
+            (click)="store.refresh()"
         >
             Обновить данные
         </button>

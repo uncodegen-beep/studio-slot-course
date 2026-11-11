@@ -3,7 +3,6 @@ import {
     ChangeDetectionStrategy,
     Component,
     ElementRef,
-    computed,
     effect,
     inject,
     linkedSignal,
@@ -13,14 +12,10 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { createSlotPrice } from '@features/book-slot/model/slot-price';
 import { FavoritesStore } from '@features/toggle-favorite/model/favorites.store';
 
-import {
-    DEFAULT_STUDIO_FILTERS,
-    type StudioFilters,
-    filterStudios,
-    sameStudioFilters,
-} from '@entities/studio/model/studio-filters';
+import { CatalogStore } from '@entities/studio/model/catalog.store';
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 import { StudioCardComponent } from '@entities/studio/ui/studio-card/studio-card.component';
 import { StudioListComponent } from '@entities/studio/ui/studio-list/studio-list.component';
@@ -28,7 +23,7 @@ import { StudioListComponent } from '@entities/studio/ui/studio-list/studio-list
 import { AnalyticsService } from '@shared/lib/analytics/analytics.service';
 import { AutofocusDirective } from '@shared/lib/autofocus/autofocus.directive';
 import { PluralPipe } from '@shared/lib/plural/plural.pipe';
-import type { Studio, StudioRoom } from '@shared/model';
+import type { StudioRoom } from '@shared/model';
 import { DurationPickerComponent } from '@shared/ui/duration-picker/duration-picker.component';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 
@@ -39,39 +34,41 @@ type DemoState = 'loading' | 'error' | 'empty' | 'data';
     selector: 'app-catalog-page',
     imports: [
         AutofocusDirective,
+        CurrencyPipe,
+        DurationPickerComponent,
         NgTemplateOutlet,
+        PluralPipe,
         RouterLink,
         SpinnerComponent,
         StudioCardComponent,
         StudioListComponent,
-        DurationPickerComponent,
-        CurrencyPipe,
-        PluralPipe,
     ],
+    templateUrl: './catalog-page.component.html',
+    styleUrl: './catalog-page.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         // Горячая клавиша «/» — как поиск на GitHub и YouTube
         '(document:keydown)': 'onKeydown($event)',
     },
-    templateUrl: './catalog-page.component.html',
-    styleUrl: './catalog-page.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CatalogPageComponent {
     protected readonly loading = signal(false);
     protected readonly error = signal<string | null>(null);
-    protected readonly studios = signal<Studio[]>(DEMO_STUDIOS);
+
+    /** Состояние каталога — в сторе: страница только читает сигналы и вызывает методы */
+    protected readonly store = inject(CatalogStore);
+    protected readonly studios = this.store.studios;
+    protected readonly query = this.store.query;
+    protected readonly filters = this.store.filters;
+    protected readonly cities = this.store.cities;
+    protected readonly filtered = this.store.filtered;
+    protected readonly count = this.store.count;
+    protected readonly featured = this.store.featured;
+
     /** Избранное живёт в сторе: его видит и шапка, и оно переживает переход между страницами */
     protected readonly favoritesStore = inject(FavoritesStore);
-    /** Строка поиска — сигнал: шаблон, который её читает, обновится сам */
-    protected readonly query = signal('');
-
-    /** equal: новый, но такой же по содержанию объект не пересчитает каталог и не запустит эффект */
-    protected readonly filters = signal<StudioFilters>(DEFAULT_STUDIO_FILTERS, {
-        equal: sameStudioFilters,
-    });
 
     private readonly analytics = inject(AnalyticsService);
-
     /** Сигнальный запрос к своему шаблону: #queryInput. required — поле есть всегда */
     private readonly searchInput = viewChild.required<ElementRef<HTMLInputElement>>('queryInput');
 
@@ -81,9 +78,6 @@ export class CatalogPageComponent {
         { value: 'empty', label: 'Пусто' },
         { value: 'data', label: 'Данные' },
     ];
-
-    /** Первая студия из подборки «Рекомендуем»; может не найтись — тип Studio | undefined */
-    protected readonly featured = computed(() => this.studios().find((studio) => studio.featured));
 
     /**
      * Выбранный зал рекомендуемой студии. linkedSignal: пользователь выбирает вручную (set),
@@ -97,23 +91,11 @@ export class CatalogPageComponent {
 
     /** Длительность сессии: меняет её пикер через [(value)] */
     protected readonly hours = signal(2);
-    /** Стоимость: зал × часы — пересчитается при смене любого из них */
-    protected readonly total = computed(
-        () => (this.selectedRoom()?.pricePerHour ?? 0) * this.hours(),
-    );
-
-    /** Города для фильтра — из самих данных, без повторов */
-    protected readonly cities = computed(() =>
-        [...new Set(this.studios().map((studio) => studio.city))].sort(),
-    );
-
-    /** Зависимости — studios, query и filters: computed запомнил их сам */
-    protected readonly filtered = computed(() =>
-        filterStudios(this.studios(), this.query(), this.filters()),
-    );
-
-    /** computed от computed: граф query/studios → filtered → count */
-    protected readonly count = computed(() => this.filtered().length);
+    /** Начало сессии, час: вечером тариф выше */
+    protected readonly startHour = signal(12);
+    protected readonly startHours = [10, 12, 14, 16, 18, 20] as const;
+    /** Цена слота — фабрика из сигналов: зал, часы и начало */
+    protected readonly price = createSlotPrice(this.selectedRoom, this.hours, this.startHour);
 
     constructor() {
         // Аналитика поиска: перезапуск — только при смене query или filters
@@ -139,32 +121,9 @@ export class CatalogPageComponent {
         }
     }
 
-    protected setCity(city: string): void {
-        this.filters.update((filters) => ({ ...filters, city }));
-    }
-
-    protected setOnlyOpen(onlyOpen: boolean): void {
-        this.filters.update((filters) => ({ ...filters, onlyOpen }));
-    }
-
-    /** Новый объект с теми же значениями: при уже сброшенных фильтрах equal ничего не запустит */
-    protected resetFilters(): void {
-        this.filters.set({ ...DEFAULT_STUDIO_FILTERS });
-    }
-
     protected showState(state: DemoState): void {
         this.loading.set(state === 'loading');
         this.error.set(state === 'error' ? 'Сервер не ответил' : null);
-        this.studios.set(state === 'data' ? DEMO_STUDIOS : []);
-    }
-
-    /** Тот же набор студий в обратном порядке: с track studio.id элементы переставляются, а не создаются */
-    protected reverse(): void {
-        this.studios.update((studios) => [...studios].reverse());
-    }
-
-    /** Новые объекты с теми же id — как ответ сервера: с track studio.id DOM переиспользуется */
-    protected refresh(): void {
-        this.studios.update((studios) => studios.map((studio) => ({ ...studio })));
+        this.store.setStudios(state === 'data' ? DEMO_STUDIOS : []);
     }
 }
