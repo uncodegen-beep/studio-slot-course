@@ -1,30 +1,27 @@
-import { type Signal, computed } from '@angular/core';
+import { type Signal, computed, inject } from '@angular/core';
 
 import type { StudioRoom } from '@shared/model';
 
-/** Вечерний тариф: с 18:00 до 23:00 цена выше на 20 % */
-const PEAK_FROM = 18;
-const PEAK_TO = 23;
-const PEAK_MULTIPLIER = 1.2;
+import { PricingService } from './pricing.service';
 
 export interface SlotPrice {
     readonly isPeak: Signal<boolean>;
-    readonly base: Signal<number>;
     readonly total: Signal<number>;
 }
 
 /**
- * Фабрика из сигналов: переиспользуемая логика цены без сервиса.
- * Принимает сигналы, а не значения, — результат пересчитывается сам
+ * Фабрика из сигналов. Правила цены больше не зашиты внутри — их даёт PricingService.
+ * inject() требует контекст внедрения: вызывать в поле класса или конструкторе
  */
 export function createSlotPrice(
     room: Signal<StudioRoom | null>,
     hours: Signal<number>,
     startHour: Signal<number>,
 ): SlotPrice {
-    const isPeak = computed(() => startHour() >= PEAK_FROM && startHour() < PEAK_TO);
-    const base = computed(() => (room()?.pricePerHour ?? 0) * hours());
-    const total = computed(() => Math.round(base() * (isPeak() ? PEAK_MULTIPLIER : 1)));
+    const pricing = inject(PricingService);
 
-    return { isPeak, base, total };
+    const isPeak = computed(() => pricing.isPeak(startHour()));
+    const total = computed(() => pricing.quote(room()?.pricePerHour ?? 0, hours(), startHour()));
+
+    return { isPeak, total };
 }
