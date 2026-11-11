@@ -40,6 +40,9 @@ export class CatalogStore {
     readonly filtered = computed(() => filterStudios(this.studios(), this.query(), this.filters()));
     readonly count = computed(() => this.filtered().length);
 
+    /** Изменены ли фильтры — из того же сигнала, без отдельного флага и effect */
+    readonly isDirty = computed(() => !sameStudioFilters(this.filters(), DEFAULT_STUDIO_FILTERS));
+
     setStudios(studios: Studio[]): void {
         this.state.update((state) => ({ ...state, studios }));
     }
@@ -54,6 +57,10 @@ export class CatalogStore {
 
     setOnlyOpen(onlyOpen: boolean): void {
         this.patchFilters({ onlyOpen });
+    }
+
+    setMaxPrice(maxPrice: number | null): void {
+        this.patchFilters({ maxPrice });
     }
 
     resetFilters(): void {

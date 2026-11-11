@@ -63,6 +63,11 @@ export class CatalogPageComponent {
     protected readonly cities = this.store.cities;
     protected readonly filtered = this.store.filtered;
     protected readonly count = this.store.count;
+
+    protected readonly isDirty = this.store.isDirty;
+    /** Варианты «цена до»; null — любая */
+    protected readonly priceOptions = [null, 1000, 1500, 2000] as const;
+
     protected readonly featured = this.store.featured;
 
     /** Избранное живёт в сторе: его видит и шапка, и оно переживает переход между страницами */
@@ -119,6 +124,10 @@ export class CatalogPageComponent {
             event.preventDefault();
             this.searchInput().nativeElement.focus();
         }
+    }
+
+    protected setMaxPrice(value: string): void {
+        this.store.setMaxPrice(value === '' ? null : Number(value));
     }
 
     protected showState(state: DemoState): void {
