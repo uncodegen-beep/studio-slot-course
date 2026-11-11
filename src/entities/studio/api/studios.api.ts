@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 
 import type { Observable } from 'rxjs';
 
+import { APP_CONFIG } from '@shared/config/app-config';
 import type { Studio } from '@shared/model';
 
 /**
@@ -13,8 +14,10 @@ import type { Studio } from '@shared/model';
 export class StudiosApi {
     private readonly http = inject(HttpClient);
 
-    /** Пока API нет — JSON-заглушка из public/api; путь без «/» в начале ради GitHub Pages */
+    private readonly baseUrl = inject(APP_CONFIG).apiBaseUrl;
+
+    /** Пока API нет — JSON-заглушка из public/api */
     getById(id: string): Observable<Studio> {
-        return this.http.get<Studio>(`api/studios/${id}.json`);
+        return this.http.get<Studio>(`${this.baseUrl}/studios/${id}.json`);
     }
 }
