@@ -10,6 +10,7 @@ import { ANALYTICS_SINKS } from '@shared/lib/analytics/analytics-sink';
 import { ConsoleAnalyticsSink } from '@shared/lib/analytics/console-analytics.sink';
 import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
 
+import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -28,7 +29,9 @@ export const appConfig: ApplicationConfig = {
                     ? new PromoPricingService()
                     : new PricingService(),
         },
-        // multi: получатели аналитики собираются в массив
-        { provide: ANALYTICS_SINKS, useClass: ConsoleAnalyticsSink, multi: true },
+        // multi: получатели аналитики собираются в массив. В консоль — только в разработке
+        ...(environment.analyticsToConsole
+            ? [{ provide: ANALYTICS_SINKS, useClass: ConsoleAnalyticsSink, multi: true }]
+            : []),
     ],
 };
