@@ -18,5 +18,11 @@ export const routes: Routes = [
                 (m) => m.BookingsPageComponent,
             ),
     },
+    {
+        path: 'studios/:id',
+        title: 'Студия — StudioSlot',
+        loadComponent: () =>
+            import('@pages/studio/ui/studio-page.component').then((m) => m.StudioPageComponent),
+    },
     { path: '**', redirectTo: 'studios' },
 ];

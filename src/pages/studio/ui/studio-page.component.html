@@ -1,0 +1,35 @@
+<a
+    class="back"
+    routerLink="/studios"
+>
+    ← Все студии
+</a>
+
+@if (studio.isLoading()) {
+    <app-spinner />
+} @else if (studio.error()) {
+    <p role="alert">Не удалось загрузить студию.</p>
+    <button
+        type="button"
+        (click)="studio.reload()"
+    >
+        Повторить
+    </button>
+} @else if (studio.hasValue()) {
+    <!-- hasValue() сужает тип: внутри value() — Studio, а не Studio | undefined -->
+    @let s = studio.value();
+    <h1>{{ s.name }}</h1>
+    <p class="meta">
+        {{ s.city }} · рейтинг {{ s.rating ?? 0 | number: "1.1-1" }} ·
+        {{ s.isOpen ? "принимает бронирования" : "сейчас закрыта" }}
+    </p>
+
+    <h2>Залы</h2>
+    <ul class="rooms">
+        @for (room of s.rooms ?? []; track room.id) {
+            <li>{{ room.name }} — {{ room.pricePerHour | currency: "RUB" : "symbol-narrow" : "1.0-0" }}/час</li>
+        } @empty {
+            <li>Залы пока не добавлены</li>
+        }
+    </ul>
+}

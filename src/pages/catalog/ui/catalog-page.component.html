@@ -81,7 +81,10 @@
 } @else {
     <!-- as сужает тип: внутри блока studio — Studio, а не Studio | undefined -->
     @if (featured(); as studio) {
-        <h2>Рекомендуем: {{ studio.name }}</h2>
+        <h2>
+            Рекомендуем:
+            <a [routerLink]="['/studios', studio.id]">{{ studio.name }}</a>
+        </h2>
         <app-studio-card
             [studio]="studio"
             [favorite]="favoritesStore.favorites().has(studio.id)"
