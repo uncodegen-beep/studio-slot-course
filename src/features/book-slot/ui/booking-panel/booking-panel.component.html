@@ -1,0 +1,45 @@
+@if (studio().rooms?.length) {
+    <fieldset class="rooms">
+        <legend>Зал</legend>
+        @for (room of studio().rooms; track room.id) {
+            <label>
+                <input
+                    type="radio"
+                    [name]="roomGroup"
+                    [checked]="selectedRoom()?.id === room.id"
+                    (change)="selectedRoom.set(room)"
+                />
+                {{ room.name }} — {{ room.pricePerHour | currency: "RUB" : "symbol-narrow" : "1.0-0" }}/час
+            </label>
+        }
+    </fieldset>
+}
+
+@if (selectedRoom()) {
+    <div class="estimate">
+        <!-- Двусторонняя привязка прямо к сигналу стора: draft.hours -->
+        <app-duration-picker
+            label="Длительность сессии"
+            [(value)]="draft.hours"
+        />
+        <label>
+            Начало
+            <select
+                #startSelect
+                [value]="draft.startHour()"
+                (change)="draft.startHour.set(+startSelect.value)"
+            >
+                @for (hour of startHours; track hour) {
+                    <option [value]="hour">{{ hour }}:00</option>
+                }
+            </select>
+        </label>
+        <p class="total">
+            Итого за {{ draft.hours() | plural: ["час", "часа", "часов"] }}:
+            {{ price.total() | currency: "RUB" : "symbol-narrow" : "1.0-0" }}
+            @if (price.isPeak()) {
+                <small class="peak">вечерний тариф +20 %</small>
+            }
+        </p>
+    </div>
+}
