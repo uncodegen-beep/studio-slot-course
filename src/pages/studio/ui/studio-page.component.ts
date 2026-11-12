@@ -3,6 +3,8 @@ import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
+import { BookingPanelComponent } from '@features/book-slot/ui/booking-panel/booking-panel.component';
+
 import { StudiosApi } from '@entities/studio/api/studios.api';
 
 import type { Studio } from '@shared/model';
@@ -11,7 +13,7 @@ import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 /** Страница студии: /studios/:id. Данные — через StudiosApi, состояния загрузки встроены в ресурс */
 @Component({
     selector: 'app-studio-page',
-    imports: [CurrencyPipe, DecimalPipe, RouterLink, SpinnerComponent],
+    imports: [CurrencyPipe, DecimalPipe, RouterLink, SpinnerComponent, BookingPanelComponent],
     templateUrl: './studio-page.component.html',
     styleUrl: './studio-page.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
