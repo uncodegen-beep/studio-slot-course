@@ -11,10 +11,10 @@
     (input)="store.setQuery(queryInput.value)"
 />
 
-<div
+<!-- Вложенные группы: внутренняя находит внешнюю через inject(FIELD_GROUP, { skipSelf: true }) -->
+<app-field-group
     class="filters"
-    role="group"
-    aria-label="Фильтры каталога"
+    legend="Фильтры каталога"
 >
     <label>
         Город
@@ -30,30 +30,32 @@
         </select>
     </label>
 
-    <label>
-        Цена до
-        <select
-            #priceSelect
-            [value]="filters().maxPrice ?? ''"
-            (change)="setMaxPrice(priceSelect.value)"
-        >
-            @for (price of priceOptions; track price) {
-                <option [value]="price ?? ''">
-                    {{ price === null ? "Любая" : (price | currency: "RUB" : "symbol-narrow" : "1.0-0") }}
-                </option>
-            }
-        </select>
-    </label>
+    <app-field-group legend="Цена и доступность">
+        <label>
+            Цена до
+            <select
+                #priceSelect
+                [value]="filters().maxPrice ?? ''"
+                (change)="setMaxPrice(priceSelect.value)"
+            >
+                @for (price of priceOptions; track price) {
+                    <option [value]="price ?? ''">
+                        {{ price === null ? "Любая" : (price | currency: "RUB" : "symbol-narrow" : "1.0-0") }}
+                    </option>
+                }
+            </select>
+        </label>
 
-    <label>
-        <input
-            #onlyOpenBox
-            type="checkbox"
-            [checked]="filters().onlyOpen"
-            (change)="store.setOnlyOpen(onlyOpenBox.checked)"
-        />
-        Только открытые
-    </label>
+        <label>
+            <input
+                #onlyOpenBox
+                type="checkbox"
+                [checked]="filters().onlyOpen"
+                (change)="store.setOnlyOpen(onlyOpenBox.checked)"
+            />
+            Только открытые
+        </label>
+    </app-field-group>
 
     <!-- Активна, только когда есть что сбрасывать -->
     <button
@@ -63,7 +65,7 @@
     >
         Сбросить фильтры
     </button>
-</div>
+</app-field-group>
 
 <!-- aria-live: скринридер сообщит новое число найденных студий -->
 <p
