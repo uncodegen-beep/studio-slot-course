@@ -4,8 +4,7 @@
 }
 
 .demo-states,
-.list-actions,
-.filters {
+.list-actions {
     display: flex;
     gap: 8px;
     margin: 16px 0;
@@ -17,7 +16,7 @@
 
 // Настройка карточки снаружи — через её CSS-переменные, инкапсуляция не нарушается
 app-studio-card {
-    --card-max-width: 100%;
+    --card-max-width: 100%; // карточка занимает колонку сетки целиком
     --card-radius: 16px;
 }
 
@@ -27,6 +26,5 @@ app-studio-card {
 }
 
 .filters {
-    flex-wrap: wrap;
-    align-items: center;
+    margin: 16px 0;
 }

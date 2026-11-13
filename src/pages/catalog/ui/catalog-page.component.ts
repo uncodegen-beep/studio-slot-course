@@ -21,6 +21,7 @@ import { StudioListComponent } from '@entities/studio/ui/studio-list/studio-list
 
 import { AnalyticsService } from '@shared/lib/analytics/analytics.service';
 import { AutofocusDirective } from '@shared/lib/autofocus/autofocus.directive';
+import { FieldGroupComponent } from '@shared/ui/field-group/field-group.component';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 
 /** Состояние, которое показываем кнопками демо — пока нет настоящей загрузки (модуль 06) */
@@ -30,13 +31,14 @@ type DemoState = 'loading' | 'error' | 'empty' | 'data';
     selector: 'app-catalog-page',
     imports: [
         AutofocusDirective,
+        BookingPanelComponent,
         CurrencyPipe,
+        FieldGroupComponent,
         NgTemplateOutlet,
         RouterLink,
         SpinnerComponent,
         StudioCardComponent,
         StudioListComponent,
-        BookingPanelComponent,
     ],
     templateUrl: './catalog-page.component.html',
     styleUrl: './catalog-page.component.scss',
@@ -58,11 +60,9 @@ export class CatalogPageComponent {
     protected readonly cities = this.store.cities;
     protected readonly filtered = this.store.filtered;
     protected readonly count = this.store.count;
-
     protected readonly isDirty = this.store.isDirty;
     /** Варианты «цена до»; null — любая */
     protected readonly priceOptions = [null, 1000, 1500, 2000] as const;
-
     protected readonly featured = this.store.featured;
 
     /** Избранное живёт в сторе: его видит и шапка, и оно переживает переход между страницами */
