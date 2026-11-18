@@ -12,3 +12,28 @@
     padding: 16px 24px 32px;
     box-sizing: border-box;
 }
+
+.progress {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 10;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #1f4fd6, transparent);
+    background-size: 50% 100%;
+    animation: progress 1s linear infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+        background: #1f4fd6;
+    }
+}
+
+@keyframes progress {
+    from {
+        background-position: -50% 0;
+    }
+
+    to {
+        background-position: 150% 0;
+    }
+}
