@@ -26,11 +26,37 @@
         >
             Кабинет
         </a>
+        @if (session.role() === "owner") {
+            <a
+                routerLink="/owner"
+                routerLinkActive="active"
+                ariaCurrentWhenActive="page"
+            >
+                Владельцу
+            </a>
+        }
     </nav>
 
     <div class="meta">
         <!-- Тот же стор, что и в каталоге: счётчик меняется вместе с карточками -->
         <span class="favorites">Избранное: {{ favoritesStore.favorites().size }}</span>
         <app-clock />
+        @if (session.user(); as user) {
+            <span class="user">{{ user.name }}</span>
+            <button
+                type="button"
+                class="sign-out"
+                (click)="signOut()"
+            >
+                Выйти
+            </button>
+        } @else {
+            <a
+                class="sign-in"
+                routerLink="/login"
+            >
+                Войти
+            </a>
+        }
     </div>
 </header>
