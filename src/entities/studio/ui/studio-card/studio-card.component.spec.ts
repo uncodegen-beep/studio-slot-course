@@ -93,4 +93,19 @@ describe('StudioCardComponent', () => {
             'icons/sprite.svg#heart-filled',
         );
     });
+
+    it('«Забронировать» сообщает id студии, у закрытой кнопка неактивна', () => {
+        const emitted: string[] = [];
+        const open = render(OPEN_STUDIO);
+        open.componentInstance.book.subscribe((id) => emitted.push(id));
+        const bookButton = (fixture: typeof open): HTMLButtonElement | undefined =>
+            [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')].find(
+                (button) => button.textContent?.trim() === 'Забронировать',
+            );
+
+        bookButton(open)?.click();
+
+        expect(emitted).toEqual(['sound-garden']);
+        expect(bookButton(render(CLOSED_STUDIO))?.disabled).toBe(true);
+    });
 });

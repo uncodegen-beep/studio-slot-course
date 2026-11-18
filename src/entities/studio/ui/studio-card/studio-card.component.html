@@ -46,6 +46,7 @@
         <button
             type="button"
             [disabled]="!studio().isOpen"
+            (click)="book.emit(studio().id)"
         >
             Забронировать
         </button>

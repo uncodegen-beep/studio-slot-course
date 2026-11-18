@@ -9,7 +9,7 @@ import {
     untracked,
     viewChild,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { BookingPanelComponent } from '@features/book-slot/ui/booking-panel/booking-panel.component';
 import { FavoritesStore } from '@features/toggle-favorite/model/favorites.store';
@@ -69,6 +69,7 @@ export class CatalogPageComponent {
     protected readonly favoritesStore = inject(FavoritesStore);
 
     private readonly analytics = inject(AnalyticsService);
+    private readonly router = inject(Router);
     /** Сигнальный запрос к своему шаблону: #queryInput. required — поле есть всегда */
     private readonly searchInput = viewChild.required<ElementRef<HTMLInputElement>>('queryInput');
 
@@ -101,6 +102,11 @@ export class CatalogPageComponent {
             event.preventDefault();
             this.searchInput().nativeElement.focus();
         }
+    }
+
+    /** Переход из кода — после действия пользователя. Сегменты массивом: id экранирует сам роутер */
+    protected openStudio(id: string): void {
+        void this.router.navigate(['/studios', id]);
     }
 
     protected setMaxPrice(value: string): void {

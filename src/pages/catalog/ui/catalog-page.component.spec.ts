@@ -1,10 +1,13 @@
-import { ApplicationRef } from '@angular/core';
+import { ApplicationRef, ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 
 import { AnalyticsService } from '@shared/lib/analytics/analytics.service';
 
 import { CatalogPageComponent } from './catalog-page.component';
+
+@Component({ template: '', changeDetection: ChangeDetectionStrategy.OnPush })
+class StudioStubComponent {}
 
 interface Setup {
     root: HTMLElement;
@@ -46,7 +49,6 @@ describe('CatalogPageComponent', () => {
         expect(root.querySelector('h2')?.textContent?.replace(/\s+/g, ' ')).toContain(
             'Рекомендуем: Sound Garden',
         );
-
         expect(root.querySelectorAll('app-studio-list li')).toHaveLength(3);
     });
 
@@ -245,5 +247,20 @@ describe('CatalogPageComponent', () => {
         expect(inField.defaultPrevented).toBe(false);
 
         (fixture.nativeElement as HTMLElement).remove();
+    });
+
+    it('Router.navigate: «Забронировать» ведёт на страницу студии', async () => {
+        TestBed.configureTestingModule({
+            providers: [provideRouter([{ path: 'studios/:id', component: StudioStubComponent }])],
+        });
+        const { root } = setup();
+        const book = [...root.querySelectorAll<HTMLButtonElement>('app-studio-card button')].find(
+            (button) => button.textContent?.trim() === 'Забронировать',
+        );
+
+        book?.click();
+        await TestBed.inject(ApplicationRef).whenStable();
+
+        expect(TestBed.inject(Router).url).toBe('/studios/sound-garden');
     });
 });
