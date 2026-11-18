@@ -119,8 +119,12 @@ describe('AppComponent', () => {
 
         session.signIn('owner');
         await harness.navigateByUrl('/owner');
-        expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe(
-            'Кабинет владельца',
+        const root = harness.routeNativeElement as HTMLElement;
+        expect(root.querySelector('.page h1')?.textContent).toBe('Мои студии');
+        expect(TestBed.inject(Title).getTitle()).toBe('Кабинет владельца — StudioSlot');
+        // Только свои студии, ссылки — внутри раздела /owner
+        expect([...root.querySelectorAll('.studios a')].map((a) => a.getAttribute('href'))).toEqual(
+            ['/owner/studios/sound-garden', '/owner/studios/nevsky-beat'],
         );
     });
 

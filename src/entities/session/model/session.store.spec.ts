@@ -22,6 +22,7 @@ describe('SessionStore', () => {
         expect(JSON.parse(localStorage.getItem('studioslot.session') ?? 'null')).toEqual({
             name: 'Владелец студии',
             role: 'owner',
+            studioIds: ['sound-garden', 'nevsky-beat'],
         });
 
         session.signOut();

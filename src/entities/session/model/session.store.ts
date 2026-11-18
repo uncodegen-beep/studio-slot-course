@@ -5,7 +5,12 @@ export type UserRole = 'client' | 'owner';
 export interface SessionUser {
     readonly name: string;
     readonly role: UserRole;
+    /** Студии, которыми управляет владелец. У клиента — пусто */
+    readonly studioIds: readonly string[];
 }
+
+/** Демо-владелец управляет двумя студиями из каталога */
+const DEMO_OWNER_STUDIOS: readonly string[] = ['sound-garden', 'nevsky-beat'];
 
 const STORAGE_KEY = 'studioslot.session';
 
@@ -13,8 +18,13 @@ function isSessionUser(value: unknown): value is SessionUser {
     if (typeof value !== 'object' || value === null) {
         return false;
     }
-    const { name, role } = value as Record<string, unknown>;
-    return typeof name === 'string' && (role === 'client' || role === 'owner');
+    const { name, role, studioIds } = value as Record<string, unknown>;
+    return (
+        typeof name === 'string' &&
+        (role === 'client' || role === 'owner') &&
+        Array.isArray(studioIds) &&
+        studioIds.every((id) => typeof id === 'string')
+    );
 }
 
 function readSaved(): SessionUser | null {
@@ -54,7 +64,11 @@ export class SessionStore {
     }
 
     signIn(role: UserRole): void {
-        this.current.set({ name: role === 'owner' ? 'Владелец студии' : 'Клиент', role });
+        this.current.set(
+            role === 'owner'
+                ? { name: 'Владелец студии', role, studioIds: DEMO_OWNER_STUDIOS }
+                : { name: 'Клиент', role, studioIds: [] },
+        );
     }
 
     signOut(): void {
