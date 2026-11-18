@@ -15,7 +15,7 @@ describe('HeaderComponent', () => {
                     { path: '', component: StubPageComponent },
                     { path: 'studios', component: StubPageComponent },
                     { path: 'studios/:id', component: StubPageComponent },
-                    { path: 'bookings', component: StubPageComponent },
+                    { path: 'account/bookings', component: StubPageComponent },
                 ]),
             ],
         });
@@ -42,10 +42,10 @@ describe('HeaderComponent', () => {
     });
 
     it('routerLinkActive: класс и aria-current только у текущего раздела', async () => {
-        const root = await renderAt('/bookings');
+        const root = await renderAt('/account/bookings');
 
-        expect(link(root, 'Мои бронирования')?.classList).toContain('active');
-        expect(link(root, 'Мои бронирования')?.getAttribute('aria-current')).toBe('page');
+        expect(link(root, 'Кабинет')?.classList).toContain('active');
+        expect(link(root, 'Кабинет')?.getAttribute('aria-current')).toBe('page');
         expect(link(root, 'Студии')?.classList).not.toContain('active');
         expect(link(root, 'Студии')?.hasAttribute('aria-current')).toBe(false);
     });
