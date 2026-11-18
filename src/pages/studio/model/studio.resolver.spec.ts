@@ -21,8 +21,8 @@ class StudioStubComponent {
     readonly studio = input<Studio>();
 }
 
-@Component({ template: '<h1>Каталог</h1>', changeDetection: ChangeDetectionStrategy.OnPush })
-class CatalogStubComponent {}
+@Component({ template: '<h1>Не найдено</h1>', changeDetection: ChangeDetectionStrategy.OnPush })
+class NotFoundStubComponent {}
 
 describe('studioResolver', () => {
     beforeEach(() => {
@@ -32,7 +32,7 @@ describe('studioResolver', () => {
                 provideHttpClientTesting(),
                 provideRouter(
                     [
-                        { path: 'studios', component: CatalogStubComponent },
+                        { path: 'not-found', component: NotFoundStubComponent },
                         {
                             path: 'studios/:id',
                             resolve: { studio: studioResolver },
@@ -61,7 +61,7 @@ describe('studioResolver', () => {
         expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Sound Garden');
     });
 
-    it('ошибка загрузки — RedirectCommand в каталог', async () => {
+    it('ошибка загрузки — RedirectCommand на 404', async () => {
         const harness = await RouterTestingHarness.create();
         const http = TestBed.inject(HttpTestingController);
 
@@ -70,7 +70,7 @@ describe('studioResolver', () => {
         request.flush('Not found', { status: 404, statusText: 'Not Found' });
         await harness.fixture.whenStable();
 
-        expect(TestBed.inject(Router).url).toBe('/studios');
-        expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Каталог');
+        expect(TestBed.inject(Router).url).toBe('/not-found');
+        expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Не найдено');
     });
 });

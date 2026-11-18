@@ -1,11 +1,15 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { Router, provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { SessionStore } from '@entities/session/model/session.store';
+import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
 import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
+import { provideAppTitleStrategy } from '@shared/lib/title/app-title.strategy';
 
 import { AppComponent } from './app';
 import { routes } from './app.routes';
@@ -15,7 +19,13 @@ describe('AppComponent', () => {
         localStorage.clear();
         TestBed.configureTestingModule({
             imports: [AppComponent],
-            providers: [provideRouter(routes, withComponentInputBinding()), provideRuLocale()],
+            providers: [
+                provideRouter(routes, withComponentInputBinding()),
+                provideAppTitleStrategy(),
+                provideHttpClient(),
+                provideHttpClientTesting(),
+                provideRuLocale(),
+            ],
         });
     });
 
@@ -114,10 +124,27 @@ describe('AppComponent', () => {
         );
     });
 
-    it('неизвестный адрес — редирект на главную', async () => {
-        await RouterTestingHarness.create('/no-such-page');
+    it('неизвестный адрес — 404, адрес в браузере не меняется', async () => {
+        const harness = await RouterTestingHarness.create('/no-such-page');
 
-        expect(TestBed.inject(Router).url).toBe('/');
+        expect(TestBed.inject(Router).url).toBe('/no-such-page');
+        expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe(
+            'Страница не найдена',
+        );
+        expect(TestBed.inject(Title).getTitle()).toBe('Страница не найдена — StudioSlot');
+    });
+
+    it('redirectTo-функция: старый /studio/:id ведёт на /studios/:id', async () => {
+        const harness = await RouterTestingHarness.create();
+        const http = TestBed.inject(HttpTestingController);
+
+        const navigation = harness.navigateByUrl('/studio/sound-garden');
+        const request = await vi.waitFor(() => http.expectOne('api/studios/sound-garden.json'));
+        request.flush(DEMO_STUDIOS[0] ?? null);
+        await navigation;
+
+        expect(TestBed.inject(Router).url).toBe('/studios/sound-garden');
+        expect(TestBed.inject(Title).getTitle()).toBe('Sound Garden — StudioSlot');
     });
 
     it('"**" — последний: всё, что ниже него, недостижимо', () => {

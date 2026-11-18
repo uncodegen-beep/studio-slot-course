@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Title } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
@@ -32,5 +33,21 @@ describe('StudioPageComponent', () => {
         const root = render(VOLGA);
 
         expect(root.querySelector('.meta')?.textContent).toContain('сейчас закрыта');
+    });
+
+    it('заголовок вкладки — имя студии', () => {
+        render(SOUND_GARDEN);
+
+        expect(TestBed.inject(Title).getTitle()).toBe('Sound Garden — StudioSlot');
+    });
+
+    it('ссылки-якоря на разделы страницы', () => {
+        const root = render(SOUND_GARDEN);
+        const hrefs = [...root.querySelectorAll('.sections a')].map((a) => a.getAttribute('href'));
+
+        expect(hrefs.every((href) => href?.includes('#'))).toBe(true);
+        expect(hrefs.map((href) => href?.split('#')[1])).toEqual(['rooms', 'booking']);
+        expect(root.querySelector('#rooms')).not.toBeNull();
+        expect(root.querySelector('#booking')).not.toBeNull();
     });
 });

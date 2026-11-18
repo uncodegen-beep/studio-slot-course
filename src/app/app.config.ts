@@ -4,7 +4,9 @@ import {
     PreloadAllModules,
     provideRouter,
     withComponentInputBinding,
+    withInMemoryScrolling,
     withPreloading,
+    withViewTransitions,
 } from '@angular/router';
 
 import { provideBookingConfig } from '@features/book-slot/model/booking-config';
@@ -12,6 +14,7 @@ import { providePricing, withPromoFromQuery } from '@features/book-slot/model/pr
 
 import { provideAnalytics, withConsoleSink } from '@shared/lib/analytics/provide-analytics';
 import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
+import { provideAppTitleStrategy } from '@shared/lib/title/app-title.strategy';
 
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
@@ -22,7 +25,20 @@ export const appConfig: ApplicationConfig = {
         provideBrowserGlobalErrorListeners(),
         // withComponentInputBinding: параметр :id маршрута приходит во вход id() страницы
         // withPreloading: после загрузки приложения ленивые чанки докачиваются в фоне
-        provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
+        provideRouter(
+            routes,
+            withComponentInputBinding(),
+            withPreloading(PreloadAllModules),
+            // Новая страница — с начала, «Назад» — на прежнюю позицию, #booking — к якорю
+            withInMemoryScrolling({
+                scrollPositionRestoration: 'enabled',
+                anchorScrolling: 'enabled',
+            }),
+            // Плавная смена страниц через View Transitions API браузера
+            withViewTransitions(),
+        ),
+        // «Страница — StudioSlot» во вкладке браузера
+        provideAppTitleStrategy(),
         // HttpClient на fetch — нужен httpResource
         provideHttpClient(withFetch()),
         provideRuLocale(),

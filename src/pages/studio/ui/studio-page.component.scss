@@ -16,3 +16,14 @@
     gap: 4px;
     padding-left: 20px;
 }
+
+.sections {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+// Якорь не прячется под краем экрана при прокрутке
+h2[id] {
+    scroll-margin-top: 16px;
+}
