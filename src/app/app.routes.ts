@@ -39,11 +39,9 @@ export const routes: Routes = [
     },
     {
         path: 'owner',
-        title: 'Кабинет владельца',
         // canMatch проверяется до загрузки чанка: клиент и гость его не скачают
         canMatch: [roleGuard('owner')],
-        loadComponent: () =>
-            import('@pages/owner/ui/owner-page.component').then((m) => m.OwnerPageComponent),
+        loadChildren: () => import('./owner.routes').then((m) => m.OWNER_ROUTES),
     },
     {
         path: 'login',
