@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
-import { Router, provideRouter } from '@angular/router';
+import { Router, provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
@@ -12,7 +12,7 @@ describe('AppComponent', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [AppComponent],
-            providers: [provideRouter(routes), provideRuLocale()],
+            providers: [provideRouter(routes, withComponentInputBinding()), provideRuLocale()],
         });
     });
 
@@ -42,6 +42,19 @@ describe('AppComponent', () => {
             'Каталог студий',
         );
         expect(TestBed.inject(Title).getTitle()).toBe('Студии — StudioSlot');
+    });
+
+    it('ссылка с главной: город из адреса попадает во вход каталога', async () => {
+        const harness = await RouterTestingHarness.create('/');
+        const kazan = [
+            ...(harness.routeNativeElement?.querySelectorAll<HTMLAnchorElement>('.cities a') ?? []),
+        ].find((a) => a.textContent?.trim() === 'Казань');
+
+        kazan?.click();
+        await harness.fixture.whenStable();
+
+        expect(decodeURIComponent(TestBed.inject(Router).url)).toBe('/studios?city=Казань');
+        expect(harness.routeNativeElement?.querySelectorAll('app-studio-list li')).toHaveLength(1);
     });
 
     it('у бронирований своя страница', async () => {

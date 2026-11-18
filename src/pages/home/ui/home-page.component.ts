@@ -22,7 +22,15 @@ import { CatalogStore } from '@entities/studio/model/catalog.store';
         <h2>Города</h2>
         <ul class="cities">
             @for (city of cities(); track city) {
-                <li>{{ city }}</li>
+                <!-- /studios?city=Казань — каталог прочитает параметр в свой вход city -->
+                <li>
+                    <a
+                        routerLink="/studios"
+                        [queryParams]="{ city }"
+                    >
+                        {{ city }}
+                    </a>
+                </li>
             }
         </ul>
     `,

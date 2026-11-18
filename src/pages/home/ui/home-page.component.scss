@@ -25,9 +25,11 @@
     padding: 0;
     list-style: none;
 
-    li {
+    a {
         padding: 4px 12px;
         border-radius: 999px;
         background: #eef1f8;
+        color: inherit;
+        text-decoration: none;
     }
 }

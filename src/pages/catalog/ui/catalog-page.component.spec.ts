@@ -2,6 +2,8 @@ import { ApplicationRef, ChangeDetectionStrategy, Component } from '@angular/cor
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 
+import { CatalogStore } from '@entities/studio/model/catalog.store';
+
 import { AnalyticsService } from '@shared/lib/analytics/analytics.service';
 
 import { CatalogPageComponent } from './catalog-page.component';
@@ -16,8 +18,12 @@ interface Setup {
     items: () => HTMLLIElement[];
 }
 
-function setup(): Setup {
+function setup(params: { city?: string; onlyOpen?: string } = {}): Setup {
     const fixture = TestBed.createComponent(CatalogPageComponent);
+    // Так роутер передаёт query-параметры во входы
+    for (const [name, value] of Object.entries(params)) {
+        fixture.componentRef.setInput(name, value);
+    }
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
 
@@ -262,5 +268,27 @@ describe('CatalogPageComponent', () => {
         await TestBed.inject(ApplicationRef).whenStable();
 
         expect(TestBed.inject(Router).url).toBe('/studios/sound-garden');
+    });
+
+    it('?city= — каталог открывается с фильтром по городу', () => {
+        const { root } = setup({ city: 'Казань' });
+
+        const items = root.querySelectorAll('app-studio-list li');
+        expect(items).toHaveLength(1);
+        expect(items[0]?.textContent).toContain('Volga Records');
+    });
+
+    it('?onlyOpen=true — только открытые студии', () => {
+        const { root } = setup({ onlyOpen: 'true' });
+
+        expect(root.querySelectorAll('app-studio-list li')).toHaveLength(2);
+    });
+
+    it('без параметров фильтры из стора не сбрасываются', () => {
+        TestBed.inject(CatalogStore).setCity('Москва');
+
+        const { root } = setup();
+
+        expect(root.querySelectorAll('app-studio-list li')).toHaveLength(1);
     });
 });
