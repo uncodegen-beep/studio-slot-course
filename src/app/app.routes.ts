@@ -1,12 +1,18 @@
 import type { Routes } from '@angular/router';
 
-// Маршруты подробно — модуль 04; здесь минимум, чтобы у страниц были адреса
+import { HomePageComponent } from '@pages/home/ui/home-page.component';
+
+/**
+ * Таблица маршрутов. Роутер проверяет её сверху вниз — побеждает первый подходящий.
+ * Конкретные пути выше, '**' — всегда последним
+ */
 export const routes: Routes = [
-    { path: '', pathMatch: 'full', redirectTo: 'studios' },
+    // component — страница в основном бандле: главную видят первой, грузить её отдельно незачем
+    { path: '', title: 'StudioSlot — студии по часам', component: HomePageComponent },
     {
         path: 'studios',
         title: 'Студии — StudioSlot',
-        // Ленивая загрузка: код страницы скачивается при первом переходе на неё
+        // loadComponent — код страницы скачивается при первом переходе (подробно — урок 47)
         loadComponent: () =>
             import('@pages/catalog/ui/catalog-page.component').then((m) => m.CatalogPageComponent),
     },
@@ -18,11 +24,13 @@ export const routes: Routes = [
                 (m) => m.BookingsPageComponent,
             ),
     },
+    // :id — любой один сегмент: /studios/nevsky-beat. '/studios' сюда не попадёт — сегментов меньше
     {
         path: 'studios/:id',
         title: 'Студия — StudioSlot',
         loadComponent: () =>
             import('@pages/studio/ui/studio-page.component').then((m) => m.StudioPageComponent),
     },
-    { path: '**', redirectTo: 'studios' },
+    // Неизвестный адрес — на главную. Страница 404 — урок 51
+    { path: '**', redirectTo: '' },
 ];
