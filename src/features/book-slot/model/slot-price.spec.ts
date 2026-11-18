@@ -58,4 +58,8 @@ describe('createSlotPrice', () => {
         expect(price.isPeak()).toBe(false);
         expect(price.total()).toBe(3000);
     });
+
+    it('вне контекста внедрения — понятная ошибка с именем фабрики', () => {
+        expect(() => createSlotPrice(room, signal(2), signal(12))).toThrow(/createSlotPrice\(\)/);
+    });
 });

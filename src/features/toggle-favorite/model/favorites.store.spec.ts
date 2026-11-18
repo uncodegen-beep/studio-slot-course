@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
+import { AnalyticsService } from '@shared/lib/analytics/analytics.service';
+
 import { FavoritesStore } from './favorites.store';
 
 const KEY = 'studioslot.favorites';
@@ -52,5 +54,17 @@ describe('FavoritesStore', () => {
         TestBed.resetTestingModule();
         localStorage.setItem(KEY, '{не json');
         expect(TestBed.inject(FavoritesStore).favorites().size).toBe(0);
+    });
+
+    it('injectTrack: каждое переключение — событие аналитики', () => {
+        const store = TestBed.inject(FavoritesStore);
+
+        store.toggle('sound-garden');
+        store.toggle('sound-garden');
+
+        expect(TestBed.inject(AnalyticsService).events()).toEqual([
+            { name: 'favorite_toggle', params: { id: 'sound-garden', added: true } },
+            { name: 'favorite_toggle', params: { id: 'sound-garden', added: false } },
+        ]);
     });
 });

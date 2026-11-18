@@ -1,4 +1,4 @@
-import { type Signal, computed, inject } from '@angular/core';
+import { type Signal, assertInInjectionContext, computed, inject } from '@angular/core';
 
 import type { StudioRoom } from '@shared/model';
 
@@ -11,13 +11,15 @@ export interface SlotPrice {
 
 /**
  * Фабрика из сигналов. Правила цены больше не зашиты внутри — их даёт PricingService.
- * inject() требует контекст внедрения: вызывать в поле класса или конструкторе
+ * inject() требует контекст внедрения: вызывайте в поле класса или конструкторе.
+ * Вызов из обработчика клика упадёт с понятной ошибкой — её даёт assertInInjectionContext
  */
 export function createSlotPrice(
     room: Signal<StudioRoom | null>,
     hours: Signal<number>,
     startHour: Signal<number>,
 ): SlotPrice {
+    assertInInjectionContext(createSlotPrice);
     const pricing = inject(PricingService);
 
     const isPeak = computed(() => pricing.isPeak(startHour()));

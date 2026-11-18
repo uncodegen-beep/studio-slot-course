@@ -1,5 +1,7 @@
 import { Injectable, effect, signal } from '@angular/core';
 
+import { injectTrack } from '@shared/lib/analytics/inject-track';
+
 const STORAGE_KEY = 'studioslot.favorites';
 
 /** Сохранённое избранное; хранилище недоступно или данные битые — начинаем с пустого */
@@ -20,6 +22,9 @@ function readSaved(): ReadonlySet<string> {
 @Injectable({ providedIn: 'root' })
 export class FavoritesStore {
     private readonly ids = signal<ReadonlySet<string>>(readSaved());
+
+    /** Поле класса — контекст внедрения есть; сама trackToggle вызывается потом, из toggle() */
+    private readonly trackToggle = injectTrack('favorite_toggle');
 
     /** У asReadonly() нет set и update — компонент не изменит состояние в обход toggle() */
     readonly favorites = this.ids.asReadonly();
@@ -47,5 +52,7 @@ export class FavoritesStore {
             }
             return next;
         });
+
+        this.trackToggle({ id, added: this.ids().has(id) });
     }
 }
