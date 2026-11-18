@@ -50,6 +50,9 @@ export class StudioCardComponent {
     /** Сообщаем родителю id студии — что сделать с избранным, решает он. output() — не Observable */
     readonly favoriteToggle = output<string>();
 
+    /** «Забронировать»: куда вести пользователя, решает страница — карточка о роутере не знает */
+    readonly book = output<string>();
+
     /** Ширина полосы рейтинга в процентах: 5 звёзд — 100 %. computed вместо ngOnChanges */
     protected readonly ratingPercent = computed(() => (this.studio().rating ?? 0) * 20);
 

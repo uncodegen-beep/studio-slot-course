@@ -108,6 +108,7 @@
             [studio]="studio"
             [favorite]="favoritesStore.favorites().has(studio.id)"
             (favoriteToggle)="favoritesStore.toggle($event)"
+            (book)="openStudio($event)"
         />
 
         <!-- Своя панель со своим черновиком: BookingDraftStore в providers панели -->
@@ -153,6 +154,7 @@
             [studio]="studio"
             [favorite]="favoritesStore.favorites().has(studio.id)"
             (favoriteToggle)="favoritesStore.toggle($event)"
+            (book)="openStudio($event)"
         />
     </ng-template>
 }
