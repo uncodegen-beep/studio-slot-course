@@ -1,6 +1,7 @@
 import type { Routes } from '@angular/router';
 
 import { HomePageComponent } from '@pages/home/ui/home-page.component';
+import { studioResolver } from '@pages/studio/model/studio.resolver';
 
 import { authGuard, roleGuard } from '@features/auth/model/auth.guards';
 
@@ -22,6 +23,8 @@ export const routes: Routes = [
         // :id — любой один сегмент: /studios/nevsky-beat. '/studios' сюда не попадёт — сегментов меньше
         path: 'studios/:id',
         title: 'Студия — StudioSlot',
+        // Страница откроется, когда студия загружена; ошибка — редирект в каталог
+        resolve: { studio: studioResolver },
         loadComponent: () =>
             import('@pages/studio/ui/studio-page.component').then((m) => m.StudioPageComponent),
     },

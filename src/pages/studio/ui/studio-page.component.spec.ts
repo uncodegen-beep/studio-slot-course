@@ -1,6 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
@@ -10,72 +8,29 @@ import type { Studio } from '@shared/model';
 
 import { StudioPageComponent } from './studio-page.component';
 
-const [SOUND_GARDEN] = DEMO_STUDIOS as [Studio, ...Studio[]];
+const [SOUND_GARDEN, , VOLGA] = DEMO_STUDIOS as [Studio, Studio, Studio];
 
-function setup(id: string): {
-    fixture: ComponentFixture<StudioPageComponent>;
-    http: HttpTestingController;
-    root: HTMLElement;
-} {
-    TestBed.configureTestingModule({
-        providers: [
-            provideHttpClient(),
-            provideHttpClientTesting(),
-            provideRouter([]),
-            provideRuLocale(),
-        ],
-    });
+function render(studio: Studio): HTMLElement {
+    TestBed.configureTestingModule({ providers: [provideRouter([]), provideRuLocale()] });
     const fixture = TestBed.createComponent(StudioPageComponent);
-    fixture.componentRef.setInput('id', id);
+    // Так роутер передаёт результат resolver во вход
+    fixture.componentRef.setInput('studio', studio);
     fixture.detectChanges();
-    return {
-        fixture,
-        http: TestBed.inject(HttpTestingController),
-        root: fixture.nativeElement as HTMLElement,
-    };
+    return fixture.nativeElement as HTMLElement;
 }
 
 describe('StudioPageComponent', () => {
-    it('спиннер, затем данные студии', async () => {
-        const { fixture, http, root } = setup('sound-garden');
-        TestBed.tick();
-
-        const request = http.expectOne('api/studios/sound-garden.json');
-        expect(root.querySelector('app-spinner')).not.toBeNull();
-
-        request.flush(SOUND_GARDEN);
-        await fixture.whenStable();
+    it('сразу показывает студию: загрузку взял на себя resolver', () => {
+        const root = render(SOUND_GARDEN);
 
         expect(root.querySelector('h1')?.textContent).toContain('Sound Garden');
         expect(root.querySelectorAll('.rooms li')).toHaveLength(3);
-        http.verify();
+        expect(root.querySelector('app-booking-panel')).not.toBeNull();
     });
 
-    it('ошибка — сообщение и «Повторить» отправляет запрос заново', async () => {
-        const { fixture, http, root } = setup('nope');
-        TestBed.tick();
+    it('закрытая студия — пометка в описании', () => {
+        const root = render(VOLGA);
 
-        http.expectOne('api/studios/nope.json').flush('Not found', {
-            status: 404,
-            statusText: 'Not Found',
-        });
-        await fixture.whenStable();
-        expect(root.querySelector('[role="alert"]')?.textContent).toContain('Не удалось загрузить');
-
-        root.querySelector<HTMLButtonElement>('button')?.click();
-        TestBed.tick();
-        http.expectOne('api/studios/nope.json');
-    });
-
-    it('смена id отменяет незавершённый запрос и отправляет новый', () => {
-        const { fixture, http } = setup('sound-garden');
-        TestBed.tick();
-        const first = http.expectOne('api/studios/sound-garden.json');
-
-        fixture.componentRef.setInput('id', 'nevsky-beat');
-        TestBed.tick();
-
-        expect(first.cancelled).toBe(true);
-        http.expectOne('api/studios/nevsky-beat.json');
+        expect(root.querySelector('.meta')?.textContent).toContain('сейчас закрыта');
     });
 });
