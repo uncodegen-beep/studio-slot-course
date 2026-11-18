@@ -69,6 +69,8 @@ describe('AppComponent', () => {
         await harness.navigateByUrl('/account/favorites');
 
         expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain('Избранное');
+        // Вложенный маршрут: страница внутри лэйаута кабинета
+        expect(harness.routeNativeElement?.querySelector('.page h1')).not.toBeNull();
     });
 
     it('старый адрес /bookings ведёт в кабинет', async () => {
