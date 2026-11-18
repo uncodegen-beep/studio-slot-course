@@ -1,18 +1,16 @@
-import { DOCUMENT } from '@angular/common';
 import { provideHttpClient, withFetch } from '@angular/common/http';
-import { type ApplicationConfig, inject, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { type ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
-import { PricingService } from '@features/book-slot/model/pricing.service';
-import { PromoPricingService } from '@features/book-slot/model/promo-pricing.service';
+import { providePricing, withPromoFromQuery } from '@features/book-slot/model/provide-pricing';
 
-import { ANALYTICS_SINKS } from '@shared/lib/analytics/analytics-sink';
-import { ConsoleAnalyticsSink } from '@shared/lib/analytics/console-analytics.sink';
+import { provideAnalytics, withConsoleSink } from '@shared/lib/analytics/provide-analytics';
 import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
 
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 
+/** Каждая фича настраивается одной provide-функцией — как provideRouter и provideHttpClient */
 export const appConfig: ApplicationConfig = {
     providers: [
         provideBrowserGlobalErrorListeners(),
@@ -21,17 +19,9 @@ export const appConfig: ApplicationConfig = {
         // HttpClient на fetch — нужен httpResource
         provideHttpClient(withFetch()),
         provideRuLocale(),
-        // useFactory: реализация выбирается при создании — ?promo в адресе включает промо-тариф
-        {
-            provide: PricingService,
-            useFactory: () =>
-                inject(DOCUMENT).location.search.includes('promo')
-                    ? new PromoPricingService()
-                    : new PricingService(),
-        },
-        // multi: получатели аналитики собираются в массив. В консоль — только в разработке
-        ...(environment.analyticsToConsole
-            ? [{ provide: ANALYTICS_SINKS, useClass: ConsoleAnalyticsSink, multi: true }]
-            : []),
+        // ?promo в адресе включает промо-тариф
+        providePricing(withPromoFromQuery()),
+        // События в консоль — только в разработке
+        provideAnalytics(...(environment.analyticsToConsole ? [withConsoleSink()] : [])),
     ],
 };
