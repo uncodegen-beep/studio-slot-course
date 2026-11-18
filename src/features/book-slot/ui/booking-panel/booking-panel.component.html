@@ -20,6 +20,7 @@
         <!-- Двусторонняя привязка прямо к сигналу стора: draft.hours -->
         <app-duration-picker
             label="Длительность сессии"
+            [options]="hourOptions"
             [(value)]="draft.hours"
         />
         <label>

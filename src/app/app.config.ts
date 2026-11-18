@@ -2,6 +2,7 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { type ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
+import { provideBookingConfig } from '@features/book-slot/model/booking-config';
 import { providePricing, withPromoFromQuery } from '@features/book-slot/model/provide-pricing';
 
 import { provideAnalytics, withConsoleSink } from '@shared/lib/analytics/provide-analytics';
@@ -21,6 +22,8 @@ export const appConfig: ApplicationConfig = {
         provideRuLocale(),
         // ?promo в адресе включает промо-тариф
         providePricing(withPromoFromQuery()),
+        // Часы работы площадки: слоты с 10:00, последний начинается в 20:00
+        provideBookingConfig({ openHour: 10, closeHour: 22 }),
         // События в консоль — только в разработке
         provideAnalytics(...(environment.analyticsToConsole ? [withConsoleSink()] : [])),
     ],

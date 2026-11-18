@@ -1,6 +1,7 @@
 import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, linkedSignal } from '@angular/core';
 
+import { BOOKING_CONFIG, injectStartHours } from '@features/book-slot/model/booking-config';
 import { BookingDraftStore } from '@features/book-slot/model/booking-draft.store';
 import { createSlotPrice } from '@features/book-slot/model/slot-price';
 
@@ -28,7 +29,12 @@ export class BookingPanelComponent {
     protected readonly draft = inject(BookingDraftStore);
     /** Имя группы радиокнопок — своё у каждой панели, иначе две панели делили бы выбор */
     protected readonly roomGroup = `booking-room-${nextId++}`;
-    protected readonly startHours = [10, 12, 14, 16, 18, 20] as const;
+    /** Часы начала и варианты длительности — из BOOKING_CONFIG, а не зашиты в компоненте */
+    protected readonly startHours = injectStartHours();
+    protected readonly hourOptions = Array.from(
+        { length: inject(BOOKING_CONFIG).maxHours },
+        (_, index) => index + 1,
+    );
 
     /** Выбранный зал: тот же, если он есть в новом списке, иначе первый (урок 28) */
     protected readonly selectedRoom = linkedSignal<readonly StudioRoom[], StudioRoom | null>({

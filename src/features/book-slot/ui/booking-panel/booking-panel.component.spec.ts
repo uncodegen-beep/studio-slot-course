@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { provideBookingConfig } from '@features/book-slot/model/booking-config';
+
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
 import type { Studio } from '@shared/model';
@@ -53,5 +55,20 @@ describe('BookingPanelComponent', () => {
         ].map((radio) => radio.name);
 
         expect(new Set(names).size).toBe(2);
+    });
+
+    it('часы начала и длительности — из BOOKING_CONFIG', async () => {
+        TestBed.configureTestingModule({
+            providers: [provideBookingConfig({ openHour: 8, closeHour: 12, maxHours: 2 })],
+        });
+        const fixture = TestBed.createComponent(HostComponent);
+        await fixture.whenStable();
+        const root = fixture.nativeElement as HTMLElement;
+
+        const options = [...root.querySelectorAll('#first select option')].map((option) =>
+            option.textContent?.trim(),
+        );
+        expect(options).toEqual(['8:00', '10:00']);
+        expect(root.querySelectorAll('#first app-duration-picker button')).toHaveLength(2);
     });
 });
