@@ -12,7 +12,26 @@
     {{ s.isOpen ? "принимает бронирования" : "сейчас закрыта" }}
 </p>
 
-<h2>Залы</h2>
+<!-- Якоря: routerLink="." — эта же страница, fragment — #rooms в адресе. Прокрутку включает anchorScrolling -->
+<nav
+    class="sections"
+    aria-label="Разделы страницы"
+>
+    <a
+        routerLink="."
+        fragment="rooms"
+    >
+        Залы
+    </a>
+    <a
+        routerLink="."
+        fragment="booking"
+    >
+        Бронирование
+    </a>
+</nav>
+
+<h2 id="rooms">Залы</h2>
 <ul class="rooms">
     @for (room of s.rooms ?? []; track room.id) {
         <li>{{ room.name }} — {{ room.pricePerHour | currency: "RUB" : "symbol-narrow" : "1.0-0" }}/час</li>
@@ -21,6 +40,6 @@
     }
 </ul>
 
-<h2>Бронирование</h2>
+<h2 id="booking">Бронирование</h2>
 <!-- Та же панель, что в каталоге, но свой экземпляр BookingDraftStore -->
 <app-booking-panel [studio]="s" />

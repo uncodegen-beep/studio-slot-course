@@ -1,6 +1,7 @@
 import type { Routes } from '@angular/router';
 
 import { HomePageComponent } from '@pages/home/ui/home-page.component';
+import { NotFoundPageComponent } from '@pages/not-found/ui/not-found-page.component';
 import { studioResolver } from '@pages/studio/model/studio.resolver';
 
 import { authGuard, roleGuard } from '@features/auth/model/auth.guards';
@@ -11,10 +12,11 @@ import { authGuard, roleGuard } from '@features/auth/model/auth.guards';
  */
 export const routes: Routes = [
     // component — страница в основном бандле: главную видят первой, грузить её отдельно незачем
-    { path: '', title: 'StudioSlot — студии по часам', component: HomePageComponent },
+    // Без title — заголовок по умолчанию из AppTitleStrategy
+    { path: '', component: HomePageComponent },
     {
         path: 'studios',
-        title: 'Студии — StudioSlot',
+        title: 'Студии',
         // loadComponent — код страницы скачивается при первом переходе на неё
         loadComponent: () =>
             import('@pages/catalog/ui/catalog-page.component').then((m) => m.CatalogPageComponent),
@@ -22,7 +24,7 @@ export const routes: Routes = [
     {
         // :id — любой один сегмент: /studios/nevsky-beat. '/studios' сюда не попадёт — сегментов меньше
         path: 'studios/:id',
-        title: 'Студия — StudioSlot',
+        title: 'Студия',
         // Страница откроется, когда студия загружена; ошибка — редирект в каталог
         resolve: { studio: studioResolver },
         loadComponent: () =>
@@ -37,7 +39,7 @@ export const routes: Routes = [
     },
     {
         path: 'owner',
-        title: 'Кабинет владельца — StudioSlot',
+        title: 'Кабинет владельца',
         // canMatch проверяется до загрузки чанка: клиент и гость его не скачают
         canMatch: [roleGuard('owner')],
         loadComponent: () =>
@@ -45,12 +47,16 @@ export const routes: Routes = [
     },
     {
         path: 'login',
-        title: 'Вход — StudioSlot',
+        title: 'Вход',
         loadComponent: () =>
             import('@pages/login/ui/login-page.component').then((m) => m.LoginPageComponent),
     },
     // Старый адрес из закладок и писем продолжает работать
     { path: 'bookings', redirectTo: 'account/bookings' },
-    // Неизвестный адрес — на главную. Страница 404 — урок 51
-    { path: '**', redirectTo: '' },
+    // Функция вместо строки: старые ссылки /studio/:id → /studios/:id
+    { path: 'studio/:id', redirectTo: ({ params }) => `/studios/${params['id']}` },
+    // Сюда ведёт resolver, если студии нет
+    { path: 'not-found', title: 'Страница не найдена', component: NotFoundPageComponent },
+    // Неизвестный адрес — 404 без редиректа: в строке браузера остаётся адрес с ошибкой
+    { path: '**', title: 'Страница не найдена', component: NotFoundPageComponent },
 ];

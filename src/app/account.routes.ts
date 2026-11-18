@@ -15,7 +15,7 @@ export const ACCOUNT_ROUTES: Routes = [
             { path: '', pathMatch: 'full', redirectTo: 'bookings' },
             {
                 path: 'bookings',
-                title: 'Мои бронирования — StudioSlot',
+                title: 'Мои бронирования',
                 loadComponent: () =>
                     import('@pages/bookings/ui/bookings-page.component').then(
                         (m) => m.BookingsPageComponent,
@@ -23,7 +23,7 @@ export const ACCOUNT_ROUTES: Routes = [
             },
             {
                 path: 'favorites',
-                title: 'Избранное — StudioSlot',
+                title: 'Избранное',
                 loadComponent: () =>
                     import('@pages/favorites/ui/favorites-page.component').then(
                         (m) => m.FavoritesPageComponent,

@@ -18,8 +18,13 @@ export const studioResolver: ResolveFn<Studio> = (route) => {
     return inject(StudiosApi)
         .getById(id)
         .pipe(
-            // Студии нет или сервер не ответил — переход заменяется переходом в каталог.
-            // Страница 404 появится в уроке 51
-            catchError(() => of(new RedirectCommand(router.parseUrl('/studios')))),
+            // Студии нет — показываем 404. skipLocationChange: адрес в браузере не меняется на /not-found
+            catchError(() =>
+                of(
+                    new RedirectCommand(router.parseUrl('/not-found'), {
+                        skipLocationChange: true,
+                    }),
+                ),
+            ),
         );
 };
