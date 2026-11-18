@@ -57,13 +57,24 @@ describe('AppComponent', () => {
         expect(harness.routeNativeElement?.querySelectorAll('app-studio-list li')).toHaveLength(1);
     });
 
-    it('у бронирований своя страница', async () => {
-        const harness = await RouterTestingHarness.create('/bookings');
+    it('loadChildren: раздел /account — бронирования и избранное', async () => {
+        const harness = await RouterTestingHarness.create('/account');
 
+        expect(TestBed.inject(Router).url).toBe('/account/bookings');
         expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain(
             'Мои бронирования',
         );
         expect(TestBed.inject(Title).getTitle()).toBe('Мои бронирования — StudioSlot');
+
+        await harness.navigateByUrl('/account/favorites');
+
+        expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain('Избранное');
+    });
+
+    it('старый адрес /bookings ведёт в кабинет', async () => {
+        await RouterTestingHarness.create('/bookings');
+
+        expect(TestBed.inject(Router).url).toBe('/account/bookings');
     });
 
     it('неизвестный адрес — редирект на главную', async () => {

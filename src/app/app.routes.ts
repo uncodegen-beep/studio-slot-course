@@ -12,25 +12,24 @@ export const routes: Routes = [
     {
         path: 'studios',
         title: 'Студии — StudioSlot',
-        // loadComponent — код страницы скачивается при первом переходе (подробно — урок 47)
+        // loadComponent — код страницы скачивается при первом переходе на неё
         loadComponent: () =>
             import('@pages/catalog/ui/catalog-page.component').then((m) => m.CatalogPageComponent),
     },
     {
-        path: 'bookings',
-        title: 'Мои бронирования — StudioSlot',
-        loadComponent: () =>
-            import('@pages/bookings/ui/bookings-page.component').then(
-                (m) => m.BookingsPageComponent,
-            ),
-    },
-    // :id — любой один сегмент: /studios/nevsky-beat. '/studios' сюда не попадёт — сегментов меньше
-    {
+        // :id — любой один сегмент: /studios/nevsky-beat. '/studios' сюда не попадёт — сегментов меньше
         path: 'studios/:id',
         title: 'Студия — StudioSlot',
         loadComponent: () =>
             import('@pages/studio/ui/studio-page.component').then((m) => m.StudioPageComponent),
     },
+    {
+        // loadChildren — целый раздел маршрутов в отдельном чанке: грузится при первом входе в /account
+        path: 'account',
+        loadChildren: () => import('./account.routes').then((m) => m.ACCOUNT_ROUTES),
+    },
+    // Старый адрес из закладок и писем продолжает работать
+    { path: 'bookings', redirectTo: 'account/bookings' },
     // Неизвестный адрес — на главную. Страница 404 — урок 51
     { path: '**', redirectTo: '' },
 ];

@@ -1,6 +1,11 @@
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { type ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import {
+    PreloadAllModules,
+    provideRouter,
+    withComponentInputBinding,
+    withPreloading,
+} from '@angular/router';
 
 import { provideBookingConfig } from '@features/book-slot/model/booking-config';
 import { providePricing, withPromoFromQuery } from '@features/book-slot/model/provide-pricing';
@@ -16,7 +21,8 @@ export const appConfig: ApplicationConfig = {
     providers: [
         provideBrowserGlobalErrorListeners(),
         // withComponentInputBinding: параметр :id маршрута приходит во вход id() страницы
-        provideRouter(routes, withComponentInputBinding()),
+        // withPreloading: после загрузки приложения ленивые чанки докачиваются в фоне
+        provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
         // HttpClient на fetch — нужен httpResource
         provideHttpClient(withFetch()),
         provideRuLocale(),
