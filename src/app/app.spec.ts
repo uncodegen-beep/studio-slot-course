@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Title } from '@angular/platform-browser';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
@@ -25,13 +26,22 @@ describe('AppComponent', () => {
         expect(root.querySelector('app-footer')?.textContent).toContain('Современный Angular');
     });
 
-    it('корень перенаправляет на каталог студий', async () => {
+    it('пустой путь — главная со своим заголовком вкладки', async () => {
         const harness = await RouterTestingHarness.create('/');
 
-        expect(TestBed.inject(Router).url).toBe('/studios');
+        expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain(
+            'Студии для репетиций',
+        );
+        expect(TestBed.inject(Title).getTitle()).toBe('StudioSlot — студии по часам');
+    });
+
+    it('/studios — каталог, а не страница студии с :id', async () => {
+        const harness = await RouterTestingHarness.create('/studios');
+
         expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain(
             'Каталог студий',
         );
+        expect(TestBed.inject(Title).getTitle()).toBe('Студии — StudioSlot');
     });
 
     it('у бронирований своя страница', async () => {
@@ -40,5 +50,16 @@ describe('AppComponent', () => {
         expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain(
             'Мои бронирования',
         );
+        expect(TestBed.inject(Title).getTitle()).toBe('Мои бронирования — StudioSlot');
+    });
+
+    it('неизвестный адрес — редирект на главную', async () => {
+        await RouterTestingHarness.create('/no-such-page');
+
+        expect(TestBed.inject(Router).url).toBe('/');
+    });
+
+    it('"**" — последний: всё, что ниже него, недостижимо', () => {
+        expect(routes.at(-1)?.path).toBe('**');
     });
 });
