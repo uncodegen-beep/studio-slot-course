@@ -3,8 +3,10 @@ import {
     ChangeDetectionStrategy,
     Component,
     ElementRef,
+    booleanAttribute,
     effect,
     inject,
+    input,
     signal,
     untracked,
     viewChild,
@@ -23,6 +25,11 @@ import { AnalyticsService } from '@shared/lib/analytics/analytics.service';
 import { AutofocusDirective } from '@shared/lib/autofocus/autofocus.directive';
 import { FieldGroupComponent } from '@shared/ui/field-group/field-group.component';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
+
+/** ?onlyOpen=true → true. Параметра нет — undefined: фильтр в сторе не трогаем */
+function optionalBoolean(value: string | boolean | undefined): boolean | undefined {
+    return value === undefined ? undefined : booleanAttribute(value);
+}
 
 /** Состояние, которое показываем кнопками демо — пока нет настоящей загрузки (модуль 06) */
 type DemoState = 'loading' | 'error' | 'empty' | 'data';
@@ -49,6 +56,15 @@ type DemoState = 'loading' | 'error' | 'empty' | 'data';
     },
 })
 export class CatalogPageComponent {
+    /**
+     * Query-параметры адреса — входы страницы (withComponentInputBinding):
+     * /studios?city=Казань&onlyOpen=true. Имя входа = имя параметра
+     */
+    readonly city = input<string>();
+    readonly onlyOpen = input<boolean | undefined, string | boolean | undefined>(undefined, {
+        transform: optionalBoolean,
+    });
+
     protected readonly loading = signal(false);
     protected readonly error = signal<string | null>(null);
 
@@ -81,6 +97,20 @@ export class CatalogPageComponent {
     ];
 
     constructor() {
+        // Адрес → фильтры. Ссылка «/studios?onlyOpen=true» открывает каталог уже отфильтрованным
+        effect(() => {
+            const city = this.city();
+            const onlyOpen = this.onlyOpen();
+            untracked(() => {
+                if (city !== undefined) {
+                    this.store.setCity(city);
+                }
+                if (onlyOpen !== undefined) {
+                    this.store.setOnlyOpen(onlyOpen);
+                }
+            });
+        });
+
         // Аналитика поиска: перезапуск — только при смене query или filters
         effect(() => {
             const query = this.query().trim();
