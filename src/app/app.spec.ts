@@ -27,6 +27,8 @@ describe('AppComponent', () => {
         expect(root.querySelector('app-header .logo')?.textContent).toContain('StudioSlot');
         expect(root.querySelector('main router-outlet')).not.toBeNull();
         expect(root.querySelector('app-footer')?.textContent).toContain('Современный Angular');
+        // Перехода нет — полоски загрузки нет
+        expect(root.querySelector('.progress')).toBeNull();
     });
 
     it('пустой путь — главная со своим заголовком вкладки', async () => {
