@@ -3,6 +3,8 @@ import { Title } from '@angular/platform-browser';
 import { Router, provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
+import { SessionStore } from '@entities/session/model/session.store';
+
 import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
 
 import { AppComponent } from './app';
@@ -10,6 +12,7 @@ import { routes } from './app.routes';
 
 describe('AppComponent', () => {
     beforeEach(() => {
+        localStorage.clear();
         TestBed.configureTestingModule({
             imports: [AppComponent],
             providers: [provideRouter(routes, withComponentInputBinding()), provideRuLocale()],
@@ -58,6 +61,7 @@ describe('AppComponent', () => {
     });
 
     it('loadChildren: раздел /account — бронирования и избранное', async () => {
+        TestBed.inject(SessionStore).signIn('client');
         const harness = await RouterTestingHarness.create('/account');
 
         expect(TestBed.inject(Router).url).toBe('/account/bookings');
@@ -74,9 +78,38 @@ describe('AppComponent', () => {
     });
 
     it('старый адрес /bookings ведёт в кабинет', async () => {
+        TestBed.inject(SessionStore).signIn('client');
         await RouterTestingHarness.create('/bookings');
 
         expect(TestBed.inject(Router).url).toBe('/account/bookings');
+    });
+
+    it('гость в кабинете — на вход, после входа обратно', async () => {
+        const harness = await RouterTestingHarness.create('/account/favorites');
+        const router = TestBed.inject(Router);
+
+        expect(decodeURIComponent(router.url)).toBe('/login?returnUrl=/account/favorites');
+
+        const client = [...(harness.routeNativeElement?.querySelectorAll('button') ?? [])].find(
+            (button) => button.textContent?.trim() === 'Войти как клиент',
+        );
+        client?.click();
+        await harness.fixture.whenStable();
+
+        expect(router.url).toBe('/account/favorites');
+    });
+
+    it('кабинет владельца — только для роли owner', async () => {
+        const session = TestBed.inject(SessionStore);
+        session.signIn('client');
+        const harness = await RouterTestingHarness.create('/owner');
+        expect(TestBed.inject(Router).url).toBe('/');
+
+        session.signIn('owner');
+        await harness.navigateByUrl('/owner');
+        expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe(
+            'Кабинет владельца',
+        );
     });
 
     it('неизвестный адрес — редирект на главную', async () => {

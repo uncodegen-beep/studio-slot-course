@@ -32,3 +32,17 @@
     color: #5b6275;
     font-size: 14px;
 }
+
+.sign-in {
+    color: inherit;
+    font-weight: 600;
+}
+
+.sign-out {
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}

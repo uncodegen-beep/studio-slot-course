@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 
+import { SessionStore } from '@entities/session/model/session.store';
+
 import { HeaderComponent } from './header.component';
 
 @Component({ template: '', changeDetection: ChangeDetectionStrategy.OnPush })
@@ -9,6 +11,7 @@ class StubPageComponent {}
 
 describe('HeaderComponent', () => {
     beforeEach(() => {
+        localStorage.clear();
         TestBed.configureTestingModule({
             providers: [
                 provideRouter([
@@ -16,6 +19,8 @@ describe('HeaderComponent', () => {
                     { path: 'studios', component: StubPageComponent },
                     { path: 'studios/:id', component: StubPageComponent },
                     { path: 'account/bookings', component: StubPageComponent },
+                    { path: 'owner', component: StubPageComponent },
+                    { path: 'login', component: StubPageComponent },
                 ]),
             ],
         });
@@ -54,5 +59,29 @@ describe('HeaderComponent', () => {
         const root = await renderAt('/studios/sound-garden');
 
         expect(link(root, 'Студии')?.classList).toContain('active');
+    });
+
+    it('гость видит «Войти», ссылки «Владельцу» нет', async () => {
+        const root = await renderAt('/');
+
+        expect(root.querySelector('.sign-in')?.getAttribute('href')).toBe('/login');
+        expect(link(root, 'Владельцу')).toBeUndefined();
+    });
+
+    it('владелец видит свой раздел, «Выйти» завершает сессию и ведёт на главную', async () => {
+        TestBed.inject(SessionStore).signIn('owner');
+        const fixture = TestBed.createComponent(HeaderComponent);
+        await TestBed.inject(Router).navigateByUrl('/owner');
+        await fixture.whenStable();
+        const root = fixture.nativeElement as HTMLElement;
+
+        expect(link(root, 'Владельцу')?.classList).toContain('active');
+
+        root.querySelector<HTMLButtonElement>('.sign-out')?.click();
+        await fixture.whenStable();
+
+        expect(TestBed.inject(SessionStore).isSignedIn()).toBe(false);
+        expect(TestBed.inject(Router).url).toBe('/');
+        expect(root.querySelector('.sign-in')).not.toBeNull();
     });
 });
