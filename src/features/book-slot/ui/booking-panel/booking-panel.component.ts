@@ -1,15 +1,36 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input, linkedSignal } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    DestroyRef,
+    inject,
+    input,
+    linkedSignal,
+    signal,
+} from '@angular/core';
+
+import { Subject, exhaustMap, tap } from 'rxjs';
 
 import { BOOKING_CONFIG, injectStartHours } from '@features/book-slot/model/booking-config';
 import { BookingDraftStore } from '@features/book-slot/model/booking-draft.store';
 import { createSlotPrice } from '@features/book-slot/model/slot-price';
 
+import { BookingsApi, type NewBooking } from '@entities/booking/api/bookings.api';
+
+import { NotifierService } from '@shared/lib/notify/notifier.service';
 import { PluralPipe } from '@shared/lib/plural/plural.pipe';
 import type { Studio, StudioRoom } from '@shared/model';
 import { DurationPickerComponent } from '@shared/ui/duration-picker/duration-picker.component';
 
 let nextId = 0;
+
+const pad = (value: number): string => String(value).padStart(2, '0');
+
+/** Завтра в выбранный час: 2026-11-20T12:00. Выбор даты появится в форме бронирования (модуль 07) */
+export function tomorrowAt(hour: number, now = new Date()): string {
+    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    return `${day.getFullYear()}-${pad(day.getMonth() + 1)}-${pad(day.getDate())}T${pad(hour)}:00`;
+}
 
 /**
  * Панель бронирования: зал, длительность, начало и цена.
@@ -48,4 +69,34 @@ export class BookingPanelComponent {
         this.draft.hours,
         this.draft.startHour,
     );
+
+    private readonly bookings = inject(BookingsApi);
+    private readonly notifier = inject(NotifierService);
+    /** Клики «Отправить заявку» */
+    private readonly submits = new Subject<NewBooking>();
+    protected readonly submitting = signal(false);
+
+    constructor() {
+        const subscription = this.submits
+            .pipe(
+                tap(() => this.submitting.set(true)),
+                // exhaustMap: пока заявка отправляется, новые клики игнорируются — двойной клик
+                // не создаст две брони. switchMap отменил бы первую, mergeMap отправил бы обе
+                exhaustMap((draft) => this.bookings.create(draft)),
+            )
+            .subscribe((booking) => {
+                this.submitting.set(false);
+                this.notifier.notify(`Заявка в ${booking.studioName} отправлена`);
+            });
+        inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
+    }
+
+    protected submit(room: StudioRoom): void {
+        this.submits.next({
+            studioName: this.studio().name,
+            startsAt: tomorrowAt(this.draft.startHour()),
+            hours: this.draft.hours(),
+            pricePerHour: room.pricePerHour,
+        });
+    }
 }

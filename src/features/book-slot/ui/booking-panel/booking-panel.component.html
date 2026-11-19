@@ -15,7 +15,7 @@
     </fieldset>
 }
 
-@if (selectedRoom()) {
+@if (selectedRoom(); as room) {
     <div class="estimate">
         <!-- Двусторонняя привязка прямо к сигналу стора: draft.hours -->
         <app-duration-picker
@@ -42,5 +42,14 @@
                 <small class="peak">вечерний тариф +20 %</small>
             }
         </p>
+        <!-- Кнопку не блокируем на время отправки: защиту от двойного клика даёт exhaustMap -->
+        <button
+            type="button"
+            class="submit"
+            [attr.aria-busy]="submitting()"
+            (click)="submit(room)"
+        >
+            {{ submitting() ? "Отправляем…" : "Отправить заявку" }}
+        </button>
     </div>
 }

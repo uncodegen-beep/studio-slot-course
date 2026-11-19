@@ -3,11 +3,13 @@ import { TestBed } from '@angular/core/testing';
 
 import { provideBookingConfig } from '@features/book-slot/model/booking-config';
 
+import { CREATE_BOOKING_MS } from '@entities/booking/api/bookings.api';
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
+import { NotifierService } from '@shared/lib/notify/notifier.service';
 import type { Studio } from '@shared/model';
 
-import { BookingPanelComponent } from './booking-panel.component';
+import { BookingPanelComponent, tomorrowAt } from './booking-panel.component';
 
 @Component({
     imports: [BookingPanelComponent],
@@ -70,5 +72,47 @@ describe('BookingPanelComponent', () => {
         );
         expect(options).toEqual(['8:00', '10:00']);
         expect(root.querySelectorAll('#first app-duration-picker button')).toHaveLength(2);
+    });
+
+    it('tomorrowAt: завтрашняя дата и час с ведущими нулями', () => {
+        expect(tomorrowAt(9, new Date(2026, 11, 31, 18, 30))).toBe('2027-01-01T09:00');
+    });
+
+    describe('отправка заявки', () => {
+        beforeEach(() => {
+            vi.useFakeTimers();
+        });
+
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
+        it('exhaustMap: три быстрых клика — одна заявка', () => {
+            const fixture = TestBed.createComponent(HostComponent);
+            fixture.detectChanges();
+            const notices: string[] = [];
+            TestBed.inject(NotifierService).notices$.subscribe((notice) =>
+                notices.push(notice.text),
+            );
+            const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+                '#first .submit',
+            );
+
+            button?.click();
+            button?.click();
+            button?.click();
+            fixture.detectChanges();
+            expect(button?.textContent?.trim()).toBe('Отправляем…');
+
+            vi.advanceTimersByTime(CREATE_BOOKING_MS);
+            fixture.detectChanges();
+            expect(notices).toEqual(['Заявка в Sound Garden отправлена']);
+            expect(button?.textContent?.trim()).toBe('Отправить заявку');
+
+            // Первая заявка завершилась — следующий клик снова работает
+            button?.click();
+            vi.advanceTimersByTime(CREATE_BOOKING_MS);
+            expect(notices).toHaveLength(2);
+        });
     });
 });
