@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 
-import { ticks } from '@shared/lib/time/ticks';
+import { timer } from 'rxjs';
 
 /** Текущее время, обновляется раз в секунду */
 @Component({
@@ -11,12 +11,11 @@ import { ticks } from '@shared/lib/time/ticks';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ClockComponent {
-    /** Сигнал для шаблона, Observable — источник событий во времени */
     protected readonly now = signal(new Date());
 
     constructor() {
-        const subscription = ticks(1000).subscribe((now) => this.now.set(now));
-        // Подписался — отпишись: компонент уничтожен, таймер должен остановиться
+        // timer(0, 1000): первое значение сразу, дальше раз в секунду. Заменил самописный ticks()
+        const subscription = timer(0, 1000).subscribe(() => this.now.set(new Date()));
         inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
     }
 }

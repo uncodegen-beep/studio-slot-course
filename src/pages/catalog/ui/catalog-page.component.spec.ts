@@ -255,6 +255,17 @@ describe('CatalogPageComponent', () => {
         (fixture.nativeElement as HTMLElement).remove();
     });
 
+    it('fromEvent: после уничтожения страницы «/» больше не перехватывается', () => {
+        const fixture = TestBed.createComponent(CatalogPageComponent);
+        fixture.detectChanges();
+
+        fixture.destroy();
+        const event = new KeyboardEvent('keydown', { key: '/', bubbles: true, cancelable: true });
+        document.body.dispatchEvent(event);
+
+        expect(event.defaultPrevented).toBe(false);
+    });
+
     it('Router.navigate: «Забронировать» ведёт на страницу студии', async () => {
         TestBed.configureTestingModule({
             providers: [provideRouter([{ path: 'studios/:id', component: StudioStubComponent }])],

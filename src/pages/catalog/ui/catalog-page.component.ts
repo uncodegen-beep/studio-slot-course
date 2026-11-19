@@ -1,7 +1,8 @@
-import { CurrencyPipe, NgTemplateOutlet } from '@angular/common';
+import { CurrencyPipe, DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     Component,
+    DestroyRef,
     ElementRef,
     booleanAttribute,
     effect,
@@ -12,6 +13,8 @@ import {
     viewChild,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+
+import { fromEvent } from 'rxjs';
 
 import { BookingPanelComponent } from '@features/book-slot/ui/booking-panel/booking-panel.component';
 import { FavoritesStore } from '@features/toggle-favorite/model/favorites.store';
@@ -50,10 +53,6 @@ type DemoState = 'loading' | 'error' | 'empty' | 'data';
     templateUrl: './catalog-page.component.html',
     styleUrl: './catalog-page.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    host: {
-        // Горячая клавиша «/» — как поиск на GitHub и YouTube
-        '(document:keydown)': 'onKeydown($event)',
-    },
 })
 export class CatalogPageComponent {
     /**
@@ -97,6 +96,13 @@ export class CatalogPageComponent {
     ];
 
     constructor() {
+        // Горячая клавиша «/» — как поиск на GitHub и YouTube. fromEvent — поток событий DOM;
+        // отписка снимает обработчик с document, иначе он пережил бы страницу
+        const keydown = fromEvent<KeyboardEvent>(inject(DOCUMENT), 'keydown').subscribe((event) =>
+            this.onKeydown(event),
+        );
+        inject(DestroyRef).onDestroy(() => keydown.unsubscribe());
+
         // Адрес → фильтры. Ссылка «/studios?onlyOpen=true» открывает каталог уже отфильтрованным
         effect(() => {
             const city = this.city();
@@ -121,7 +127,7 @@ export class CatalogPageComponent {
         });
     }
 
-    protected onKeydown(event: KeyboardEvent): void {
+    private onKeydown(event: KeyboardEvent): void {
         const target = event.target as HTMLElement | null;
         const typing =
             target instanceof HTMLInputElement ||
