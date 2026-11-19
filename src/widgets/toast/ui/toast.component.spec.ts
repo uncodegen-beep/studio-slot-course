@@ -47,4 +47,16 @@ describe('ToastComponent', () => {
 
         expect(root.querySelector('[role="status"] p')?.textContent).toBe('Второе');
     });
+
+    it('уничтожение — таймер скрытия тоже отменён', () => {
+        const clearInterval = vi.spyOn(globalThis, 'clearInterval');
+        const fixture = TestBed.createComponent(ToastComponent);
+        fixture.detectChanges();
+        TestBed.inject(NotifierService).notify('Сообщение');
+
+        fixture.destroy();
+
+        // timer в RxJS работает на setInterval: отписка от внутреннего потока его очищает
+        expect(clearInterval).toHaveBeenCalled();
+    });
 });
