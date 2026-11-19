@@ -1,7 +1,17 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { Subject, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs';
+import {
+    Subject,
+    catchError,
+    debounceTime,
+    distinctUntilChanged,
+    map,
+    of,
+    retry,
+    switchMap,
+    tap,
+} from 'rxjs';
 
 import { StudiosApi } from '@entities/studio/api/studios.api';
 
@@ -11,6 +21,9 @@ import type { Studio } from '@shared/model';
 export const SEARCH_DEBOUNCE_MS = 300;
 /** Короче — слишком много совпадений, запрос бесполезен */
 export const SEARCH_MIN_LENGTH = 2;
+/** Повторы при сбое сети и пауза между ними */
+export const SEARCH_RETRIES = 2;
+export const SEARCH_RETRY_MS = 1000;
 
 /** Поиск студии с подсказками. Каждый ввод — запрос; устаревший запрос отменяется */
 @Component({
@@ -26,7 +39,14 @@ export const SEARCH_MIN_LENGTH = 2;
                 (input)="search(input.value)"
             />
         </label>
-        @if (results().length) {
+        @if (failed()) {
+            <p
+                class="error"
+                role="alert"
+            >
+                Поиск сейчас недоступен. Попробуйте ещё раз чуть позже.
+            </p>
+        } @else if (results().length) {
             <ul class="results">
                 @for (studio of results(); track studio.id) {
                     <li>
@@ -46,6 +66,7 @@ export class StudioSearchComponent {
     private readonly queries = new Subject<string>();
 
     protected readonly results = signal<readonly Studio[]>([]);
+    protected readonly failed = signal(false);
 
     constructor() {
         const subscription = this.queries
@@ -56,9 +77,24 @@ export class StudioSearchComponent {
                 map((query) => (query.length >= SEARCH_MIN_LENGTH ? query : '')),
                 // «sound» → «sounds» → «sound» за время паузы — запрос не повторяем
                 distinctUntilChanged(),
+                // Новый запрос — старая ошибка больше не актуальна
+                tap(() => this.failed.set(false)),
                 // Новый ввод — switchMap отписывается от прошлого запроса, HttpClient его отменяет.
                 // Ответ на «so» не перезапишет ответ на «sound», даже если придёт позже
-                switchMap((query) => (query ? this.api.search(query) : of([]))),
+                switchMap((query) =>
+                    query
+                        ? this.api.search(query).pipe(
+                              // Сбой сети — ещё две попытки с паузой, потом сдаёмся
+                              retry({ count: SEARCH_RETRIES, delay: SEARCH_RETRY_MS }),
+                              // catchError ВНУТРИ switchMap: ошибка гасит только этот запрос.
+                              // Снаружи она завершила бы весь поток, и поиск перестал бы работать
+                              catchError(() => {
+                                  this.failed.set(true);
+                                  return of([]);
+                              }),
+                          )
+                        : of([]),
+                ),
             )
             .subscribe((studios) => this.results.set(studios));
         inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
