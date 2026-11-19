@@ -13,8 +13,8 @@ export const OWNER_ROUTES: Routes = [
                 path: '',
                 title: 'Кабинет владельца',
                 loadComponent: () =>
-                    import('@pages/owner/ui/owner-studio-page.component').then(
-                        (m) => m.OwnerStudioPageComponent,
+                    import('@pages/owner/ui/owner-studios-page.component').then(
+                        (m) => m.OwnerStudiosPageComponent,
                     ),
             },
             {
