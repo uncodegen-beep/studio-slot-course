@@ -163,4 +163,14 @@ describe('StudioSearchComponent', () => {
             expect(root.querySelector('.results a')?.textContent).toBe('Volga Records');
         });
     });
+
+    it('async pipe: уничтожение компонента отменяет запрос в полёте', () => {
+        const { type, request } = setup();
+
+        type('sound');
+        const pending = request('sound');
+        TestBed.resetTestingModule();
+
+        expect(pending.cancelled).toBe(true);
+    });
 });

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import { forkJoin, of } from 'rxjs';
@@ -45,11 +46,11 @@ export class OwnerStudiosPageComponent {
         // forkJoin: все запросы параллельно, один ответ — массив в том же порядке, что ids.
         // Пустой массив forkJoin завершает без значения — поэтому of([])
         const studios$ = ids.length ? forkJoin(ids.map((id) => this.api.getById(id))) : of([]);
-        const subscription = studios$.subscribe({
+        // Ушли со страницы до ответа — takeUntilDestroyed отпишется, HttpClient отменит запросы
+        studios$.pipe(takeUntilDestroyed()).subscribe({
             next: (studios) => this.studios.set(studios),
             // Хотя бы один запрос упал — forkJoin падает целиком
             error: () => this.failed.set(true),
         });
-        inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
     }
 }
