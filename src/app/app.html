@@ -7,6 +7,15 @@
     ></div>
 }
 
+@if (!online()) {
+    <p
+        class="offline"
+        role="alert"
+    >
+        Нет соединения с интернетом. Данные могут быть устаревшими.
+    </p>
+}
+
 <app-header />
 
 <main class="content">

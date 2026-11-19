@@ -1,35 +1,55 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { forkJoin, of } from 'rxjs';
+
 import { SessionStore } from '@entities/session/model/session.store';
-import { CatalogStore } from '@entities/studio/model/catalog.store';
+import { StudiosApi } from '@entities/studio/api/studios.api';
 
-import { ownsStudio } from '../model/owner-studio';
+import type { Studio } from '@shared/model';
 
-/** /owner — студии владельца. Ссылки относительные: studios/:id внутри раздела /owner */
+/** /owner — студии владельца с сервера. Ссылки относительные: studios/:id внутри раздела /owner */
 @Component({
     selector: 'app-owner-studios-page',
     imports: [RouterLink],
     template: `
         <h1>Мои студии</h1>
-        <ul class="studios">
-            @for (studio of studios(); track studio.id) {
-                <li>
-                    <a [routerLink]="['studios', studio.id]">{{ studio.name }}</a>
-                    · {{ studio.city }} · залов: {{ studio.rooms?.length ?? 0 }}
-                </li>
-            } @empty {
-                <li>Студий пока нет</li>
-            }
-        </ul>
+        @if (failed()) {
+            <p class="error">Не удалось загрузить студии. Обновите страницу.</p>
+        } @else if (studios(); as list) {
+            <ul class="studios">
+                @for (studio of list; track studio.id) {
+                    <li>
+                        <a [routerLink]="['studios', studio.id]">{{ studio.name }}</a>
+                        · {{ studio.city }} · залов: {{ studio.rooms?.length ?? 0 }}
+                    </li>
+                } @empty {
+                    <li>Студий пока нет</li>
+                }
+            </ul>
+        } @else {
+            <p class="loading">Загружаем студии…</p>
+        }
     `,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OwnerStudiosPageComponent {
-    private readonly session = inject(SessionStore);
-    private readonly catalog = inject(CatalogStore);
+    private readonly api = inject(StudiosApi);
 
-    protected readonly studios = computed(() =>
-        this.catalog.studios().filter((studio) => ownsStudio(this.session.user(), studio.id)),
-    );
+    /** null — ещё грузим */
+    protected readonly studios = signal<readonly Studio[] | null>(null);
+    protected readonly failed = signal(false);
+
+    constructor() {
+        const ids = inject(SessionStore).user()?.studioIds ?? [];
+        // forkJoin: все запросы параллельно, один ответ — массив в том же порядке, что ids.
+        // Пустой массив forkJoin завершает без значения — поэтому of([])
+        const studios$ = ids.length ? forkJoin(ids.map((id) => this.api.getById(id))) : of([]);
+        const subscription = studios$.subscribe({
+            next: (studios) => this.studios.set(studios),
+            // Хотя бы один запрос упал — forkJoin падает целиком
+            error: () => this.failed.set(true),
+        });
+        inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
+    }
 }

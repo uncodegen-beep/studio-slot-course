@@ -41,6 +41,20 @@ describe('AppComponent', () => {
         expect(root.querySelector('.progress')).toBeNull();
     });
 
+    it('merge online/offline: без сети — предупреждение', () => {
+        const fixture = TestBed.createComponent(AppComponent);
+        fixture.detectChanges();
+        const root = fixture.nativeElement as HTMLElement;
+
+        window.dispatchEvent(new Event('offline'));
+        fixture.detectChanges();
+        expect(root.querySelector('.offline')?.textContent).toContain('Нет соединения');
+
+        window.dispatchEvent(new Event('online'));
+        fixture.detectChanges();
+        expect(root.querySelector('.offline')).toBeNull();
+    });
+
     it('пустой путь — главная со своим заголовком вкладки', async () => {
         const harness = await RouterTestingHarness.create('/');
 
@@ -119,6 +133,10 @@ describe('AppComponent', () => {
 
         session.signIn('owner');
         await harness.navigateByUrl('/owner');
+        const http = TestBed.inject(HttpTestingController);
+        http.expectOne('api/studios/sound-garden.json').flush(DEMO_STUDIOS[0] ?? null);
+        http.expectOne('api/studios/nevsky-beat.json').flush(DEMO_STUDIOS[1] ?? null);
+        harness.detectChanges();
         const root = harness.routeNativeElement as HTMLElement;
         expect(root.querySelector('.page h1')?.textContent).toBe('Мои студии');
         expect(TestBed.inject(Title).getTitle()).toBe('Кабинет владельца — StudioSlot');
