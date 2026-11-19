@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { concat, map, of, switchMap, timer } from 'rxjs';
 
@@ -30,12 +31,12 @@ export class ToastComponent {
         // Было: подписка внутри подписки и ручная отмена таймера.
         // Стало: каждое уведомление превращается во внутренний поток «показать → через 3 с скрыть»,
         // а switchMap сам отписывается от предыдущего внутреннего потока при новом уведомлении
-        const subscription = inject(NotifierService)
+        inject(NotifierService)
             .notices$.pipe(
                 switchMap((notice) => concat(of(notice), timer(TOAST_MS).pipe(map(() => null)))),
+                // Последним в pipe: завершает и внешний поток, и текущий внутренний
+                takeUntilDestroyed(),
             )
             .subscribe((notice) => this.notice.set(notice));
-        // Одна подписка — одна отписка: внутренние потоки закроются вместе с внешней
-        inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
     }
 }

@@ -1,12 +1,6 @@
 import { DOCUMENT } from '@angular/common';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    DestroyRef,
-    computed,
-    inject,
-    signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterOutlet } from '@angular/router';
 
 import { FooterComponent } from '@widgets/footer/ui/footer.component';
@@ -33,8 +27,9 @@ export class AppComponent {
     constructor() {
         const window = inject(DOCUMENT).defaultView;
         if (window) {
-            const subscription = online$(window).subscribe((online) => this.online.set(online));
-            inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
+            online$(window)
+                .pipe(takeUntilDestroyed())
+                .subscribe((online) => this.online.set(online));
         }
     }
 }

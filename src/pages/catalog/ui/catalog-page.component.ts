@@ -2,7 +2,6 @@ import { CurrencyPipe, DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     Component,
-    DestroyRef,
     ElementRef,
     booleanAttribute,
     effect,
@@ -12,6 +11,7 @@ import {
     untracked,
     viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 
 import { BookingPanelComponent } from '@features/book-slot/ui/booking-panel/booking-panel.component';
@@ -96,10 +96,9 @@ export class CatalogPageComponent {
 
     constructor() {
         // Горячая клавиша «/» — как поиск на GitHub и YouTube. Фильтр и preventDefault — внутри hotkey()
-        const keydown = hotkey(inject(DOCUMENT), '/').subscribe(() =>
-            this.searchInput().nativeElement.focus(),
-        );
-        inject(DestroyRef).onDestroy(() => keydown.unsubscribe());
+        hotkey(inject(DOCUMENT), '/')
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => this.searchInput().nativeElement.focus());
 
         // Адрес → фильтры. Ссылка «/studios?onlyOpen=true» открывает каталог уже отфильтрованным
         effect(() => {

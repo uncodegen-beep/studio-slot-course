@@ -2,12 +2,12 @@ import { CurrencyPipe } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     Component,
-    DestroyRef,
     inject,
     input,
     linkedSignal,
     signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Subject, exhaustMap, tap } from 'rxjs';
 
@@ -77,18 +77,18 @@ export class BookingPanelComponent {
     protected readonly submitting = signal(false);
 
     constructor() {
-        const subscription = this.submits
+        this.submits
             .pipe(
                 tap(() => this.submitting.set(true)),
                 // exhaustMap: пока заявка отправляется, новые клики игнорируются — двойной клик
                 // не создаст две брони. switchMap отменил бы первую, mergeMap отправил бы обе
                 exhaustMap((draft) => this.bookings.create(draft)),
+                takeUntilDestroyed(),
             )
             .subscribe((booking) => {
                 this.submitting.set(false);
                 this.notifier.notify(`Заявка в ${booking.studioName} отправлена`);
             });
-        inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
     }
 
     protected submit(room: StudioRoom): void {

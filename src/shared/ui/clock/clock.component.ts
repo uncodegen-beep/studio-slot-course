@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { map, timer } from 'rxjs';
 
@@ -15,9 +16,12 @@ export class ClockComponent {
 
     constructor() {
         // timer даёт номера 0, 1, 2…; map превращает номер в текущее время
-        const subscription = timer(0, 1000)
-            .pipe(map(() => new Date()))
+        // takeUntilDestroyed: поток завершится вместе с компонентом — отписка без DestroyRef руками
+        timer(0, 1000)
+            .pipe(
+                map(() => new Date()),
+                takeUntilDestroyed(),
+            )
             .subscribe((now) => this.now.set(now));
-        inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
     }
 }
