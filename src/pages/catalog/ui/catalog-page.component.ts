@@ -14,8 +14,6 @@ import {
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { fromEvent } from 'rxjs';
-
 import { BookingPanelComponent } from '@features/book-slot/ui/booking-panel/booking-panel.component';
 import { FavoritesStore } from '@features/toggle-favorite/model/favorites.store';
 
@@ -26,6 +24,7 @@ import { StudioListComponent } from '@entities/studio/ui/studio-list/studio-list
 
 import { AnalyticsService } from '@shared/lib/analytics/analytics.service';
 import { AutofocusDirective } from '@shared/lib/autofocus/autofocus.directive';
+import { hotkey } from '@shared/lib/dom/hotkey';
 import { FieldGroupComponent } from '@shared/ui/field-group/field-group.component';
 import { SpinnerComponent } from '@shared/ui/spinner/spinner.component';
 
@@ -96,10 +95,9 @@ export class CatalogPageComponent {
     ];
 
     constructor() {
-        // Горячая клавиша «/» — как поиск на GitHub и YouTube. fromEvent — поток событий DOM;
-        // отписка снимает обработчик с document, иначе он пережил бы страницу
-        const keydown = fromEvent<KeyboardEvent>(inject(DOCUMENT), 'keydown').subscribe((event) =>
-            this.onKeydown(event),
+        // Горячая клавиша «/» — как поиск на GitHub и YouTube. Фильтр и preventDefault — внутри hotkey()
+        const keydown = hotkey(inject(DOCUMENT), '/').subscribe(() =>
+            this.searchInput().nativeElement.focus(),
         );
         inject(DestroyRef).onDestroy(() => keydown.unsubscribe());
 
@@ -125,19 +123,6 @@ export class CatalogPageComponent {
             const favorites = untracked(() => this.favoritesStore.favorites().size);
             this.analytics.track('catalog_search', { query, city, onlyOpen, favorites });
         });
-    }
-
-    private onKeydown(event: KeyboardEvent): void {
-        const target = event.target as HTMLElement | null;
-        const typing =
-            target instanceof HTMLInputElement ||
-            target instanceof HTMLTextAreaElement ||
-            target instanceof HTMLSelectElement;
-        // В поле ввода «/» — обычный символ, перехватывать нельзя
-        if (event.key === '/' && !typing) {
-            event.preventDefault();
-            this.searchInput().nativeElement.focus();
-        }
     }
 
     /** Переход из кода — после действия пользователя. Сегменты массивом: id экранирует сам роутер */
