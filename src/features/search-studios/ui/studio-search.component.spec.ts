@@ -9,7 +9,12 @@ import { provideRouter } from '@angular/router';
 
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
-import { SEARCH_DEBOUNCE_MS, StudioSearchComponent } from './studio-search.component';
+import {
+    SEARCH_DEBOUNCE_MS,
+    SEARCH_RETRIES,
+    SEARCH_RETRY_MS,
+    StudioSearchComponent,
+} from './studio-search.component';
 
 interface Setup {
     readonly root: HTMLElement;
@@ -122,5 +127,40 @@ describe('StudioSearchComponent', () => {
         type('s');
 
         TestBed.inject(HttpTestingController).expectNone(() => true);
+    });
+
+    describe('ошибки', () => {
+        const fail = { status: 500, statusText: 'Server Error' };
+
+        it('retry: сбой и успешный повтор — пользователь ошибки не видит', () => {
+            const { root, type, request, render } = setup();
+
+            type('sound');
+            request('sound').flush('Server error', fail);
+            vi.advanceTimersByTime(SEARCH_RETRY_MS);
+            request('sound').flush(DEMO_STUDIOS);
+            render();
+
+            expect(root.querySelector('.error')).toBeNull();
+            expect(root.querySelector('.results a')?.textContent).toBe('Sound Garden');
+        });
+
+        it('catchError: все попытки упали — сообщение, а поиск продолжает работать', () => {
+            const { root, type, request, render } = setup();
+
+            type('sound');
+            for (let attempt = 0; attempt <= SEARCH_RETRIES; attempt++) {
+                request('sound').flush('Server error', fail);
+                vi.advanceTimersByTime(SEARCH_RETRY_MS);
+            }
+            render();
+            expect(root.querySelector('[role="alert"]')?.textContent).toContain('недоступен');
+
+            type('volga');
+            request('volga').flush(DEMO_STUDIOS);
+            render();
+            expect(root.querySelector('.error')).toBeNull();
+            expect(root.querySelector('.results a')?.textContent).toBe('Volga Records');
+        });
     });
 });
