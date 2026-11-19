@@ -27,3 +27,20 @@
     color: #a3123e;
     font-weight: 400;
 }
+
+.submit {
+    justify-self: start;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #1f4fd6;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    &[aria-busy='true'] {
+        opacity: 0.7;
+        cursor: progress;
+    }
+}
