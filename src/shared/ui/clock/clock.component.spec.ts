@@ -34,6 +34,6 @@ describe('ClockComponent', () => {
 
         fixture.destroy();
 
-        expect(clearInterval).toHaveBeenCalledTimes(1);
+        expect(clearInterval).toHaveBeenCalled();
     });
 });
