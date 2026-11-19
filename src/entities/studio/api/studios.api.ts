@@ -1,7 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 
-import { type Observable, shareReplay } from 'rxjs';
+import { type Observable, map, shareReplay } from 'rxjs';
+
+import { DEFAULT_STUDIO_FILTERS, filterStudios } from '@entities/studio/model/studio-filters';
 
 import { APP_CONFIG } from '@shared/config/app-config';
 import type { Studio } from '@shared/model';
@@ -32,6 +34,16 @@ export class StudiosApi {
         );
         this.cache.set(id, studio$);
         return studio$;
+    }
+
+    /**
+     * Поиск по названию и городу. Запрос уходит с ?q=, но статичный JSON его не понимает —
+     * пока сервера нет, фильтруем сами. С настоящим API map уйдёт, а сигнатура останется
+     */
+    search(query: string): Observable<Studio[]> {
+        return this.http
+            .get<Studio[]>(`${this.baseUrl}/studios/index.json`, { params: { q: query } })
+            .pipe(map((studios) => filterStudios(studios, query, DEFAULT_STUDIO_FILTERS)));
     }
 
     /** Данные студии изменились (урок 92: редактор зала) — следующий запрос пойдёт в сеть */

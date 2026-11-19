@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { StudioSearchComponent } from '@features/search-studios/ui/studio-search.component';
+
 import { CatalogStore } from '@entities/studio/model/catalog.store';
 
 /** Главная: адрес «/». Подключена в маршрутах напрямую через component — она нужна сразу */
 @Component({
     selector: 'app-home-page',
-    imports: [RouterLink],
+    imports: [RouterLink, StudioSearchComponent],
     template: `
         <section class="hero">
             <h1>Студии для репетиций, записи и съёмок — по часам</h1>
@@ -18,6 +20,8 @@ import { CatalogStore } from '@entities/studio/model/catalog.store';
                 Смотреть студии
             </a>
         </section>
+
+        <app-studio-search />
 
         <h2>Города</h2>
         <ul class="cities">
