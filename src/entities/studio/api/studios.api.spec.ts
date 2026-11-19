@@ -2,27 +2,79 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
+import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
+
+import type { Studio } from '@shared/model';
+
 import { StudiosApi } from './studios.api';
 
+const [SOUND_GARDEN] = DEMO_STUDIOS as [Studio, ...Studio[]];
+const URL = 'api/studios/sound-garden.json';
+
 describe('StudiosApi', () => {
-    it('getById запрашивает JSON студии', () => {
+    let api: StudiosApi;
+    let http: HttpTestingController;
+
+    beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [provideHttpClient(), provideHttpClientTesting()],
         });
-        const api = TestBed.inject(StudiosApi);
-        const http = TestBed.inject(HttpTestingController);
+        api = TestBed.inject(StudiosApi);
+        http = TestBed.inject(HttpTestingController);
+    });
+
+    afterEach(() => {
+        http.verify();
+    });
+
+    it('getById запрашивает JSON студии', () => {
         let name = '';
 
         api.getById('nevsky-beat').subscribe((studio) => (name = studio.name));
         http.expectOne('api/studios/nevsky-beat.json').flush({ name: 'Nevsky Beat' });
 
         expect(name).toBe('Nevsky Beat');
-        http.verify();
     });
 
-    it('один экземпляр на приложение', () => {
-        TestBed.configureTestingModule({ providers: [provideHttpClient()] });
+    it('один экземпляр на приложение — один кэш на всех', () => {
+        expect(TestBed.inject(StudiosApi)).toBe(api);
+    });
 
-        expect(TestBed.inject(StudiosApi)).toBe(TestBed.inject(StudiosApi));
+    it('shareReplay: два подписчика — один запрос', () => {
+        const names: string[] = [];
+
+        api.getById('sound-garden').subscribe((studio) => names.push(studio.name));
+        api.getById('sound-garden').subscribe((studio) => names.push(studio.name));
+        http.expectOne(URL).flush(SOUND_GARDEN);
+
+        expect(names).toEqual(['Sound Garden', 'Sound Garden']);
+    });
+
+    it('опоздавший подписчик получает сохранённый ответ без запроса', () => {
+        api.getById('sound-garden').subscribe();
+        http.expectOne(URL).flush(SOUND_GARDEN);
+
+        let late: Studio | undefined;
+        api.getById('sound-garden').subscribe((studio) => (late = studio));
+
+        expect(late?.id).toBe('sound-garden');
+        http.expectNone(URL);
+    });
+
+    it('ошибка не кэшируется: следующая подписка идёт в сеть', () => {
+        api.getById('sound-garden').subscribe({ error: () => undefined });
+        http.expectOne(URL).flush('Server error', { status: 500, statusText: 'Server Error' });
+
+        api.getById('sound-garden').subscribe();
+        http.expectOne(URL).flush(SOUND_GARDEN);
+    });
+
+    it('invalidate — следующий вызов делает новый запрос', () => {
+        api.getById('sound-garden').subscribe();
+        http.expectOne(URL).flush(SOUND_GARDEN);
+
+        api.invalidate('sound-garden');
+        api.getById('sound-garden').subscribe();
+        http.expectOne(URL).flush(SOUND_GARDEN);
     });
 });
