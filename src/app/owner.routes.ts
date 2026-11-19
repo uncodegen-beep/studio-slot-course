@@ -1,5 +1,6 @@
 import type { Routes } from '@angular/router';
 
+import { ownerStudioResolver, ownsStudioGuard } from '@pages/owner/model/owner-studio';
 import { OwnerLayoutComponent } from '@pages/owner/ui/owner-layout.component';
 
 /** Кабинет владельца: /owner/… Подключается через loadChildren под roleGuard('owner') */
@@ -12,11 +13,21 @@ export const OWNER_ROUTES: Routes = [
                 path: '',
                 title: 'Кабинет владельца',
                 loadComponent: () =>
-                    import('@pages/owner/ui/owner-studios-page.component').then(
-                        (m) => m.OwnerStudiosPageComponent,
+                    import('@pages/owner/ui/owner-studio-page.component').then(
+                        (m) => m.OwnerStudioPageComponent,
                     ),
             },
-            // Задание модуля 04: страница своей студии — studios/:slug
+            {
+                // Сначала guard (своя ли студия), потом resolver (загрузка): чужую даже не запрашиваем
+                path: 'studios/:slug',
+                title: 'Студия',
+                canActivate: [ownsStudioGuard],
+                resolve: { studio: ownerStudioResolver },
+                loadComponent: () =>
+                    import('@pages/owner/ui/owner-studio-page.component').then(
+                        (m) => m.OwnerStudioPageComponent,
+                    ),
+            },
         ],
     },
 ];
