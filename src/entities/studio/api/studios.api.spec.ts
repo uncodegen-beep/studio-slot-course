@@ -77,4 +77,15 @@ describe('StudiosApi', () => {
         api.getById('sound-garden').subscribe();
         http.expectOne(URL).flush(SOUND_GARDEN);
     });
+
+    it('search: запрос с ?q= и студии по названию или городу', () => {
+        let names: string[] = [];
+
+        api.search('казань').subscribe((studios) => (names = studios.map((studio) => studio.name)));
+        http.expectOne(
+            (req) => req.url === 'api/studios/index.json' && req.params.get('q') === 'казань',
+        ).flush(DEMO_STUDIOS);
+
+        expect(names).toEqual(['Volga Records']);
+    });
 });
