@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 
-import { timer } from 'rxjs';
+import { map, timer } from 'rxjs';
 
 /** Текущее время, обновляется раз в секунду */
 @Component({
@@ -14,8 +14,10 @@ export class ClockComponent {
     protected readonly now = signal(new Date());
 
     constructor() {
-        // timer(0, 1000): первое значение сразу, дальше раз в секунду. Заменил самописный ticks()
-        const subscription = timer(0, 1000).subscribe(() => this.now.set(new Date()));
+        // timer даёт номера 0, 1, 2…; map превращает номер в текущее время
+        const subscription = timer(0, 1000)
+            .pipe(map(() => new Date()))
+            .subscribe((now) => this.now.set(now));
         inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
     }
 }
