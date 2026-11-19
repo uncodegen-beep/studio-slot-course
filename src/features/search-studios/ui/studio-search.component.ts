@@ -1,11 +1,16 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { Subject, of, switchMap } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 
 import { StudiosApi } from '@entities/studio/api/studios.api';
 
 import type { Studio } from '@shared/model';
+
+/** Пауза после последнего нажатия, прежде чем искать */
+export const SEARCH_DEBOUNCE_MS = 300;
+/** Короче — слишком много совпадений, запрос бесполезен */
+export const SEARCH_MIN_LENGTH = 2;
 
 /** Поиск студии с подсказками. Каждый ввод — запрос; устаревший запрос отменяется */
 @Component({
@@ -45,6 +50,12 @@ export class StudioSearchComponent {
     constructor() {
         const subscription = this.queries
             .pipe(
+                // Пока пользователь печатает — ждём. «s-o-u-n-d» за секунду = один запрос, а не пять
+                debounceTime(SEARCH_DEBOUNCE_MS),
+                // Одна буква — как пустой запрос: подсказки скрываются
+                map((query) => (query.length >= SEARCH_MIN_LENGTH ? query : '')),
+                // «sound» → «sounds» → «sound» за время паузы — запрос не повторяем
+                distinctUntilChanged(),
                 // Новый ввод — switchMap отписывается от прошлого запроса, HttpClient его отменяет.
                 // Ответ на «so» не перезапишет ответ на «sound», даже если придёт позже
                 switchMap((query) => (query ? this.api.search(query) : of([]))),

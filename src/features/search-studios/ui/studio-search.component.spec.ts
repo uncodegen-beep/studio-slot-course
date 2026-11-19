@@ -9,7 +9,7 @@ import { provideRouter } from '@angular/router';
 
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
-import { StudioSearchComponent } from './studio-search.component';
+import { SEARCH_DEBOUNCE_MS, StudioSearchComponent } from './studio-search.component';
 
 interface Setup {
     readonly root: HTMLElement;
@@ -29,9 +29,11 @@ function setup(): Setup {
     const http = TestBed.inject(HttpTestingController);
     return {
         root,
+        // Ввод и пауза debounce: запрос уходит после неё
         type: (value) => {
             input.value = value;
             input.dispatchEvent(new Event('input'));
+            vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
         },
         request: (q) =>
             http.expectOne(
@@ -42,6 +44,14 @@ function setup(): Setup {
 }
 
 describe('StudioSearchComponent', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     it('показывает найденные студии со ссылками', () => {
         const { root, type, request, render } = setup();
 
@@ -78,5 +88,39 @@ describe('StudioSearchComponent', () => {
 
         TestBed.inject(HttpTestingController).expectNone(() => true);
         expect(root.querySelector('.results')).toBeNull();
+    });
+
+    it('debounceTime: быстрый набор — один запрос с последним значением', () => {
+        const { root } = setup();
+        const input = root.querySelector('input') as HTMLInputElement;
+        const http = TestBed.inject(HttpTestingController);
+
+        for (const value of ['s', 'so', 'sou', 'soun', 'sound']) {
+            input.value = value;
+            input.dispatchEvent(new Event('input'));
+            vi.advanceTimersByTime(100);
+        }
+        http.expectNone(() => true);
+
+        vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+        expect(http.match(() => true).map((req) => req.request.params.get('q'))).toEqual(['sound']);
+    });
+
+    it('distinctUntilChanged: то же значение после паузы — без повторного запроса', () => {
+        const { type, request } = setup();
+
+        type('sound');
+        request('sound').flush(DEMO_STUDIOS);
+        type('sound ');
+
+        TestBed.inject(HttpTestingController).expectNone(() => true);
+    });
+
+    it('одна буква — без запроса', () => {
+        const { type } = setup();
+
+        type('s');
+
+        TestBed.inject(HttpTestingController).expectNone(() => true);
     });
 });
