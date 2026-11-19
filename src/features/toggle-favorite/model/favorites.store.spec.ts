@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { AnalyticsService } from '@shared/lib/analytics/analytics.service';
+import { NotifierService } from '@shared/lib/notify/notifier.service';
 
 import { FavoritesStore } from './favorites.store';
 
@@ -66,5 +67,16 @@ describe('FavoritesStore', () => {
             { name: 'favorite_toggle', params: { id: 'sound-garden', added: true } },
             { name: 'favorite_toggle', params: { id: 'sound-garden', added: false } },
         ]);
+    });
+
+    it('каждое переключение — уведомление через NotifierService', () => {
+        const store = TestBed.inject(FavoritesStore);
+        const texts: string[] = [];
+        TestBed.inject(NotifierService).notices$.subscribe((notice) => texts.push(notice.text));
+
+        store.toggle('sound-garden');
+        store.toggle('sound-garden');
+
+        expect(texts).toEqual(['Добавлено в избранное', 'Убрано из избранного']);
     });
 });

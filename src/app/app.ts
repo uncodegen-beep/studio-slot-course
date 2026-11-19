@@ -3,10 +3,11 @@ import { Router, RouterOutlet } from '@angular/router';
 
 import { FooterComponent } from '@widgets/footer/ui/footer.component';
 import { HeaderComponent } from '@widgets/header/ui/header.component';
+import { ToastComponent } from '@widgets/toast/ui/toast.component';
 
 @Component({
     selector: 'app-root',
-    imports: [FooterComponent, HeaderComponent, RouterOutlet],
+    imports: [FooterComponent, HeaderComponent, RouterOutlet, ToastComponent],
     templateUrl: './app.html',
     styleUrl: './app.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
