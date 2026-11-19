@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 
-import { useInterval } from '@shared/lib/interval/use-interval';
+import { ticks } from '@shared/lib/time/ticks';
 
 /** Текущее время, обновляется раз в секунду */
 @Component({
@@ -11,11 +11,12 @@ import { useInterval } from '@shared/lib/interval/use-interval';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ClockComponent {
-    /** Сигнал вместо поля: set() сам планирует обновление шаблона — markForCheck больше не нужен */
+    /** Сигнал для шаблона, Observable — источник событий во времени */
     protected readonly now = signal(new Date());
 
     constructor() {
-        // Очистка — рядом с подпиской, а не в ngOnDestroy в конце класса
-        useInterval(() => this.now.set(new Date()), 1000);
+        const subscription = ticks(1000).subscribe((now) => this.now.set(now));
+        // Подписался — отпишись: компонент уничтожен, таймер должен остановиться
+        inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
     }
 }

@@ -26,4 +26,14 @@ describe('ClockComponent', () => {
 
         expect(time()).toBe('18:00:02');
     });
+
+    it('уничтожение компонента отписывается от потока — таймер остановлен', () => {
+        const clearInterval = vi.spyOn(globalThis, 'clearInterval');
+        const fixture = TestBed.createComponent(ClockComponent);
+        fixture.detectChanges();
+
+        fixture.destroy();
+
+        expect(clearInterval).toHaveBeenCalledTimes(1);
+    });
 });
