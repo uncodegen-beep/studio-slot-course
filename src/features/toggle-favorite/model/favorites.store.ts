@@ -1,6 +1,7 @@
-import { Injectable, effect, signal } from '@angular/core';
+import { Injectable, effect, inject, signal } from '@angular/core';
 
 import { injectTrack } from '@shared/lib/analytics/inject-track';
+import { NotifierService } from '@shared/lib/notify/notifier.service';
 
 const STORAGE_KEY = 'studioslot.favorites';
 
@@ -25,6 +26,8 @@ export class FavoritesStore {
 
     /** Поле класса — контекст внедрения есть; сама trackToggle вызывается потом, из toggle() */
     private readonly trackToggle = injectTrack('favorite_toggle');
+
+    private readonly notifier = inject(NotifierService);
 
     /** У asReadonly() нет set и update — компонент не изменит состояние в обход toggle() */
     readonly favorites = this.ids.asReadonly();
@@ -53,6 +56,9 @@ export class FavoritesStore {
             return next;
         });
 
-        this.trackToggle({ id, added: this.ids().has(id) });
+        const added = this.ids().has(id);
+        this.trackToggle({ id, added });
+        // Событие, а не состояние: сообщили — и забыли. Кто покажет, стор не знает
+        this.notifier.notify(added ? 'Добавлено в избранное' : 'Убрано из избранного');
     }
 }
