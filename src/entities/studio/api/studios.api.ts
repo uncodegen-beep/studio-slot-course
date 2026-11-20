@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 
-import { type Observable, map, shareReplay } from 'rxjs';
+import { type Observable, map, shareReplay, tap, timer } from 'rxjs';
 
 import { DEFAULT_STUDIO_FILTERS, filterStudios } from '@entities/studio/model/studio-filters';
 
@@ -44,6 +44,19 @@ export class StudiosApi {
         return this.http
             .get<Studio[]>(`${this.baseUrl}/studios/index.json`, { params: { q: query } })
             .pipe(map((studios) => filterStudios(studios, query, DEFAULT_STUDIO_FILTERS)));
+    }
+
+    /**
+     * Сохранить описание студии. Сервера с записью пока нет — ответ имитируем через 400 мс.
+     * Настоящий PUT появится с мок-API в уроке 70; сигнатура метода не изменится
+     */
+    updateDescription(id: string, description: string): Observable<string> {
+        return timer(400).pipe(
+            // «Сервер» отвечает сохранённым текстом
+            map(() => description),
+            // Данные изменились — кэш студии больше не верен
+            tap(() => this.invalidate(id)),
+        );
     }
 
     /** Данные студии изменились (урок 92: редактор зала) — следующий запрос пойдёт в сеть */

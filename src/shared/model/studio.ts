@@ -23,6 +23,8 @@ export interface Studio {
     isNew?: boolean;
     /** Залы; цена студии — минимальная из них */
     rooms?: readonly StudioRoom[];
+    /** Описание для гостей — редактирует владелец */
+    description?: string;
 }
 
 /** Карточка в списке: только то, что показываем */
