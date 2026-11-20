@@ -1,80 +1,97 @@
 import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { Title } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 
-import { StudiosApi } from '@entities/studio/api/studios.api';
+import { SessionStore } from '@entities/session/model/session.store';
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
 import type { Studio } from '@shared/model';
 
-import { OwnerStudioPageComponent } from './owner-studio-page.component';
+import { OwnerStudiosPageComponent } from './owner-studios-page.component';
 
-const [SOUND_GARDEN] = DEMO_STUDIOS as [Studio, ...Studio[]];
+const [SOUND_GARDEN, NEVSKY_BEAT] = DEMO_STUDIOS as [Studio, Studio, ...Studio[]];
 
-describe('OwnerStudioPageComponent', () => {
+function setup(): {
+    root: HTMLElement;
+    http: HttpTestingController;
+    render: () => Promise<void>;
+} {
+    const fixture = TestBed.createComponent(OwnerStudiosPageComponent);
+    fixture.detectChanges();
+    return {
+        root: fixture.nativeElement as HTMLElement,
+        http: TestBed.inject(HttpTestingController),
+        // resource обновляет значение асинхронно: даём ему завершиться, потом проверяем вид.
+        // Не whenStable: пока хоть один запрос без ответа, resource держит приложение «занятым»
+        render: async () => {
+            await new Promise((resolve) => setTimeout(resolve));
+            fixture.detectChanges();
+        },
+    };
+}
+
+describe('OwnerStudiosPageComponent', () => {
     beforeEach(() => {
-        vi.useFakeTimers();
-        TestBed.configureTestingModule({ providers: [provideRouter([]), provideHttpClient()] });
+        localStorage.clear();
+        TestBed.configureTestingModule({
+            providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+        });
+        TestBed.inject(SessionStore).signIn('owner');
     });
 
-    afterEach(() => {
-        vi.useRealTimers();
+    it('rxResource + forkJoin: список появляется, когда пришли все ответы', async () => {
+        const { root, http, render } = setup();
+
+        http.expectOne('api/studios/sound-garden.json').flush(SOUND_GARDEN);
+        await render();
+        expect(root.querySelector('.loading')).not.toBeNull();
+
+        http.expectOne('api/studios/nevsky-beat.json').flush(NEVSKY_BEAT);
+        await render();
+        expect([...root.querySelectorAll('.studios a')].map((a) => a.textContent)).toEqual([
+            'Sound Garden',
+            'Nevsky Beat',
+        ]);
     });
 
-    function setup(): { root: HTMLElement; type: (text: string) => void; render: () => void } {
-        const fixture = TestBed.createComponent(OwnerStudioPageComponent);
-        fixture.componentRef.setInput('studio', { ...SOUND_GARDEN, description: 'Есть парковка' });
-        fixture.detectChanges();
-        const root = fixture.nativeElement as HTMLElement;
-        const area = root.querySelector('textarea') as HTMLTextAreaElement;
-        return {
-            root,
-            type: (text) => {
-                area.value = text;
-                area.dispatchEvent(new Event('input'));
-                // toObservable передаёт значение сигнала через эффект
-                TestBed.tick();
-            },
-            render: () => fixture.detectChanges(),
-        };
-    }
+    it('один запрос упал — ошибка вместо списка', async () => {
+        const { root, http, render } = setup();
 
-    const status = (root: HTMLElement): string | undefined =>
-        root.querySelector('[role="status"]')?.textContent?.trim();
+        http.expectOne('api/studios/sound-garden.json').flush(SOUND_GARDEN);
+        http.expectOne('api/studios/nevsky-beat.json').flush('Server error', {
+            status: 500,
+            statusText: 'Server Error',
+        });
+        await render();
 
-    it('черновик берётся из данных студии, заголовок вкладки — её имя', () => {
-        const { root } = setup();
-
-        expect(root.querySelector('textarea')?.value).toBe('Есть парковка');
-        expect(TestBed.inject(Title).getTitle()).toBe('Sound Garden — StudioSlot');
+        expect(root.querySelector('.error')).not.toBeNull();
     });
 
-    it('autosave: пауза — «Сохраняем…», ответ — «Сохранено», один запрос на серию правок', () => {
-        const save = vi.spyOn(TestBed.inject(StudiosApi), 'updateDescription');
-        const { root, type, render } = setup();
+    it('у клиента студий нет — пустой список без запросов', async () => {
+        TestBed.inject(SessionStore).signIn('client');
+        const { root, http, render } = setup();
+        await render();
 
-        type('Есть парковка и');
-        vi.advanceTimersByTime(300);
-        type('Есть парковка и кофе');
-        vi.advanceTimersByTime(1000);
-        render();
-        expect(status(root)).toBe('Сохраняем…');
-
-        vi.advanceTimersByTime(400);
-        render();
-        expect(status(root)).toBe('Сохранено');
-        expect(save).toHaveBeenCalledExactlyOnceWith('sound-garden', 'Есть парковка и кофе');
+        http.expectNone(() => true);
+        expect(root.querySelector('.studios li')?.textContent).toContain('Студий пока нет');
     });
 
-    it('открыли страницу и ничего не меняли — сохранения нет', () => {
-        const save = vi.spyOn(TestBed.inject(StudiosApi), 'updateDescription');
-        const { root, render } = setup();
+    it('rxResource: «Повторить» после ошибки загружает заново', async () => {
+        const { root, http, render } = setup();
+        http.expectOne('api/studios/sound-garden.json').flush('Server error', {
+            status: 500,
+            statusText: 'Server Error',
+        });
+        http.expectOne('api/studios/nevsky-beat.json').flush(NEVSKY_BEAT);
+        await render();
 
-        vi.advanceTimersByTime(5000);
-        render();
+        root.querySelector<HTMLButtonElement>('.error + button')?.click();
+        await render();
+        http.expectOne('api/studios/sound-garden.json').flush(SOUND_GARDEN);
+        // nevsky-beat ответил в первый раз — кэш StudiosApi (урок 58) отдаёт его без запроса
+        await render();
 
-        expect(save).not.toHaveBeenCalled();
-        expect(status(root)).toBe('');
+        expect(root.querySelectorAll('.studios a')).toHaveLength(2);
     });
 });
