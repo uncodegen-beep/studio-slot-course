@@ -79,8 +79,9 @@ describe('Модуль 04 · страница своей студии', () => {
         void harness.navigateByUrl('/owner/studios/nevsky-beat');
         const request = await vi.waitFor(() => http.expectOne('api/studios/nevsky-beat.json'));
         request.flush('Server error', { status: 500, statusText: 'Server Error' });
-        await harness.fixture.whenStable();
 
-        expect(TestBed.inject(Router).url).toBe('/owner');
+        // Не whenStable: на /owner список студий грузится через rxResource (урок 67),
+        // и приложение «занято», пока его запросы без ответа
+        await vi.waitFor(() => expect(TestBed.inject(Router).url).toBe('/owner'));
     });
 });

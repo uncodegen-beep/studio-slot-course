@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import { forkJoin, of } from 'rxjs';
@@ -7,19 +7,23 @@ import { forkJoin, of } from 'rxjs';
 import { SessionStore } from '@entities/session/model/session.store';
 import { StudiosApi } from '@entities/studio/api/studios.api';
 
-import type { Studio } from '@shared/model';
-
 /** /owner — студии владельца с сервера. Ссылки относительные: studios/:id внутри раздела /owner */
 @Component({
     selector: 'app-owner-studios-page',
     imports: [RouterLink],
     template: `
         <h1>Мои студии</h1>
-        @if (failed()) {
-            <p class="error">Не удалось загрузить студии. Обновите страницу.</p>
-        } @else if (studios(); as list) {
+        @if (studios.error()) {
+            <p class="error">Не удалось загрузить студии.</p>
+            <button
+                type="button"
+                (click)="studios.reload()"
+            >
+                Повторить
+            </button>
+        } @else if (studios.hasValue()) {
             <ul class="studios">
-                @for (studio of list; track studio.id) {
+                @for (studio of studios.value(); track studio.id) {
                     <li>
                         <a [routerLink]="['studios', studio.id]">{{ studio.name }}</a>
                         · {{ studio.city }} · залов: {{ studio.rooms?.length ?? 0 }}
@@ -36,21 +40,16 @@ import type { Studio } from '@shared/model';
 })
 export class OwnerStudiosPageComponent {
     private readonly api = inject(StudiosApi);
+    private readonly session = inject(SessionStore);
 
-    /** null — ещё грузим */
-    protected readonly studios = signal<readonly Studio[] | null>(null);
-    protected readonly failed = signal(false);
-
-    constructor() {
-        const ids = inject(SessionStore).user()?.studioIds ?? [];
-        // forkJoin: все запросы параллельно, один ответ — массив в том же порядке, что ids.
-        // Пустой массив forkJoin завершает без значения — поэтому of([])
-        const studios$ = ids.length ? forkJoin(ids.map((id) => this.api.getById(id))) : of([]);
-        // Ушли со страницы до ответа — takeUntilDestroyed отпишется, HttpClient отменит запросы
-        studios$.pipe(takeUntilDestroyed()).subscribe({
-            next: (studios) => this.studios.set(studios),
-            // Хотя бы один запрос упал — forkJoin падает целиком
-            error: () => this.failed.set(true),
-        });
-    }
+    /**
+     * Данные для экрана — это состояние: загрузка, значение, ошибка. Поэтому resource, а не
+     * ручной subscribe с тремя сигналами. RxJS остался внутри — forkJoin для параллельных запросов.
+     * params — сигнал: сменится набор студий, и resource загрузит заново
+     */
+    protected readonly studios = rxResource({
+        params: () => this.session.user()?.studioIds ?? [],
+        stream: ({ params: ids }) =>
+            ids.length ? forkJoin(ids.map((id) => this.api.getById(id))) : of([]),
+    });
 }
