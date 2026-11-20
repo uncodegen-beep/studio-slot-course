@@ -4,8 +4,9 @@ import {
     type TestRequest,
     provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
@@ -16,6 +17,9 @@ import {
     StudioSearchComponent,
 } from './studio-search.component';
 
+@Component({ template: '', changeDetection: ChangeDetectionStrategy.OnPush })
+class StudioStubComponent {}
+
 interface Setup {
     readonly root: HTMLElement;
     readonly type: (value: string) => void;
@@ -25,7 +29,11 @@ interface Setup {
 
 function setup(): Setup {
     TestBed.configureTestingModule({
-        providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+        providers: [
+            provideRouter([{ path: 'studios/:id', component: StudioStubComponent }]),
+            provideHttpClient(),
+            provideHttpClientTesting(),
+        ],
     });
     const fixture = TestBed.createComponent(StudioSearchComponent);
     fixture.detectChanges();
@@ -94,7 +102,7 @@ describe('StudioSearchComponent', () => {
         render();
 
         TestBed.inject(HttpTestingController).expectNone(() => true);
-        expect(root.querySelector('.results')).toBeNull();
+        expect(root.querySelector<HTMLElement>('.results')?.hidden).toBe(true);
     });
 
     it('debounceTime: быстрый набор — один запрос с последним значением', () => {
@@ -175,5 +183,73 @@ describe('StudioSearchComponent', () => {
         TestBed.resetTestingModule();
 
         expect(pending.cancelled).toBe(true);
+    });
+
+    describe('клавиатура и подсветка', () => {
+        function press(root: HTMLElement, key: string): void {
+            root.querySelector('input')?.dispatchEvent(
+                new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
+            );
+        }
+
+        it('стрелки выбирают подсказку, aria-activedescendant следует за выбором', () => {
+            const { root, type, request, render } = setup();
+            // «rd» — в Garden и в Records: две подсказки
+            type('rd');
+            request('rd').flush(DEMO_STUDIOS);
+            render();
+            const input = root.querySelector('input') as HTMLInputElement;
+            const options = [...root.querySelectorAll('[role="option"]')];
+
+            expect(input.getAttribute('aria-expanded')).toBe('true');
+            expect(input.hasAttribute('aria-activedescendant')).toBe(false);
+
+            press(root, 'ArrowDown');
+            render();
+            expect(input.getAttribute('aria-activedescendant')).toBe(options[0]?.id);
+
+            press(root, 'ArrowUp');
+            render();
+            expect(input.getAttribute('aria-activedescendant')).toBe(options.at(-1)?.id);
+        });
+
+        it('Enter открывает выбранную студию и очищает поле', async () => {
+            const { root, type, request, render } = setup();
+            type('sound');
+            request('sound').flush(DEMO_STUDIOS);
+            render();
+
+            press(root, 'ArrowDown');
+            press(root, 'Enter');
+            render();
+
+            await vi.waitFor(() =>
+                expect(TestBed.inject(Router).url).toBe('/studios/sound-garden'),
+            );
+            expect(root.querySelector('input')?.value).toBe('');
+        });
+
+        it('Escape прячет подсказки', () => {
+            const { root, type, request, render } = setup();
+            type('sound');
+            request('sound').flush(DEMO_STUDIOS);
+            render();
+
+            press(root, 'Escape');
+            render();
+
+            expect(root.querySelector<HTMLElement>('[role="listbox"]')?.hidden).toBe(true);
+            expect(root.querySelector('input')?.getAttribute('aria-expanded')).toBe('false');
+        });
+
+        it('совпадение подсвечено <mark>, текст ссылки целый', () => {
+            const { root, type, request, render } = setup();
+            type('garden');
+            request('garden').flush(DEMO_STUDIOS);
+            render();
+
+            expect(root.querySelector('.results mark')?.textContent).toBe('Garden');
+            expect(root.querySelector('.results a')?.textContent).toBe('Sound Garden');
+        });
     });
 });

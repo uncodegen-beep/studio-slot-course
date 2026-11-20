@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
@@ -14,6 +16,9 @@ describe('HeaderComponent', () => {
         localStorage.clear();
         TestBed.configureTestingModule({
             providers: [
+                // В шапке поиск — ему нужен HttpClient
+                provideHttpClient(),
+                provideHttpClientTesting(),
                 provideRouter([
                     { path: '', component: StubPageComponent },
                     { path: 'studios', component: StubPageComponent },

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
+import { StudioSearchComponent } from '@features/search-studios/ui/studio-search.component';
 import { FavoritesStore } from '@features/toggle-favorite/model/favorites.store';
 
 import { SessionStore } from '@entities/session/model/session.store';
@@ -9,7 +10,7 @@ import { ClockComponent } from '@shared/ui/clock/clock.component';
 
 @Component({
     selector: 'app-header',
-    imports: [ClockComponent, RouterLink, RouterLinkActive],
+    imports: [ClockComponent, RouterLink, RouterLinkActive, StudioSearchComponent],
     templateUrl: './header.component.html',
     styleUrl: './header.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,37 +1,69 @@
 :host {
+    position: relative;
     display: block;
-    max-width: 480px;
-    margin-bottom: 24px;
+    width: min(320px, 100%);
 }
 
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-weight: 600;
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
 
-    input {
-        padding: 10px 12px;
-        border: 1px solid #c8cedb;
-        border-radius: 8px;
-        font: inherit;
-        font-weight: 400;
-    }
+.field input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #c8cedb;
+    border-radius: 8px;
+    font: inherit;
 }
 
 .results {
-    margin: 8px 0 0;
-    padding: 8px 12px;
+    position: absolute;
+    inset: calc(100% + 4px) 0 auto;
+    z-index: 15;
+    margin: 0;
+    padding: 4px;
     border: 1px solid #e3e7f0;
     border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
     list-style: none;
 
-    li + li {
-        margin-top: 4px;
+    li {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 6px 8px;
+        border-radius: 6px;
+    }
+
+    .active {
+        background: #eef1f8;
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    mark {
+        background: #ffe58a;
+        color: inherit;
+    }
+
+    .city {
+        color: #5b6478;
     }
 }
 
 .error {
-    margin: 8px 0 0;
+    position: absolute;
+    inset: calc(100% + 4px) 0 auto;
+    margin: 0;
     color: #a3123e;
 }

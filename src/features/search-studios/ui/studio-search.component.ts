@@ -1,6 +1,13 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    inject,
+    linkedSignal,
+    signal,
+} from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import {
     catchError,
@@ -15,6 +22,9 @@ import {
 
 import { StudiosApi } from '@entities/studio/api/studios.api';
 
+import { highlight } from '@shared/lib/text/highlight';
+import type { Studio } from '@shared/model';
+
 /** Пауза после последнего нажатия, прежде чем искать */
 export const SEARCH_DEBOUNCE_MS = 300;
 /** Короче — слишком много совпадений, запрос бесполезен */
@@ -23,52 +33,28 @@ export const SEARCH_MIN_LENGTH = 2;
 export const SEARCH_RETRIES = 2;
 export const SEARCH_RETRY_MS = 1000;
 
-/** Поиск студии с подсказками. Сигнал → поток → сигнал: время и отмена — в RxJS, шаблон — на сигналах */
+/**
+ * Поиск студии в шапке: подсказки, клавиатура и подсветка совпадений.
+ * Разметка — паттерн combobox из WAI-ARIA: поле + список вариантов
+ */
 @Component({
     selector: 'app-studio-search',
     imports: [RouterLink],
-    template: `
-        <label class="field">
-            Найти студию
-            <input
-                #input
-                type="search"
-                placeholder="Название или город"
-                [value]="query()"
-                (input)="query.set(input.value.trim())"
-            />
-        </label>
-        @if (failed()) {
-            <p
-                class="error"
-                role="alert"
-            >
-                Поиск сейчас недоступен. Попробуйте ещё раз чуть позже.
-            </p>
-        } @else if (results().length) {
-            <ul class="results">
-                @for (studio of results(); track studio.id) {
-                    <li>
-                        <a [routerLink]="['/studios', studio.id]">{{ studio.name }}</a>
-                        · {{ studio.city }}
-                    </li>
-                }
-            </ul>
-        }
-    `,
+    templateUrl: './studio-search.component.html',
     styleUrl: './studio-search.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudioSearchComponent {
     private readonly api = inject(StudiosApi);
+    private readonly router = inject(Router);
 
-    /** Текст поиска — состояние, поэтому сигнал. Subject из урока 61 больше не нужен */
     protected readonly query = signal('');
     protected readonly failed = signal(false);
+    /** Escape прячет подсказки, новый ввод — показывает снова */
+    protected readonly dismissed = signal(false);
+    protected readonly highlight = highlight;
 
-    /** toSignal: результаты для шаблона без async pipe; отписка — при уничтожении компонента */
     protected readonly results = toSignal(
-        // toObservable: каждое новое значение сигнала — значение потока
         toObservable(this.query).pipe(
             debounceTime(SEARCH_DEBOUNCE_MS),
             map((query) => (query.length >= SEARCH_MIN_LENGTH ? query : '')),
@@ -88,4 +74,61 @@ export class StudioSearchComponent {
         ),
         { initialValue: [] },
     );
+
+    /** Выбранная стрелками подсказка. Новые результаты — выбор сбрасывается (linkedSignal, урок 28) */
+    protected readonly active = linkedSignal({ source: this.results, computation: () => -1 });
+    protected readonly open = computed(() => !this.dismissed() && this.results().length > 0);
+    protected readonly activeId = computed(() => {
+        const studio = this.results()[this.active()];
+        return this.open() && studio ? this.optionId(studio) : null;
+    });
+
+    protected optionId(studio: Studio): string {
+        return `studio-option-${studio.id}`;
+    }
+
+    protected onInput(value: string): void {
+        this.dismissed.set(false);
+        this.query.set(value.trim());
+    }
+
+    protected onKeydown(event: KeyboardEvent): void {
+        const count = this.results().length;
+        if (!this.open() || !count) {
+            return;
+        }
+        switch (event.key) {
+            case 'ArrowDown':
+                event.preventDefault();
+                this.active.update((index) => (index + 1) % count);
+                break;
+            case 'ArrowUp':
+                event.preventDefault();
+                this.active.update((index) => (index <= 0 ? count - 1 : index - 1));
+                break;
+            case 'Enter': {
+                const studio = this.results()[this.active()];
+                if (studio) {
+                    event.preventDefault();
+                    this.go(studio);
+                }
+                break;
+            }
+            case 'Escape':
+                this.dismissed.set(true);
+                break;
+        }
+    }
+
+    /** Клик по подсказке: переход делает routerLink, нам — очистить поле */
+    protected close(): void {
+        this.query.set('');
+        this.dismissed.set(true);
+    }
+
+    /** Enter на выбранной подсказке: переход из кода (урок 45) */
+    private go(studio: Studio): void {
+        this.close();
+        void this.router.navigate(['/studios', studio.id]);
+    }
 }

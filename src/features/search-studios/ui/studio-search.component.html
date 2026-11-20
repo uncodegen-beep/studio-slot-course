@@ -1,0 +1,60 @@
+<label class="field">
+    <span class="visually-hidden">Найти студию</span>
+    <!-- combobox: экранный диктор объявит число подсказок и выбранную стрелками -->
+    <input
+        #input
+        type="search"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-controls="studio-search-list"
+        placeholder="Поиск студии"
+        autocomplete="off"
+        [attr.aria-expanded]="open()"
+        [attr.aria-activedescendant]="activeId()"
+        [value]="query()"
+        (input)="onInput(input.value)"
+        (keydown)="onKeydown($event)"
+    />
+</label>
+
+@if (failed()) {
+    <p
+        class="error"
+        role="alert"
+    >
+        Поиск сейчас недоступен. Попробуйте ещё раз чуть позже.
+    </p>
+}
+
+<ul
+    id="studio-search-list"
+    class="results"
+    role="listbox"
+    aria-label="Найденные студии"
+    [hidden]="!open()"
+>
+    @for (studio of results(); track studio.id; let index = $index) {
+        <li
+            role="option"
+            [id]="optionId(studio)"
+            [attr.aria-selected]="index === active()"
+            [class.active]="index === active()"
+        >
+            <a
+                tabindex="-1"
+                [routerLink]="['/studios', studio.id]"
+                (click)="close()"
+            >
+                <!-- Только элементы, без голого текста: пробелы между частями слова не появятся -->
+                @for (part of highlight(studio.name, query()); track $index) {
+                    @if (part.match) {
+                        <mark>{{ part.text }}</mark>
+                    } @else {
+                        <span>{{ part.text }}</span>
+                    }
+                }
+            </a>
+            <span class="city">{{ studio.city }}</span>
+        </li>
+    }
+</ul>
