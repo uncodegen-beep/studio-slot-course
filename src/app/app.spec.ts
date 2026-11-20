@@ -136,6 +136,8 @@ describe('AppComponent', () => {
         const http = TestBed.inject(HttpTestingController);
         http.expectOne('api/studios/sound-garden.json').flush(DEMO_STUDIOS[0] ?? null);
         http.expectOne('api/studios/nevsky-beat.json').flush(DEMO_STUDIOS[1] ?? null);
+        // rxResource обновляет значение асинхронно
+        await new Promise((resolve) => setTimeout(resolve));
         harness.detectChanges();
         const root = harness.routeNativeElement as HTMLElement;
         expect(root.querySelector('.page h1')?.textContent).toBe('Мои студии');
