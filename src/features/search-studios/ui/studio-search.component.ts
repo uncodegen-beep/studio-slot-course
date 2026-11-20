@@ -1,10 +1,8 @@
-import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import {
-    type Observable,
-    Subject,
     catchError,
     debounceTime,
     distinctUntilChanged,
@@ -17,8 +15,6 @@ import {
 
 import { StudiosApi } from '@entities/studio/api/studios.api';
 
-import type { Studio } from '@shared/model';
-
 /** Пауза после последнего нажатия, прежде чем искать */
 export const SEARCH_DEBOUNCE_MS = 300;
 /** Короче — слишком много совпадений, запрос бесполезен */
@@ -27,10 +23,10 @@ export const SEARCH_MIN_LENGTH = 2;
 export const SEARCH_RETRIES = 2;
 export const SEARCH_RETRY_MS = 1000;
 
-/** Поиск студии с подсказками. Каждый ввод — запрос; устаревший запрос отменяется */
+/** Поиск студии с подсказками. Сигнал → поток → сигнал: время и отмена — в RxJS, шаблон — на сигналах */
 @Component({
     selector: 'app-studio-search',
-    imports: [AsyncPipe, RouterLink],
+    imports: [RouterLink],
     template: `
         <label class="field">
             Найти студию
@@ -38,11 +34,10 @@ export const SEARCH_RETRY_MS = 1000;
                 #input
                 type="search"
                 placeholder="Название или город"
-                (input)="search(input.value)"
+                [value]="query()"
+                (input)="query.set(input.value.trim())"
             />
         </label>
-        <!-- async подписывается при показе и отписывается при уничтожении компонента -->
-        @let results = (results$ | async) ?? [];
         @if (failed()) {
             <p
                 class="error"
@@ -50,9 +45,9 @@ export const SEARCH_RETRY_MS = 1000;
             >
                 Поиск сейчас недоступен. Попробуйте ещё раз чуть позже.
             </p>
-        } @else if (results.length) {
+        } @else if (results().length) {
             <ul class="results">
-                @for (studio of results; track studio.id) {
+                @for (studio of results(); track studio.id) {
                     <li>
                         <a [routerLink]="['/studios', studio.id]">{{ studio.name }}</a>
                         · {{ studio.city }}
@@ -66,40 +61,31 @@ export const SEARCH_RETRY_MS = 1000;
 })
 export class StudioSearchComponent {
     private readonly api = inject(StudiosApi);
-    /** Поток запросов из поля ввода */
-    private readonly queries = new Subject<string>();
 
+    /** Текст поиска — состояние, поэтому сигнал. Subject из урока 61 больше не нужен */
+    protected readonly query = signal('');
     protected readonly failed = signal(false);
 
-    /** Подписки в коде нет: на поток подписывается шаблон через async pipe */
-    protected readonly results$: Observable<readonly Studio[]> = this.queries.pipe(
-        // Пока пользователь печатает — ждём. «s-o-u-n-d» за секунду = один запрос, а не пять
-        debounceTime(SEARCH_DEBOUNCE_MS),
-        // Одна буква — как пустой запрос: подсказки скрываются
-        map((query) => (query.length >= SEARCH_MIN_LENGTH ? query : '')),
-        // «sound» → «sounds» → «sound» за время паузы — запрос не повторяем
-        distinctUntilChanged(),
-        // Новый запрос — старая ошибка больше не актуальна
-        tap(() => this.failed.set(false)),
-        // Новый ввод — switchMap отписывается от прошлого запроса, HttpClient его отменяет.
-        // Ответ на «so» не перезапишет ответ на «sound», даже если придёт позже
-        switchMap((query) =>
-            query
-                ? this.api.search(query).pipe(
-                      // Сбой сети — ещё две попытки с паузой, потом сдаёмся
-                      retry({ count: SEARCH_RETRIES, delay: SEARCH_RETRY_MS }),
-                      // catchError ВНУТРИ switchMap: ошибка гасит только этот запрос.
-                      // Снаружи она завершила бы весь поток, и поиск перестал бы работать
-                      catchError(() => {
-                          this.failed.set(true);
-                          return of([]);
-                      }),
-                  )
-                : of([]),
+    /** toSignal: результаты для шаблона без async pipe; отписка — при уничтожении компонента */
+    protected readonly results = toSignal(
+        // toObservable: каждое новое значение сигнала — значение потока
+        toObservable(this.query).pipe(
+            debounceTime(SEARCH_DEBOUNCE_MS),
+            map((query) => (query.length >= SEARCH_MIN_LENGTH ? query : '')),
+            distinctUntilChanged(),
+            tap(() => this.failed.set(false)),
+            switchMap((query) =>
+                query
+                    ? this.api.search(query).pipe(
+                          retry({ count: SEARCH_RETRIES, delay: SEARCH_RETRY_MS }),
+                          catchError(() => {
+                              this.failed.set(true);
+                              return of([]);
+                          }),
+                      )
+                    : of([]),
+            ),
         ),
+        { initialValue: [] },
     );
-
-    protected search(query: string): void {
-        this.queries.next(query.trim());
-    }
 }
