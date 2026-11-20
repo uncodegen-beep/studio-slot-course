@@ -38,6 +38,8 @@ function setup(): Setup {
         type: (value) => {
             input.value = value;
             input.dispatchEvent(new Event('input'));
+            // toObservable отдаёт новое значение сигнала через эффект — даём эффектам выполниться
+            TestBed.tick();
             vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
         },
         request: (q) =>
@@ -103,6 +105,7 @@ describe('StudioSearchComponent', () => {
         for (const value of ['s', 'so', 'sou', 'soun', 'sound']) {
             input.value = value;
             input.dispatchEvent(new Event('input'));
+            TestBed.tick();
             vi.advanceTimersByTime(100);
         }
         http.expectNone(() => true);
@@ -164,7 +167,7 @@ describe('StudioSearchComponent', () => {
         });
     });
 
-    it('async pipe: уничтожение компонента отменяет запрос в полёте', () => {
+    it('toSignal: уничтожение компонента отменяет запрос в полёте', () => {
         const { type, request } = setup();
 
         type('sound');

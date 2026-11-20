@@ -1,7 +1,9 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterOutlet } from '@angular/router';
+
+import { of } from 'rxjs';
 
 import { FooterComponent } from '@widgets/footer/ui/footer.component';
 import { HeaderComponent } from '@widgets/header/ui/header.component';
@@ -22,14 +24,10 @@ export class AppComponent {
     /** Идёт переход — например, resolver ждёт ответ сервера. Сигнал роутера, без подписок */
     protected readonly navigating = computed(() => this.router.currentNavigation() !== null);
 
-    protected readonly online = signal(true);
+    private readonly window = inject(DOCUMENT).defaultView;
 
-    constructor() {
-        const window = inject(DOCUMENT).defaultView;
-        if (window) {
-            online$(window)
-                .pipe(takeUntilDestroyed())
-                .subscribe((online) => this.online.set(online));
-        }
-    }
+    /** Есть ли сеть. Без window (рендер на сервере, модуль 13) считаем, что есть */
+    protected readonly online = toSignal(this.window ? online$(this.window) : of(true), {
+        initialValue: true,
+    });
 }
