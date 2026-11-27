@@ -32,9 +32,20 @@ describe('StudiosApi', () => {
         let name = '';
 
         api.getById('nevsky-beat').subscribe((studio) => (name = studio.name));
-        http.expectOne('api/studios/nevsky-beat').flush({ name: 'Nevsky Beat' });
+        http.expectOne('api/studios/nevsky-beat').flush({
+            ...toStudioDto(SOUND_GARDEN),
+            id: 'nevsky-beat',
+            name: 'Nevsky Beat',
+        });
 
         expect(name).toBe('Nevsky Beat');
+    });
+
+    it('отклоняет ответ без обязательных полей', () => {
+        const error = vi.fn();
+        api.getById('sound-garden').subscribe({ error });
+        http.expectOne(URL).flush({ name: 'Sound Garden' });
+        expect(error).toHaveBeenCalledOnce();
     });
 
     it('один экземпляр на приложение — один кэш на всех', () => {
@@ -86,7 +97,7 @@ describe('StudiosApi', () => {
         const request = http.expectOne(
             (req) => req.url === 'api/studios' && req.params.get('q') === 'казань',
         );
-        request.flush(DEMO_STUDIOS.filter((studio) => studio.city === 'Казань'));
+        request.flush(DEMO_STUDIOS.map(toStudioDto).filter((studio) => studio.city === 'Казань'));
 
         expect(request.request.method).toBe('GET');
         expect(names).toEqual(['Volga Records']);
@@ -103,7 +114,7 @@ describe('StudiosApi', () => {
             id: 'sound-garden',
             description: 'Есть парковка',
         });
-        put.flush({ ...SOUND_GARDEN, description: 'Есть парковка' });
+        put.flush(put.request.body);
 
         // Кэш сброшен — свежие данные с сервера
         api.getById('sound-garden').subscribe();

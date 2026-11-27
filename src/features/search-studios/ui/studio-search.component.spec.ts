@@ -8,6 +8,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 
+import { toStudioDto } from '@entities/studio/api/studio.dto';
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
 import {
@@ -70,7 +71,9 @@ describe('StudioSearchComponent', () => {
 
         type('nevsky');
         request('nevsky').flush(
-            DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('nevsky')),
+            DEMO_STUDIOS.map(toStudioDto).filter((studio) =>
+                studio.name.toLowerCase().includes('nevsky'),
+            ),
         );
         render();
 
@@ -86,7 +89,11 @@ describe('StudioSearchComponent', () => {
         const second = request('sound');
 
         expect(first.cancelled).toBe(true);
-        second.flush(DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('sound')));
+        second.flush(
+            DEMO_STUDIOS.map(toStudioDto).filter((studio) =>
+                studio.name.toLowerCase().includes('sound'),
+            ),
+        );
         render();
         expect([...root.querySelectorAll('.results a')].map((a) => a.textContent)).toEqual([
             'Sound Garden',
@@ -98,7 +105,9 @@ describe('StudioSearchComponent', () => {
 
         type('volga');
         request('volga').flush(
-            DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('volga')),
+            DEMO_STUDIOS.map(toStudioDto).filter((studio) =>
+                studio.name.toLowerCase().includes('volga'),
+            ),
         );
         type('   ');
         render();
@@ -129,7 +138,9 @@ describe('StudioSearchComponent', () => {
 
         type('sound');
         request('sound').flush(
-            DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('sound')),
+            DEMO_STUDIOS.map(toStudioDto).filter((studio) =>
+                studio.name.toLowerCase().includes('sound'),
+            ),
         );
         type('sound ');
 
@@ -154,7 +165,9 @@ describe('StudioSearchComponent', () => {
             request('sound').flush('Server error', fail);
             vi.advanceTimersByTime(SEARCH_RETRY_MS);
             request('sound').flush(
-                DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('sound')),
+                DEMO_STUDIOS.map(toStudioDto).filter((studio) =>
+                    studio.name.toLowerCase().includes('sound'),
+                ),
             );
             render();
 
@@ -175,7 +188,9 @@ describe('StudioSearchComponent', () => {
 
             type('volga');
             request('volga').flush(
-                DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('volga')),
+                DEMO_STUDIOS.map(toStudioDto).filter((studio) =>
+                    studio.name.toLowerCase().includes('volga'),
+                ),
             );
             render();
             expect(root.querySelector('.error')).toBeNull();
@@ -205,7 +220,9 @@ describe('StudioSearchComponent', () => {
             // «rd» — в Garden и в Records: две подсказки
             type('rd');
             request('rd').flush(
-                DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('rd')),
+                DEMO_STUDIOS.map(toStudioDto).filter((studio) =>
+                    studio.name.toLowerCase().includes('rd'),
+                ),
             );
             render();
             const input = root.querySelector('input') as HTMLInputElement;
@@ -227,7 +244,9 @@ describe('StudioSearchComponent', () => {
             const { root, type, request, render } = setup();
             type('sound');
             request('sound').flush(
-                DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('sound')),
+                DEMO_STUDIOS.map(toStudioDto).filter((studio) =>
+                    studio.name.toLowerCase().includes('sound'),
+                ),
             );
             render();
 
@@ -245,7 +264,9 @@ describe('StudioSearchComponent', () => {
             const { root, type, request, render } = setup();
             type('sound');
             request('sound').flush(
-                DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('sound')),
+                DEMO_STUDIOS.map(toStudioDto).filter((studio) =>
+                    studio.name.toLowerCase().includes('sound'),
+                ),
             );
             render();
 
@@ -260,7 +281,9 @@ describe('StudioSearchComponent', () => {
             const { root, type, request, render } = setup();
             type('garden');
             request('garden').flush(
-                DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('garden')),
+                DEMO_STUDIOS.map(toStudioDto).filter((studio) =>
+                    studio.name.toLowerCase().includes('garden'),
+                ),
             );
             render();
 

@@ -6,7 +6,7 @@ import { type Observable, map, shareReplay, tap } from 'rxjs';
 import { LOCAL_RETRY } from '@shared/api/interceptors/http.interceptors';
 import type { Studio } from '@shared/model';
 
-import { type StudioDto, toStudio, toStudioDto } from './studio.dto';
+import { studioDtoSchema, toStudio, toStudioDto } from './studio.dto';
 
 /**
  * Доступ к данным студий. Компоненты не знают адресов и HttpClient — только методы сервиса.
@@ -25,8 +25,8 @@ export class StudiosApi {
         if (cached) {
             return cached;
         }
-        const studio$ = this.http.get<StudioDto>(`${this.baseUrl}/studios/${id}`).pipe(
-            map(toStudio),
+        const studio$ = this.http.get<unknown>(`${this.baseUrl}/studios/${id}`).pipe(
+            map((body) => toStudio(studioDtoSchema.parse(body))),
             // HttpClient холодный: каждая подписка — новый запрос. shareReplay делает поток горячим:
             // один запрос на всех подписчиков, последний ответ — новым подписчикам.
             // refCount: false — кэш живёт, даже когда подписчиков не осталось.
@@ -40,21 +40,21 @@ export class StudiosApi {
     /** GET /api/studios?q= — фильтрует сервер, клиенту приходят только совпадения */
     search(query: string): Observable<Studio[]> {
         return this.http
-            .get<StudioDto[]>(`${this.baseUrl}/studios`, {
+            .get<unknown>(`${this.baseUrl}/studios`, {
                 context: new HttpContext().set(LOCAL_RETRY, true),
                 params: { q: query },
             })
-            .pipe(map((rows) => rows.map(toStudio)));
+            .pipe(map((rows) => studioDtoSchema.array().parse(rows).map(toStudio)));
     }
 
     /** PUT /api/studios/:id — студия целиком; ответ — сохранённая версия */
     update(studio: Studio): Observable<Studio> {
         return (
             this.http
-                .put<StudioDto>(`${this.baseUrl}/studios/${studio.id}`, toStudioDto(studio))
+                .put<unknown>(`${this.baseUrl}/studios/${studio.id}`, toStudioDto(studio))
                 // Данные изменились — кэш студии больше не верен
                 .pipe(
-                    map(toStudio),
+                    map((body) => toStudio(studioDtoSchema.parse(body))),
                     tap(() => this.invalidate(studio.id)),
                 )
         );
