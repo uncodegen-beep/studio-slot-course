@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
+import { toStudioDto } from '@entities/studio/api/studio.dto';
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
 import type { Studio } from '@shared/model';
@@ -45,14 +46,14 @@ describe('StudiosApi', () => {
 
         api.getById('sound-garden').subscribe((studio) => names.push(studio.name));
         api.getById('sound-garden').subscribe((studio) => names.push(studio.name));
-        http.expectOne(URL).flush(SOUND_GARDEN);
+        http.expectOne(URL).flush(toStudioDto(SOUND_GARDEN));
 
         expect(names).toEqual(['Sound Garden', 'Sound Garden']);
     });
 
     it('опоздавший подписчик получает сохранённый ответ без запроса', () => {
         api.getById('sound-garden').subscribe();
-        http.expectOne(URL).flush(SOUND_GARDEN);
+        http.expectOne(URL).flush(toStudioDto(SOUND_GARDEN));
 
         let late: Studio | undefined;
         api.getById('sound-garden').subscribe((studio) => (late = studio));
@@ -66,16 +67,16 @@ describe('StudiosApi', () => {
         http.expectOne(URL).flush('Server error', { status: 500, statusText: 'Server Error' });
 
         api.getById('sound-garden').subscribe();
-        http.expectOne(URL).flush(SOUND_GARDEN);
+        http.expectOne(URL).flush(toStudioDto(SOUND_GARDEN));
     });
 
     it('invalidate — следующий вызов делает новый запрос', () => {
         api.getById('sound-garden').subscribe();
-        http.expectOne(URL).flush(SOUND_GARDEN);
+        http.expectOne(URL).flush(toStudioDto(SOUND_GARDEN));
 
         api.invalidate('sound-garden');
         api.getById('sound-garden').subscribe();
-        http.expectOne(URL).flush(SOUND_GARDEN);
+        http.expectOne(URL).flush(toStudioDto(SOUND_GARDEN));
     });
 
     it('search — GET /api/studios?q=, фильтрует сервер', () => {
@@ -93,7 +94,7 @@ describe('StudiosApi', () => {
 
     it('update — PUT студии целиком и сброс кэша', () => {
         api.getById('sound-garden').subscribe();
-        http.expectOne(URL).flush(SOUND_GARDEN);
+        http.expectOne(URL).flush(toStudioDto(SOUND_GARDEN));
 
         api.update({ ...SOUND_GARDEN, description: 'Есть парковка' }).subscribe();
         const put = http.expectOne(URL);
@@ -106,6 +107,6 @@ describe('StudiosApi', () => {
 
         // Кэш сброшен — свежие данные с сервера
         api.getById('sound-garden').subscribe();
-        http.expectOne(URL).flush(SOUND_GARDEN);
+        http.expectOne(URL).flush(toStudioDto(SOUND_GARDEN));
     });
 });
