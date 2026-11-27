@@ -121,6 +121,12 @@ describe('AppComponent', () => {
             (button) => button.textContent?.trim() === 'Войти как клиент',
         );
         client?.click();
+        TestBed.inject(HttpTestingController)
+            .expectOne('api/auth/demo')
+            .flush({
+                user: { name: 'Клиент', role: 'client', studioIds: [] },
+                accessToken: 'demo',
+            });
         await harness.fixture.whenStable();
 
         expect(router.url).toBe('/account/favorites');

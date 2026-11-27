@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
@@ -83,6 +83,7 @@ describe('HeaderComponent', () => {
         expect(link(root, 'Владельцу')?.classList).toContain('active');
 
         root.querySelector<HTMLButtonElement>('.sign-out')?.click();
+        TestBed.inject(HttpTestingController).expectOne('api/auth/logout').flush(null);
         await fixture.whenStable();
 
         expect(TestBed.inject(SessionStore).isSignedIn()).toBe(false);
