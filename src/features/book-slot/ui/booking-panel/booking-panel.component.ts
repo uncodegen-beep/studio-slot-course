@@ -18,6 +18,7 @@ import { createSlotPrice } from '@features/book-slot/model/slot-price';
 import { BookingsApi, type NewBooking } from '@entities/booking/api/bookings.api';
 import { SessionStore } from '@entities/session/model/session.store';
 
+import { requestErrorMessage } from '@shared/api/request-error';
 import { NotifierService } from '@shared/lib/notify/notifier.service';
 import { PluralPipe } from '@shared/lib/plural/plural.pipe';
 import type { Studio, StudioRoom } from '@shared/model';
@@ -86,10 +87,8 @@ export class BookingPanelComponent {
                 exhaustMap((draft) => {
                     this.submitting.set(true);
                     return this.bookings.create(draft).pipe(
-                        catchError(() => {
-                            this.notifier.notify(
-                                'Не удалось отправить заявку. Попробуйте ещё раз.',
-                            );
+                        catchError((error: unknown) => {
+                            this.notifier.notify(requestErrorMessage(error));
                             return EMPTY;
                         }),
                         finalize(() => this.submitting.set(false)),
