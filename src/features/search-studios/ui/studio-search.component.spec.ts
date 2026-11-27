@@ -69,7 +69,9 @@ describe('StudioSearchComponent', () => {
         const { root, type, request, render } = setup();
 
         type('nevsky');
-        request('nevsky').flush(DEMO_STUDIOS);
+        request('nevsky').flush(
+            DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('nevsky')),
+        );
         render();
 
         expect(root.querySelector('.results a')?.getAttribute('href')).toBe('/studios/nevsky-beat');
@@ -84,7 +86,7 @@ describe('StudioSearchComponent', () => {
         const second = request('sound');
 
         expect(first.cancelled).toBe(true);
-        second.flush(DEMO_STUDIOS);
+        second.flush(DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('sound')));
         render();
         expect([...root.querySelectorAll('.results a')].map((a) => a.textContent)).toEqual([
             'Sound Garden',
@@ -95,7 +97,9 @@ describe('StudioSearchComponent', () => {
         const { root, type, request, render } = setup();
 
         type('volga');
-        request('volga').flush(DEMO_STUDIOS);
+        request('volga').flush(
+            DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('volga')),
+        );
         type('   ');
         render();
 
@@ -124,7 +128,9 @@ describe('StudioSearchComponent', () => {
         const { type, request } = setup();
 
         type('sound');
-        request('sound').flush(DEMO_STUDIOS);
+        request('sound').flush(
+            DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('sound')),
+        );
         type('sound ');
 
         TestBed.inject(HttpTestingController).expectNone(() => true);
@@ -147,7 +153,9 @@ describe('StudioSearchComponent', () => {
             type('sound');
             request('sound').flush('Server error', fail);
             vi.advanceTimersByTime(SEARCH_RETRY_MS);
-            request('sound').flush(DEMO_STUDIOS);
+            request('sound').flush(
+                DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('sound')),
+            );
             render();
 
             expect(root.querySelector('.error')).toBeNull();
@@ -166,7 +174,9 @@ describe('StudioSearchComponent', () => {
             expect(root.querySelector('[role="alert"]')?.textContent).toContain('недоступен');
 
             type('volga');
-            request('volga').flush(DEMO_STUDIOS);
+            request('volga').flush(
+                DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('volga')),
+            );
             render();
             expect(root.querySelector('.error')).toBeNull();
             expect(root.querySelector('.results a')?.textContent).toBe('Volga Records');
@@ -194,7 +204,9 @@ describe('StudioSearchComponent', () => {
             const { root, type, request, render } = setup();
             // «rd» — в Garden и в Records: две подсказки
             type('rd');
-            request('rd').flush(DEMO_STUDIOS);
+            request('rd').flush(
+                DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('rd')),
+            );
             render();
             const input = root.querySelector('input') as HTMLInputElement;
             const options = [...root.querySelectorAll('[role="option"]')];
@@ -214,7 +226,9 @@ describe('StudioSearchComponent', () => {
         it('Enter открывает выбранную студию и очищает поле', async () => {
             const { root, type, request, render } = setup();
             type('sound');
-            request('sound').flush(DEMO_STUDIOS);
+            request('sound').flush(
+                DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('sound')),
+            );
             render();
 
             press(root, 'ArrowDown');
@@ -230,7 +244,9 @@ describe('StudioSearchComponent', () => {
         it('Escape прячет подсказки', () => {
             const { root, type, request, render } = setup();
             type('sound');
-            request('sound').flush(DEMO_STUDIOS);
+            request('sound').flush(
+                DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('sound')),
+            );
             render();
 
             press(root, 'Escape');
@@ -243,7 +259,9 @@ describe('StudioSearchComponent', () => {
         it('совпадение подсвечено <mark>, текст ссылки целый', () => {
             const { root, type, request, render } = setup();
             type('garden');
-            request('garden').flush(DEMO_STUDIOS);
+            request('garden').flush(
+                DEMO_STUDIOS.filter((studio) => studio.name.toLowerCase().includes('garden')),
+            );
             render();
 
             expect(root.querySelector('.results mark')?.textContent).toBe('Garden');

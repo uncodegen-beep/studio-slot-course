@@ -16,8 +16,6 @@ async function enableMocking(): Promise<void> {
     await worker.start({
         // Относительный путь — от base href: на GitHub Pages сайт живёт в подпапке
         serviceWorker: { url: 'mockServiceWorker.js' },
-        // Запросы не к API (шрифты, картинки) идут в сеть как обычно
-        onUnhandledRequest: 'bypass',
         quiet: environment.production,
     });
 }

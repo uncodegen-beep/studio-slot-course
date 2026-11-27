@@ -38,9 +38,9 @@ describe('мок-база', () => {
             pricePerHour: 1500,
         });
 
-        expect(booking).toMatchObject({ id: 'b-1', status: 'PENDING', discount: 0 });
+        expect(booking).toMatchObject({ status: 'PENDING', discount: 0 });
         expect(db.listBookings()).toHaveLength(before + 1);
-        expect(db.deleteBooking('b-1')).toBe(true);
-        expect(db.deleteBooking('b-1')).toBe(false);
+        expect(db.deleteBooking(booking.id)).toBe(true);
+        expect(db.deleteBooking(booking.id)).toBe(false);
     });
 });

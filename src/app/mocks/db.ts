@@ -45,6 +45,9 @@ export function createDb(): MockDb {
         },
         listBookings: () => [...bookings.values()],
         createBooking(body) {
+            while (bookings.has(`b-${nextId}`)) {
+                nextId++;
+            }
             const booking: Booking = {
                 ...body,
                 id: `b-${nextId++}`,
