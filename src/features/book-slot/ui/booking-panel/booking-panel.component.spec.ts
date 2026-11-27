@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { provideBookingConfig } from '@features/book-slot/model/booking-config';
 
+import { SessionStore } from '@entities/session/model/session.store';
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
 import { NotifierService } from '@shared/lib/notify/notifier.service';
@@ -87,7 +88,31 @@ describe('BookingPanelComponent', () => {
     });
 
     describe('отправка заявки', () => {
+        it('владелец не может отправить заявку из панели', () => {
+            TestBed.inject(SessionStore).signIn('owner');
+            const fixture = TestBed.createComponent(HostComponent);
+            fixture.detectChanges();
+            expect(fixture.nativeElement.querySelector('.submit')).toBeNull();
+        });
+
+        it('после ошибки клиент может повторить отправку', () => {
+            TestBed.inject(SessionStore).signIn('client');
+            const fixture = TestBed.createComponent(HostComponent);
+            fixture.detectChanges();
+            const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+                '#first .submit',
+            );
+            const http = TestBed.inject(HttpTestingController);
+            button?.click();
+            http.expectOne('api/bookings').flush(null, { status: 503, statusText: 'Unavailable' });
+            fixture.detectChanges();
+            expect(button?.getAttribute('aria-busy')).toBe('false');
+            button?.click();
+            http.expectOne('api/bookings').flush({ studioName: 'Sound Garden' });
+        });
+
         it('exhaustMap: три быстрых клика — один POST', () => {
+            TestBed.inject(SessionStore).signIn('client');
             const fixture = TestBed.createComponent(HostComponent);
             fixture.detectChanges();
             const http = TestBed.inject(HttpTestingController);

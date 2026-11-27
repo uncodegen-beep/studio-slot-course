@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
@@ -73,6 +73,18 @@ describe('HeaderComponent', () => {
         expect(link(root, 'Владельцу')).toBeUndefined();
     });
 
+    it('при ошибке сервера выход всё равно закрывает локальную сессию', async () => {
+        const session = TestBed.inject(SessionStore);
+        session.signIn('owner');
+        const root = await renderAt('/owner');
+        root.querySelector<HTMLButtonElement>('.sign-out')?.click();
+        TestBed.inject(HttpTestingController)
+            .expectOne('api/auth/logout')
+            .flush(null, { status: 500, statusText: 'Error' });
+        await vi.waitFor(() => expect(TestBed.inject(Router).url).toBe('/'));
+        expect(session.accessToken()).toBeNull();
+    });
+
     it('владелец видит свой раздел, «Выйти» завершает сессию и ведёт на главную', async () => {
         TestBed.inject(SessionStore).signIn('owner');
         const fixture = TestBed.createComponent(HeaderComponent);
@@ -83,6 +95,7 @@ describe('HeaderComponent', () => {
         expect(link(root, 'Владельцу')?.classList).toContain('active');
 
         root.querySelector<HTMLButtonElement>('.sign-out')?.click();
+        TestBed.inject(HttpTestingController).expectOne('api/auth/logout').flush(null);
         await fixture.whenStable();
 
         expect(TestBed.inject(SessionStore).isSignedIn()).toBe(false);

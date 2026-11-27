@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { AuthApi } from '@entities/session/api/auth.api';
 import { SessionStore, type UserRole } from '@entities/session/model/session.store';
 
-/** Вход: /login?returnUrl=/account. Демо-кнопки ролей — настоящий вход через OAuth в модуле 06 */
+/** Вход: /login?returnUrl=/account. Демо-кнопки ролей — проверка роли в мок-API */
 @Component({
     selector: 'app-login-page',
     template: `
@@ -27,6 +28,7 @@ import { SessionStore, type UserRole } from '@entities/session/model/session.sto
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPageComponent {
+    private readonly auth = inject(AuthApi);
     private readonly session = inject(SessionStore);
     private readonly router = inject(Router);
 
@@ -36,11 +38,15 @@ export class LoginPageComponent {
     /** Только адреса своего приложения: «//evil.example» или «https://…» не принимаем */
     private readonly target = computed(() => {
         const url = this.returnUrl();
-        return url?.startsWith('/') && !url.startsWith('//') ? url : '/account';
+        return url?.startsWith('/') && !url.startsWith('//') ? url : null;
     });
 
     protected signIn(role: UserRole): void {
-        this.session.signIn(role);
-        void this.router.navigateByUrl(this.target());
+        this.auth.login(role).subscribe((session) => {
+            this.session.establish(session);
+            void this.router.navigateByUrl(
+                this.target() ?? (role === 'owner' ? '/owner' : '/account'),
+            );
+        });
     }
 }
