@@ -45,9 +45,10 @@ describe('OwnerStudioPageComponent', () => {
     const status = (root: HTMLElement): string | undefined =>
         root.querySelector('[role="status"]')?.textContent?.trim();
 
-    it('черновик берётся из данных студии, заголовок вкладки — её имя', () => {
+    it('черновик берётся из данных студии, заголовок вкладки — её имя', async () => {
         const { root } = setup();
 
+        await Promise.resolve();
         expect(root.querySelector('textarea')?.value).toBe('Есть парковка');
         expect(TestBed.inject(Title).getTitle()).toBe('Sound Garden — StudioSlot');
     });
