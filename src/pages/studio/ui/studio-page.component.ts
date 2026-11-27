@@ -8,13 +8,15 @@ import { BookingPanelComponent } from '@features/book-slot/ui/booking-panel/book
 import { formatTitle } from '@shared/lib/title/app-title.strategy';
 import type { Studio } from '@shared/model';
 
+import { NearbyStudiosComponent } from './nearby-studios.component';
+
 /**
  * Страница студии: /studios/:id. Данные загрузил studioResolver до показа страницы,
  * поэтому здесь нет загрузки и ошибки — только готовая студия во входе
  */
 @Component({
     selector: 'app-studio-page',
-    imports: [BookingPanelComponent, CurrencyPipe, DecimalPipe, RouterLink],
+    imports: [NearbyStudiosComponent, BookingPanelComponent, CurrencyPipe, DecimalPipe, RouterLink],
     templateUrl: './studio-page.component.html',
     styleUrl: './studio-page.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

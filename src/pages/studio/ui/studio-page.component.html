@@ -43,3 +43,7 @@
 <h2 id="booking">Бронирование</h2>
 <!-- Та же панель, что в каталоге, но свой экземпляр BookingDraftStore -->
 <app-booking-panel [studio]="s" />
+<app-nearby-studios
+    [city]="s.city"
+    [studioId]="s.id"
+/>
