@@ -1,5 +1,9 @@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { type ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+    type ApplicationConfig,
+    ErrorHandler,
+    provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import { inject, provideAppInitializer } from '@angular/core';
 import {
     PreloadAllModules,
@@ -23,6 +27,7 @@ import {
     loadingInterceptor,
     retryInterceptor,
 } from '@shared/api/interceptors/http.interceptors';
+import { AppErrorHandler } from '@shared/api/request-error';
 import { provideAnalytics, withConsoleSink } from '@shared/lib/analytics/provide-analytics';
 import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
 import { provideAppTitleStrategy } from '@shared/lib/title/app-title.strategy';
@@ -34,6 +39,7 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
     providers: [
         provideBrowserGlobalErrorListeners(),
+        { provide: ErrorHandler, useClass: AppErrorHandler },
         provideAppInitializer(() =>
             firstValueFrom(
                 inject(TokenRefresher)
