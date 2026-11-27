@@ -48,7 +48,7 @@ describe('OwnerStudiosPageComponent', () => {
         await render();
         expect(root.querySelector('.loading')).not.toBeNull();
 
-        http.expectOne('api/studios/nevsky-beat').flush(NEVSKY_BEAT);
+        http.expectOne('api/studios/nevsky-beat').flush(toStudioDto(NEVSKY_BEAT));
         await render();
         expect([...root.querySelectorAll('.studios a')].map((a) => a.textContent)).toEqual([
             'Sound Garden',
@@ -84,7 +84,7 @@ describe('OwnerStudiosPageComponent', () => {
             status: 500,
             statusText: 'Server Error',
         });
-        http.expectOne('api/studios/nevsky-beat').flush(NEVSKY_BEAT);
+        http.expectOne('api/studios/nevsky-beat').flush(toStudioDto(NEVSKY_BEAT));
         await render();
 
         root.querySelector<HTMLButtonElement>('.error + button')?.click();

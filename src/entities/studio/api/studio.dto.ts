@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 import type { Studio, StudioRoom } from '@shared/model';
 
 type RoomDto = Omit<StudioRoom, 'pricePerHour'> & { price_per_hour: number };
@@ -30,3 +32,19 @@ export function toStudioDto({ pricePerHour, rooms, ...studio }: Studio): StudioD
         }),
     };
 }
+
+export const studioDtoSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    city: z.string(),
+    price_per_hour: z.number(),
+    coverUrl: z.string(),
+    isOpen: z.boolean(),
+    rating: z.number().optional(),
+    featured: z.boolean().optional(),
+    isNew: z.boolean().optional(),
+    description: z.string().optional(),
+    rooms: z
+        .array(z.object({ id: z.string(), name: z.string(), price_per_hour: z.number() }))
+        .optional(),
+});
