@@ -1,4 +1,9 @@
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import {
+    provideHttpClient,
+    withFetch,
+    withInterceptors,
+    withXsrfConfiguration,
+} from '@angular/common/http';
 import {
     type ApplicationConfig,
     ErrorHandler,
@@ -66,6 +71,7 @@ export const appConfig: ApplicationConfig = {
         // HttpClient на fetch — нужен httpResource
         provideHttpClient(
             withFetch(),
+            withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' }),
             withInterceptors([
                 apiUrlInterceptor,
                 authInterceptor,
