@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 
 import { type Observable, map, shareReplay, tap } from 'rxjs';
 
-import { APP_CONFIG } from '@shared/config/app-config';
+import { LOCAL_RETRY } from '@shared/api/interceptors/http.interceptors';
 import type { Studio } from '@shared/model';
 
 import { type StudioDto, toStudio, toStudioDto } from './studio.dto';
@@ -15,7 +15,7 @@ import { type StudioDto, toStudio, toStudioDto } from './studio.dto';
 @Injectable({ providedIn: 'root' })
 export class StudiosApi {
     private readonly http = inject(HttpClient);
-    private readonly baseUrl = inject(APP_CONFIG).apiBaseUrl;
+    private readonly baseUrl = 'api';
     /** Один горячий поток на студию: повторный переход на неё не идёт в сеть */
     private readonly cache = new Map<string, Observable<Studio>>();
 
@@ -40,7 +40,10 @@ export class StudiosApi {
     /** GET /api/studios?q= — фильтрует сервер, клиенту приходят только совпадения */
     search(query: string): Observable<Studio[]> {
         return this.http
-            .get<StudioDto[]>(`${this.baseUrl}/studios`, { params: { q: query } })
+            .get<StudioDto[]>(`${this.baseUrl}/studios`, {
+                context: new HttpContext().set(LOCAL_RETRY, true),
+                params: { q: query },
+            })
             .pipe(map((rows) => rows.map(toStudio)));
     }
 
