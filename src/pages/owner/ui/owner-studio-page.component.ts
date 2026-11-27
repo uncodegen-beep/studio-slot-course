@@ -39,6 +39,7 @@ const STATUS_TEXT = {
         <p>{{ s.city }} · {{ s.isOpen ? 'принимает бронирования' : 'бронирование закрыто' }}</p>
 
         <h2>Залы и цены</h2>
+        <a [routerLink]="['rooms']">Редактировать тарифы залов</a>
         <ul class="rooms">
             @for (room of s.rooms ?? []; track room.id) {
                 <li>

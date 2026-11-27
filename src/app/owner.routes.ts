@@ -18,6 +18,16 @@ export const OWNER_ROUTES: Routes = [
                     ),
             },
             {
+                path: 'studios/:slug/rooms',
+                title: 'Залы и тарифы',
+                canActivate: [ownsStudioGuard],
+                resolve: { studio: ownerStudioResolver },
+                loadComponent: () =>
+                    import('@pages/owner/ui/room-editor.component').then(
+                        (m) => m.RoomEditorComponent,
+                    ),
+            },
+            {
                 // Сначала guard (своя ли студия), потом resolver (загрузка): чужую даже не запрашиваем
                 path: 'studios/:slug',
                 title: 'Студия',
