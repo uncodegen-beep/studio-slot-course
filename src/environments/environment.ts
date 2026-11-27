@@ -2,5 +2,7 @@
 export const environment = {
     production: true,
     apiBaseUrl: 'api',
+    // Своего сервера у StudioSlot нет: и в проде запросы обслуживает MSW (сайт — статика на GitHub Pages)
+    mockApi: true,
     analyticsToConsole: false,
 };

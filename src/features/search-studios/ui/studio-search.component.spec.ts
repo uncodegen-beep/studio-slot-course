@@ -51,9 +51,7 @@ function setup(): Setup {
             vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
         },
         request: (q) =>
-            http.expectOne(
-                (req) => req.url === 'api/studios/index.json' && req.params.get('q') === q,
-            ),
+            http.expectOne((req) => req.url === 'api/studios' && req.params.get('q') === q),
         render: () => fixture.detectChanges(),
     };
 }

@@ -43,11 +43,11 @@ describe('OwnerStudiosPageComponent', () => {
     it('rxResource + forkJoin: список появляется, когда пришли все ответы', async () => {
         const { root, http, render } = setup();
 
-        http.expectOne('api/studios/sound-garden.json').flush(SOUND_GARDEN);
+        http.expectOne('api/studios/sound-garden').flush(SOUND_GARDEN);
         await render();
         expect(root.querySelector('.loading')).not.toBeNull();
 
-        http.expectOne('api/studios/nevsky-beat.json').flush(NEVSKY_BEAT);
+        http.expectOne('api/studios/nevsky-beat').flush(NEVSKY_BEAT);
         await render();
         expect([...root.querySelectorAll('.studios a')].map((a) => a.textContent)).toEqual([
             'Sound Garden',
@@ -58,8 +58,8 @@ describe('OwnerStudiosPageComponent', () => {
     it('один запрос упал — ошибка вместо списка', async () => {
         const { root, http, render } = setup();
 
-        http.expectOne('api/studios/sound-garden.json').flush(SOUND_GARDEN);
-        http.expectOne('api/studios/nevsky-beat.json').flush('Server error', {
+        http.expectOne('api/studios/sound-garden').flush(SOUND_GARDEN);
+        http.expectOne('api/studios/nevsky-beat').flush('Server error', {
             status: 500,
             statusText: 'Server Error',
         });
@@ -79,16 +79,16 @@ describe('OwnerStudiosPageComponent', () => {
 
     it('rxResource: «Повторить» после ошибки загружает заново', async () => {
         const { root, http, render } = setup();
-        http.expectOne('api/studios/sound-garden.json').flush('Server error', {
+        http.expectOne('api/studios/sound-garden').flush('Server error', {
             status: 500,
             statusText: 'Server Error',
         });
-        http.expectOne('api/studios/nevsky-beat.json').flush(NEVSKY_BEAT);
+        http.expectOne('api/studios/nevsky-beat').flush(NEVSKY_BEAT);
         await render();
 
         root.querySelector<HTMLButtonElement>('.error + button')?.click();
         await render();
-        http.expectOne('api/studios/sound-garden.json').flush(SOUND_GARDEN);
+        http.expectOne('api/studios/sound-garden').flush(SOUND_GARDEN);
         // nevsky-beat ответил в первый раз — кэш StudiosApi (урок 58) отдаёт его без запроса
         await render();
 

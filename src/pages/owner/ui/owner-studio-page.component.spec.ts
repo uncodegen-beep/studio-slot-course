@@ -1,9 +1,9 @@
 import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 
-import { StudiosApi } from '@entities/studio/api/studios.api';
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
 import type { Studio } from '@shared/model';
@@ -15,7 +15,9 @@ const [SOUND_GARDEN] = DEMO_STUDIOS as [Studio, ...Studio[]];
 describe('OwnerStudioPageComponent', () => {
     beforeEach(() => {
         vi.useFakeTimers();
-        TestBed.configureTestingModule({ providers: [provideRouter([]), provideHttpClient()] });
+        TestBed.configureTestingModule({
+            providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+        });
     });
 
     afterEach(() => {
@@ -50,9 +52,9 @@ describe('OwnerStudioPageComponent', () => {
         expect(TestBed.inject(Title).getTitle()).toBe('Sound Garden — StudioSlot');
     });
 
-    it('autosave: пауза — «Сохраняем…», ответ — «Сохранено», один запрос на серию правок', () => {
-        const save = vi.spyOn(TestBed.inject(StudiosApi), 'updateDescription');
+    it('autosave: пауза — «Сохраняем…», ответ — «Сохранено», один PUT на серию правок', () => {
         const { root, type, render } = setup();
+        const http = TestBed.inject(HttpTestingController);
 
         type('Есть парковка и');
         vi.advanceTimersByTime(300);
@@ -61,20 +63,24 @@ describe('OwnerStudioPageComponent', () => {
         render();
         expect(status(root)).toBe('Сохраняем…');
 
-        vi.advanceTimersByTime(400);
+        const put = http.expectOne('api/studios/sound-garden');
+        expect(put.request.method).toBe('PUT');
+        expect(put.request.body).toMatchObject({
+            name: 'Sound Garden',
+            description: 'Есть парковка и кофе',
+        });
+        put.flush(put.request.body);
         render();
         expect(status(root)).toBe('Сохранено');
-        expect(save).toHaveBeenCalledExactlyOnceWith('sound-garden', 'Есть парковка и кофе');
     });
 
     it('открыли страницу и ничего не меняли — сохранения нет', () => {
-        const save = vi.spyOn(TestBed.inject(StudiosApi), 'updateDescription');
         const { root, render } = setup();
 
         vi.advanceTimersByTime(5000);
         render();
 
-        expect(save).not.toHaveBeenCalled();
+        TestBed.inject(HttpTestingController).expectNone(() => true);
         expect(status(root)).toBe('');
     });
 });

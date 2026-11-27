@@ -56,7 +56,7 @@ describe('Модуль 04 · страница своей студии', () => {
         const http = TestBed.inject(HttpTestingController);
 
         const navigation = harness.navigateByUrl('/owner/studios/sound-garden');
-        const request = await vi.waitFor(() => http.expectOne('api/studios/sound-garden.json'));
+        const request = await vi.waitFor(() => http.expectOne('api/studios/sound-garden'));
         request.flush(SOUND_GARDEN);
         await navigation;
 
@@ -69,7 +69,7 @@ describe('Модуль 04 · страница своей студии', () => {
         await RouterTestingHarness.create('/owner/studios/volga-records');
 
         expect(TestBed.inject(Router).url).toBe('/owner');
-        TestBed.inject(HttpTestingController).expectNone('api/studios/volga-records.json');
+        TestBed.inject(HttpTestingController).expectNone('api/studios/volga-records');
     });
 
     it('сервер не ответил — обратно в /owner', async () => {
@@ -77,7 +77,7 @@ describe('Модуль 04 · страница своей студии', () => {
         const http = TestBed.inject(HttpTestingController);
 
         void harness.navigateByUrl('/owner/studios/nevsky-beat');
-        const request = await vi.waitFor(() => http.expectOne('api/studios/nevsky-beat.json'));
+        const request = await vi.waitFor(() => http.expectOne('api/studios/nevsky-beat'));
         request.flush('Server error', { status: 500, statusText: 'Server Error' });
 
         // Не whenStable: на /owner список студий грузится через rxResource (урок 67),

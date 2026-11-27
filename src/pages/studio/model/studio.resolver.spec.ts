@@ -50,7 +50,7 @@ describe('studioResolver', () => {
         const http = TestBed.inject(HttpTestingController);
 
         const navigation = harness.navigateByUrl('/studios/sound-garden');
-        const request = await vi.waitFor(() => http.expectOne('api/studios/sound-garden.json'));
+        const request = await vi.waitFor(() => http.expectOne('api/studios/sound-garden'));
         // Пока ответа нет — переход не завершён
         expect(TestBed.inject(Router).url).toBe('/');
 
@@ -66,7 +66,7 @@ describe('studioResolver', () => {
         const http = TestBed.inject(HttpTestingController);
 
         void harness.navigateByUrl('/studios/nope');
-        const request = await vi.waitFor(() => http.expectOne('api/studios/nope.json'));
+        const request = await vi.waitFor(() => http.expectOne('api/studios/nope'));
         request.flush('Not found', { status: 404, statusText: 'Not Found' });
         await harness.fixture.whenStable();
 

@@ -1,30 +1,31 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 
-import { type Observable, map, timer } from 'rxjs';
+import type { Observable } from 'rxjs';
+
+import { APP_CONFIG } from '@shared/config/app-config';
 
 import type { Booking } from '../model/booking';
 
 export type NewBooking = Pick<Booking, 'studioName' | 'startsAt' | 'hours' | 'pricePerHour'>;
 
-/** Ответ «сервера» приходит не сразу — как настоящий POST */
-export const CREATE_BOOKING_MS = 800;
-
-let nextId = 1;
-
-/**
- * Бронирования. Сервера бронирований пока нет (модуль 06):
- * create имитирует POST — заявка «создаётся» через CREATE_BOOKING_MS
- */
+/** Бронирования: GET — список, POST — создать, DELETE — удалить */
 @Injectable({ providedIn: 'root' })
 export class BookingsApi {
+    private readonly http = inject(HttpClient);
+    private readonly url = `${inject(APP_CONFIG).apiBaseUrl}/bookings`;
+
+    list(): Observable<Booking[]> {
+        return this.http.get<Booking[]>(this.url);
+    }
+
+    /** POST: тело — новая бронь, ответ 201 — она же с id и статусом от сервера */
     create(draft: NewBooking): Observable<Booking> {
-        return timer(CREATE_BOOKING_MS).pipe(
-            map(() => ({
-                ...draft,
-                id: `new-${nextId++}`,
-                discount: 0,
-                status: 'PENDING' as const,
-            })),
-        );
+        return this.http.post<Booking>(this.url, draft);
+    }
+
+    /** DELETE: ответ 204 без тела — поэтому Observable<void> */
+    remove(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.url}/${id}`);
     }
 }

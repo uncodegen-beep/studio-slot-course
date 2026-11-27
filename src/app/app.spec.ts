@@ -134,8 +134,8 @@ describe('AppComponent', () => {
         session.signIn('owner');
         await harness.navigateByUrl('/owner');
         const http = TestBed.inject(HttpTestingController);
-        http.expectOne('api/studios/sound-garden.json').flush(DEMO_STUDIOS[0] ?? null);
-        http.expectOne('api/studios/nevsky-beat.json').flush(DEMO_STUDIOS[1] ?? null);
+        http.expectOne('api/studios/sound-garden').flush(DEMO_STUDIOS[0] ?? null);
+        http.expectOne('api/studios/nevsky-beat').flush(DEMO_STUDIOS[1] ?? null);
         // rxResource обновляет значение асинхронно
         await new Promise((resolve) => setTimeout(resolve));
         harness.detectChanges();
@@ -163,7 +163,7 @@ describe('AppComponent', () => {
         const http = TestBed.inject(HttpTestingController);
 
         const navigation = harness.navigateByUrl('/studio/sound-garden');
-        const request = await vi.waitFor(() => http.expectOne('api/studios/sound-garden.json'));
+        const request = await vi.waitFor(() => http.expectOne('api/studios/sound-garden'));
         request.flush(DEMO_STUDIOS[0] ?? null);
         await navigation;
 
