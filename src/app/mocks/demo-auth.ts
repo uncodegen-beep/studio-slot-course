@@ -8,6 +8,12 @@ export function createDemoAuth(): {
 } {
     let active: Session | null = null;
     let expires = 0;
+    // Только для MSW: имитация серверной refresh-сессии в пределах вкладки.
+    const key = 'studioslot.mock.refresh';
+    function remember(role: UserRole): void {
+        sessionStorage.setItem(key, JSON.stringify({ role, expires: Date.now() + 7 * 86400000 }));
+    }
+
     function issue(role: UserRole): Session {
         active = { user: demoUser(role), accessToken: crypto.randomUUID() };
         expires = Date.now() + 15 * 60_000;
@@ -29,9 +35,32 @@ export function createDemoAuth(): {
             const { role } = (await request.json()) as { role: unknown };
             if (role !== 'client' && role !== 'owner')
                 return HttpResponse.json({ message: 'Неизвестная роль' }, { status: 400 });
+            remember(role);
             return HttpResponse.json(issue(role));
         }),
+        http.post('*/api/auth/refresh', () => {
+            let grant;
+            try {
+                grant = JSON.parse(sessionStorage.getItem(key) ?? 'null') as {
+                    role: UserRole;
+                    expires: number;
+                } | null;
+            } catch {
+                grant = null;
+            }
+            if (
+                !grant ||
+                !['owner', 'client'].includes(grant.role) ||
+                !(grant.expires > Date.now())
+            ) {
+                sessionStorage.removeItem(key);
+                return HttpResponse.json({ message: 'Сессия истекла' }, { status: 401 });
+            }
+            remember(grant.role);
+            return HttpResponse.json(issue(grant.role));
+        }),
         http.post('*/api/auth/logout', () => {
+            sessionStorage.removeItem(key);
             active = null;
             return new HttpResponse(null, { status: 204 });
         }),
