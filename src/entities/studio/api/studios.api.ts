@@ -1,10 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 
-import { type Observable, shareReplay, tap } from 'rxjs';
+import { type Observable, map, shareReplay, tap } from 'rxjs';
 
 import { APP_CONFIG } from '@shared/config/app-config';
 import type { Studio } from '@shared/model';
+
+import { type StudioDto, toStudio, toStudioDto } from './studio.dto';
 
 /**
  * Доступ к данным студий. Компоненты не знают адресов и HttpClient — только методы сервиса.
@@ -23,7 +25,8 @@ export class StudiosApi {
         if (cached) {
             return cached;
         }
-        const studio$ = this.http.get<Studio>(`${this.baseUrl}/studios/${id}`).pipe(
+        const studio$ = this.http.get<StudioDto>(`${this.baseUrl}/studios/${id}`).pipe(
+            map(toStudio),
             // HttpClient холодный: каждая подписка — новый запрос. shareReplay делает поток горячим:
             // один запрос на всех подписчиков, последний ответ — новым подписчикам.
             // refCount: false — кэш живёт, даже когда подписчиков не осталось.
@@ -36,16 +39,21 @@ export class StudiosApi {
 
     /** GET /api/studios?q= — фильтрует сервер, клиенту приходят только совпадения */
     search(query: string): Observable<Studio[]> {
-        return this.http.get<Studio[]>(`${this.baseUrl}/studios`, { params: { q: query } });
+        return this.http
+            .get<StudioDto[]>(`${this.baseUrl}/studios`, { params: { q: query } })
+            .pipe(map((rows) => rows.map(toStudio)));
     }
 
     /** PUT /api/studios/:id — студия целиком; ответ — сохранённая версия */
     update(studio: Studio): Observable<Studio> {
         return (
             this.http
-                .put<Studio>(`${this.baseUrl}/studios/${studio.id}`, studio)
+                .put<StudioDto>(`${this.baseUrl}/studios/${studio.id}`, toStudioDto(studio))
                 // Данные изменились — кэш студии больше не верен
-                .pipe(tap(() => this.invalidate(studio.id)))
+                .pipe(
+                    map(toStudio),
+                    tap(() => this.invalidate(studio.id)),
+                )
         );
     }
 

@@ -6,6 +6,7 @@ import { Router, provideRouter, withComponentInputBinding } from '@angular/route
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { SessionStore } from '@entities/session/model/session.store';
+import { toStudioDto } from '@entities/studio/api/studio.dto';
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
 import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
@@ -134,8 +135,8 @@ describe('AppComponent', () => {
         session.signIn('owner');
         await harness.navigateByUrl('/owner');
         const http = TestBed.inject(HttpTestingController);
-        http.expectOne('api/studios/sound-garden').flush(DEMO_STUDIOS[0] ?? null);
-        http.expectOne('api/studios/nevsky-beat').flush(DEMO_STUDIOS[1] ?? null);
+        http.expectOne('api/studios/sound-garden').flush(DEMO_STUDIOS.map(toStudioDto)[0] ?? null);
+        http.expectOne('api/studios/nevsky-beat').flush(DEMO_STUDIOS.map(toStudioDto)[1] ?? null);
         // rxResource обновляет значение асинхронно
         await new Promise((resolve) => setTimeout(resolve));
         harness.detectChanges();
@@ -164,7 +165,7 @@ describe('AppComponent', () => {
 
         const navigation = harness.navigateByUrl('/studio/sound-garden');
         const request = await vi.waitFor(() => http.expectOne('api/studios/sound-garden'));
-        request.flush(DEMO_STUDIOS[0] ?? null);
+        request.flush(DEMO_STUDIOS.map(toStudioDto)[0] ?? null);
         await navigation;
 
         expect(TestBed.inject(Router).url).toBe('/studios/sound-garden');

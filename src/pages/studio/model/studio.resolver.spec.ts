@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
+import { toStudioDto } from '@entities/studio/api/studio.dto';
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
 import type { Studio } from '@shared/model';
@@ -54,7 +55,7 @@ describe('studioResolver', () => {
         // Пока ответа нет — переход не завершён
         expect(TestBed.inject(Router).url).toBe('/');
 
-        request.flush(SOUND_GARDEN);
+        request.flush(toStudioDto(SOUND_GARDEN));
         await navigation;
 
         expect(TestBed.inject(Router).url).toBe('/studios/sound-garden');

@@ -1,6 +1,6 @@
 import { type HttpHandler, HttpResponse, delay, http } from 'msw';
 
-import type { Studio } from '@shared/model';
+import { type StudioDto, toStudio, toStudioDto } from '@entities/studio/api/studio.dto';
 
 import { type MockDb, type NewBookingBody, createDb } from './db';
 
@@ -22,21 +22,24 @@ export function createHandlers(db: MockDb = createDb()): HttpHandler[] {
             await delay();
             const params = new URL(request.url).searchParams;
             return HttpResponse.json(
-                db.searchStudios(params.get('q') ?? '', params.get('city') ?? ''),
+                db.searchStudios(params.get('q') ?? '', params.get('city') ?? '').map(toStudioDto),
             );
         }),
 
         http.get('*/api/studios/:id', async ({ params }) => {
             await delay();
             const studio = db.getStudio(String(params['id']));
-            return studio ? HttpResponse.json(studio) : notFound('Студия не найдена');
+            return studio ? HttpResponse.json(toStudioDto(studio)) : notFound('Студия не найдена');
         }),
 
         // PUT — замена ресурса целиком: клиент присылает студию полностью
         http.put('*/api/studios/:id', async ({ params, request }) => {
             await delay();
-            const saved = db.replaceStudio(String(params['id']), (await request.json()) as Studio);
-            return saved ? HttpResponse.json(saved) : notFound('Студия не найдена');
+            const saved = db.replaceStudio(
+                String(params['id']),
+                toStudio((await request.json()) as StudioDto),
+            );
+            return saved ? HttpResponse.json(toStudioDto(saved)) : notFound('Студия не найдена');
         }),
 
         http.get('*/api/bookings', async () => {

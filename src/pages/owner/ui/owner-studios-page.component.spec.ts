@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { SessionStore } from '@entities/session/model/session.store';
+import { toStudioDto } from '@entities/studio/api/studio.dto';
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
 import type { Studio } from '@shared/model';
@@ -43,7 +44,7 @@ describe('OwnerStudiosPageComponent', () => {
     it('rxResource + forkJoin: список появляется, когда пришли все ответы', async () => {
         const { root, http, render } = setup();
 
-        http.expectOne('api/studios/sound-garden').flush(SOUND_GARDEN);
+        http.expectOne('api/studios/sound-garden').flush(toStudioDto(SOUND_GARDEN));
         await render();
         expect(root.querySelector('.loading')).not.toBeNull();
 
@@ -58,7 +59,7 @@ describe('OwnerStudiosPageComponent', () => {
     it('один запрос упал — ошибка вместо списка', async () => {
         const { root, http, render } = setup();
 
-        http.expectOne('api/studios/sound-garden').flush(SOUND_GARDEN);
+        http.expectOne('api/studios/sound-garden').flush(toStudioDto(SOUND_GARDEN));
         http.expectOne('api/studios/nevsky-beat').flush('Server error', {
             status: 500,
             statusText: 'Server Error',
@@ -88,7 +89,7 @@ describe('OwnerStudiosPageComponent', () => {
 
         root.querySelector<HTMLButtonElement>('.error + button')?.click();
         await render();
-        http.expectOne('api/studios/sound-garden').flush(SOUND_GARDEN);
+        http.expectOne('api/studios/sound-garden').flush(toStudioDto(SOUND_GARDEN));
         // nevsky-beat ответил в первый раз — кэш StudiosApi (урок 58) отдаёт его без запроса
         await render();
 
