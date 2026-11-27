@@ -17,6 +17,7 @@ import { createSlotPrice } from '@features/book-slot/model/slot-price';
 
 import { BookingsApi, type NewBooking } from '@entities/booking/api/bookings.api';
 import { SessionStore } from '@entities/session/model/session.store';
+import { roomSlots } from '@entities/studio/api/room-slots';
 
 import { requestErrorMessage } from '@shared/api/request-error';
 import { NotifierService } from '@shared/lib/notify/notifier.service';
@@ -65,6 +66,12 @@ export class BookingPanelComponent {
         computation: (rooms, previous) =>
             rooms.find((room) => room.id === previous?.value?.id) ?? rooms[0] ?? null,
     });
+
+    protected readonly showSchedule = signal(false);
+    protected readonly slots = roomSlots(
+        () => this.studio().id,
+        () => (this.showSchedule() ? this.selectedRoom()?.id : undefined),
+    );
 
     protected readonly price = createSlotPrice(
         this.selectedRoom,

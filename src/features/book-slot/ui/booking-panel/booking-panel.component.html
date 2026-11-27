@@ -17,6 +17,32 @@
 
 @if (selectedRoom(); as room) {
     <div class="estimate">
+        <button
+            type="button"
+            (click)="showSchedule.set(true)"
+        >
+            Расписание зала
+        </button>
+        @if (slots.isLoading()) {
+            <p>Загрузка расписания…</p>
+        } @else if (slots.error()) {
+            <button
+                type="button"
+                (click)="slots.reload()"
+            >
+                Повторить загрузку расписания
+            </button>
+        } @else if (slots.hasValue()) {
+            <p>
+                Начало слотов:
+                @for (hour of slots.value(); track hour) {
+                    <span>{{ hour }}:00 </span>
+                } @empty {
+                    Нет слотов
+                }
+            </p>
+        }
+
         <!-- Двусторонняя привязка прямо к сигналу стора: draft.hours -->
         <app-duration-picker
             label="Длительность сессии"

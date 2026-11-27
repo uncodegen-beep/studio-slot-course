@@ -1,5 +1,7 @@
 import { type HttpHandler, HttpResponse, delay, http } from 'msw';
 
+import { DEFAULT_BOOKING_CONFIG, startHoursOf } from '@features/book-slot/model/booking-config';
+
 import { type StudioDto, toStudio, toStudioDto } from '@entities/studio/api/studio.dto';
 
 import { type MockDb, type NewBookingBody, createDb } from './db';
@@ -33,6 +35,13 @@ export function createHandlers(db: MockDb = createDb()): HttpHandler[] {
             await delay();
             const studio = db.getStudio(String(params['id']));
             return studio ? HttpResponse.json(toStudioDto(studio)) : notFound('Студия не найдена');
+        }),
+
+        http.get('*/api/studios/:studioId/rooms/:roomId/slots', ({ params }) => {
+            const studio = db.getStudio(String(params['studioId']));
+            if (!studio?.rooms?.some((room) => room.id === params['roomId']))
+                return notFound('Зал не найден');
+            return HttpResponse.json(studio.isOpen ? startHoursOf(DEFAULT_BOOKING_CONFIG) : []);
         }),
 
         // PUT — замена ресурса целиком: клиент присылает студию полностью
