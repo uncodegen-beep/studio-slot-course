@@ -9,6 +9,7 @@ import {
     linkedSignal,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 
@@ -29,7 +30,7 @@ const STATUS_TEXT = {
 /** /owner/studios/:slug — своя студия владельца. Данные — от ownerStudioResolver */
 @Component({
     selector: 'app-owner-studio-page',
-    imports: [CurrencyPipe, RouterLink],
+    imports: [FormsModule, CurrencyPipe, RouterLink],
     template: `
         <a routerLink="/owner">← Мои студии</a>
 
@@ -53,10 +54,10 @@ const STATUS_TEXT = {
         <label class="description">
             <span>Что важно знать перед бронированием</span>
             <textarea
-                #area
+                name="description"
                 rows="4"
-                [value]="description()"
-                (input)="description.set(area.value)"
+                [ngModel]="description()"
+                (ngModelChange)="description.set($event)"
             ></textarea>
         </label>
         <!-- role="status": экранный диктор сообщит «Сохранено», не перебивая ввод -->
