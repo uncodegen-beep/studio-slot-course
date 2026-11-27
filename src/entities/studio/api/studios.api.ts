@@ -1,16 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 
-import { type Observable, map, shareReplay, tap, timer } from 'rxjs';
-
-import { DEFAULT_STUDIO_FILTERS, filterStudios } from '@entities/studio/model/studio-filters';
+import { type Observable, shareReplay, tap } from 'rxjs';
 
 import { APP_CONFIG } from '@shared/config/app-config';
 import type { Studio } from '@shared/model';
 
 /**
  * Доступ к данным студий. Компоненты не знают адресов и HttpClient — только методы сервиса.
- * providedIn: 'root' — один экземпляр, создаётся при первом inject и не попадёт в бандл, если не нужен
+ * Запросы обслуживает мок-API на MSW (урок 70); с настоящим сервером код не изменится
  */
 @Injectable({ providedIn: 'root' })
 export class StudiosApi {
@@ -19,13 +17,13 @@ export class StudiosApi {
     /** Один горячий поток на студию: повторный переход на неё не идёт в сеть */
     private readonly cache = new Map<string, Observable<Studio>>();
 
-    /** Пока API нет — JSON-заглушка из public/api */
+    /** GET /api/studios/:id */
     getById(id: string): Observable<Studio> {
         const cached = this.cache.get(id);
         if (cached) {
             return cached;
         }
-        const studio$ = this.http.get<Studio>(`${this.baseUrl}/studios/${id}.json`).pipe(
+        const studio$ = this.http.get<Studio>(`${this.baseUrl}/studios/${id}`).pipe(
             // HttpClient холодный: каждая подписка — новый запрос. shareReplay делает поток горячим:
             // один запрос на всех подписчиков, последний ответ — новым подписчикам.
             // refCount: false — кэш живёт, даже когда подписчиков не осталось.
@@ -36,30 +34,22 @@ export class StudiosApi {
         return studio$;
     }
 
-    /**
-     * Поиск по названию и городу. Запрос уходит с ?q=, но статичный JSON его не понимает —
-     * пока сервера нет, фильтруем сами. С настоящим API map уйдёт, а сигнатура останется
-     */
+    /** GET /api/studios?q= — фильтрует сервер, клиенту приходят только совпадения */
     search(query: string): Observable<Studio[]> {
-        return this.http
-            .get<Studio[]>(`${this.baseUrl}/studios/index.json`, { params: { q: query } })
-            .pipe(map((studios) => filterStudios(studios, query, DEFAULT_STUDIO_FILTERS)));
+        return this.http.get<Studio[]>(`${this.baseUrl}/studios`, { params: { q: query } });
     }
 
-    /**
-     * Сохранить описание студии. Сервера с записью пока нет — ответ имитируем через 400 мс.
-     * Настоящий PUT появится с мок-API в уроке 70; сигнатура метода не изменится
-     */
-    updateDescription(id: string, description: string): Observable<string> {
-        return timer(400).pipe(
-            // «Сервер» отвечает сохранённым текстом
-            map(() => description),
-            // Данные изменились — кэш студии больше не верен
-            tap(() => this.invalidate(id)),
+    /** PUT /api/studios/:id — студия целиком; ответ — сохранённая версия */
+    update(studio: Studio): Observable<Studio> {
+        return (
+            this.http
+                .put<Studio>(`${this.baseUrl}/studios/${studio.id}`, studio)
+                // Данные изменились — кэш студии больше не верен
+                .pipe(tap(() => this.invalidate(studio.id)))
         );
     }
 
-    /** Данные студии изменились (урок 92: редактор зала) — следующий запрос пойдёт в сеть */
+    /** Данные студии изменились — следующий запрос пойдёт в сеть */
     invalidate(id: string): void {
         this.cache.delete(id);
     }

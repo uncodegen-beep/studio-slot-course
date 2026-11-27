@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
@@ -12,7 +14,14 @@ import { StudioPageComponent } from './studio-page.component';
 const [SOUND_GARDEN, , VOLGA] = DEMO_STUDIOS as [Studio, Studio, Studio];
 
 function render(studio: Studio): HTMLElement {
-    TestBed.configureTestingModule({ providers: [provideRouter([]), provideRuLocale()] });
+    TestBed.configureTestingModule({
+        providers: [
+            provideRouter([]),
+            provideRuLocale(),
+            provideHttpClient(),
+            provideHttpClientTesting(),
+        ],
+    });
     const fixture = TestBed.createComponent(StudioPageComponent);
     // Так роутер передаёт результат resolver во вход
     fixture.componentRef.setInput('studio', studio);

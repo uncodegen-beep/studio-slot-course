@@ -101,7 +101,7 @@ export class OwnerStudioPageComponent {
     private readonly status = toSignal(
         toObservable(this.description).pipe(
             skip(1),
-            autosave((text) => this.api.updateDescription(this.studio().id, text)),
+            autosave((text) => this.api.update({ ...this.studio(), description: text })),
         ),
     );
     protected readonly statusText = computed(() => {

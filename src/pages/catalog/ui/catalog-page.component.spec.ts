@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef, ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
@@ -46,7 +48,10 @@ function setup(params: { city?: string; onlyOpen?: string } = {}): Setup {
 describe('CatalogPageComponent', () => {
     beforeEach(() => {
         // в шаблоне есть routerLink — нужен роутер
-        TestBed.configureTestingModule({ providers: [provideRouter([])] });
+        // В каталоге панель бронирования — ей нужен HttpClient
+        TestBed.configureTestingModule({
+            providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+        });
     });
 
     it('по умолчанию показывает рекомендуемую студию и список', () => {

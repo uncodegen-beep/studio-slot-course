@@ -1,9 +1,10 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { provideBookingConfig } from '@features/book-slot/model/booking-config';
 
-import { CREATE_BOOKING_MS } from '@entities/booking/api/bookings.api';
 import { DEMO_STUDIOS } from '@entities/studio/model/studios.demo';
 
 import { NotifierService } from '@shared/lib/notify/notifier.service';
@@ -30,6 +31,13 @@ class HostComponent {
 }
 
 describe('BookingPanelComponent', () => {
+    // Панель отправляет заявку через BookingsApi — ему нужен HttpClient
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [provideHttpClient(), provideHttpClientTesting()],
+        });
+    });
+
     it('providers: у каждой панели свой BookingDraftStore', async () => {
         const fixture = TestBed.createComponent(HostComponent);
         await fixture.whenStable();
@@ -79,17 +87,10 @@ describe('BookingPanelComponent', () => {
     });
 
     describe('отправка заявки', () => {
-        beforeEach(() => {
-            vi.useFakeTimers();
-        });
-
-        afterEach(() => {
-            vi.useRealTimers();
-        });
-
-        it('exhaustMap: три быстрых клика — одна заявка', () => {
+        it('exhaustMap: три быстрых клика — один POST', () => {
             const fixture = TestBed.createComponent(HostComponent);
             fixture.detectChanges();
+            const http = TestBed.inject(HttpTestingController);
             const notices: string[] = [];
             TestBed.inject(NotifierService).notices$.subscribe((notice) =>
                 notices.push(notice.text),
@@ -104,14 +105,17 @@ describe('BookingPanelComponent', () => {
             fixture.detectChanges();
             expect(button?.textContent?.trim()).toBe('Отправляем…');
 
-            vi.advanceTimersByTime(CREATE_BOOKING_MS);
+            const post = http.expectOne('api/bookings');
+            expect(post.request.method).toBe('POST');
+            expect(post.request.body).toMatchObject({ studioName: 'Sound Garden', hours: 2 });
+            post.flush({ ...post.request.body, id: 'b-1', discount: 0, status: 'PENDING' });
             fixture.detectChanges();
             expect(notices).toEqual(['Заявка в Sound Garden отправлена']);
             expect(button?.textContent?.trim()).toBe('Отправить заявку');
 
-            // Первая заявка завершилась — следующий клик снова работает
+            // Первая заявка завершилась — следующий клик снова отправляет
             button?.click();
-            vi.advanceTimersByTime(CREATE_BOOKING_MS);
+            http.expectOne('api/bookings').flush({ id: 'b-2', studioName: 'Sound Garden' });
             expect(notices).toHaveLength(2);
         });
     });

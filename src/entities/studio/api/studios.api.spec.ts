@@ -9,7 +9,7 @@ import type { Studio } from '@shared/model';
 import { StudiosApi } from './studios.api';
 
 const [SOUND_GARDEN] = DEMO_STUDIOS as [Studio, ...Studio[]];
-const URL = 'api/studios/sound-garden.json';
+const URL = 'api/studios/sound-garden';
 
 describe('StudiosApi', () => {
     let api: StudiosApi;
@@ -27,11 +27,11 @@ describe('StudiosApi', () => {
         http.verify();
     });
 
-    it('getById запрашивает JSON студии', () => {
+    it('getById — GET /api/studios/:id', () => {
         let name = '';
 
         api.getById('nevsky-beat').subscribe((studio) => (name = studio.name));
-        http.expectOne('api/studios/nevsky-beat.json').flush({ name: 'Nevsky Beat' });
+        http.expectOne('api/studios/nevsky-beat').flush({ name: 'Nevsky Beat' });
 
         expect(name).toBe('Nevsky Beat');
     });
@@ -78,14 +78,34 @@ describe('StudiosApi', () => {
         http.expectOne(URL).flush(SOUND_GARDEN);
     });
 
-    it('search: запрос с ?q= и студии по названию или городу', () => {
+    it('search — GET /api/studios?q=, фильтрует сервер', () => {
         let names: string[] = [];
 
         api.search('казань').subscribe((studios) => (names = studios.map((studio) => studio.name)));
-        http.expectOne(
-            (req) => req.url === 'api/studios/index.json' && req.params.get('q') === 'казань',
-        ).flush(DEMO_STUDIOS);
+        const request = http.expectOne(
+            (req) => req.url === 'api/studios' && req.params.get('q') === 'казань',
+        );
+        request.flush(DEMO_STUDIOS.filter((studio) => studio.city === 'Казань'));
 
+        expect(request.request.method).toBe('GET');
         expect(names).toEqual(['Volga Records']);
+    });
+
+    it('update — PUT студии целиком и сброс кэша', () => {
+        api.getById('sound-garden').subscribe();
+        http.expectOne(URL).flush(SOUND_GARDEN);
+
+        api.update({ ...SOUND_GARDEN, description: 'Есть парковка' }).subscribe();
+        const put = http.expectOne(URL);
+        expect(put.request.method).toBe('PUT');
+        expect(put.request.body).toMatchObject({
+            id: 'sound-garden',
+            description: 'Есть парковка',
+        });
+        put.flush({ ...SOUND_GARDEN, description: 'Есть парковка' });
+
+        // Кэш сброшен — свежие данные с сервера
+        api.getById('sound-garden').subscribe();
+        http.expectOne(URL).flush(SOUND_GARDEN);
     });
 });

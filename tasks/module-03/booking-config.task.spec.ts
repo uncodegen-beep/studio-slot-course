@@ -1,5 +1,7 @@
 // Задание модуля 03: конфиг бронирования через InjectionToken и provide-функцию.
 // Функций ещё нет — они описаны интерфейсом ниже: тест компилируется, но падает, пока их не сделать.
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import type { EnvironmentProviders } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
@@ -47,6 +49,9 @@ describe('Модуль 03 · конфиг бронирования', () => {
     it('панель бронирования берёт часы начала и длительности из конфига', async () => {
         TestBed.configureTestingModule({
             providers: [
+                // С урока 70 панель отправляет заявки по HTTP
+                provideHttpClient(),
+                provideHttpClientTesting(),
                 task.provideBookingConfig({
                     openHour: 8,
                     closeHour: 12,
