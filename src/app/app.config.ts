@@ -12,6 +12,7 @@ import {
 import { provideBookingConfig } from '@features/book-slot/model/booking-config';
 import { providePricing, withPromoFromQuery } from '@features/book-slot/model/provide-pricing';
 
+import { authInterceptor } from '@shared/api/interceptors/auth.interceptor';
 import {
     apiUrlInterceptor,
     loadingInterceptor,
@@ -47,7 +48,12 @@ export const appConfig: ApplicationConfig = {
         // HttpClient на fetch — нужен httpResource
         provideHttpClient(
             withFetch(),
-            withInterceptors([apiUrlInterceptor, loadingInterceptor, retryInterceptor]),
+            withInterceptors([
+                apiUrlInterceptor,
+                authInterceptor,
+                loadingInterceptor,
+                retryInterceptor,
+            ]),
         ),
         provideRuLocale(),
         // ?promo в адресе включает промо-тариф

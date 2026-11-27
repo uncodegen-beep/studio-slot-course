@@ -14,22 +14,14 @@ describe('SessionStore', () => {
         expect(session.role()).toBeNull();
     });
 
-    it('signIn и signOut сохраняются в localStorage', () => {
+    it('токен остаётся в памяти и очищается при выходе', () => {
         const session = TestBed.inject(SessionStore);
-
         session.signIn('owner');
-        TestBed.tick();
-        expect(JSON.parse(localStorage.getItem('studioslot.session') ?? 'null')).toEqual({
-            name: 'Владелец студии',
-            role: 'owner',
-            studioIds: ['sound-garden', 'nevsky-beat'],
-        });
-
-        session.signOut();
-        TestBed.tick();
+        expect(session.accessToken()).toBeTruthy();
         expect(localStorage.getItem('studioslot.session')).toBeNull();
+        session.signOut();
+        expect(session.accessToken()).toBeNull();
     });
-
     it('битые данные в хранилище — не вошёл', () => {
         localStorage.setItem('studioslot.session', '{"role":"admin"}');
 
