@@ -1,5 +1,5 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { StudiosApi } from '@entities/studio/api/studios.api';
@@ -25,6 +25,14 @@ import type { Studio } from '@shared/model';
                                 type="number"
                                 formControlName="pricePerHour"
                         /></label>
+                        @if (row.controls.name.touched && row.controls.name.invalid) {
+                            <p>Введите название зала.</p>
+                        }
+                        @if (
+                            row.controls.pricePerHour.touched && row.controls.pricePerHour.invalid
+                        ) {
+                            <p>Введите цену от 1 рубля.</p>
+                        }
                     </fieldset>
                 }
             </div>
@@ -46,8 +54,14 @@ export class RoomEditorComponent {
                         (room) =>
                             new FormGroup({
                                 id: this.builder.control(room.id),
-                                name: this.builder.control(room.name),
-                                pricePerHour: this.builder.control(room.pricePerHour),
+                                name: this.builder.control(room.name, [
+                                    Validators.required,
+                                    Validators.pattern(/\S/),
+                                ]),
+                                pricePerHour: this.builder.control(room.pricePerHour, [
+                                    Validators.required,
+                                    Validators.min(1),
+                                ]),
                             }),
                     ),
                 ),
@@ -55,6 +69,10 @@ export class RoomEditorComponent {
     );
     protected save(): void {
         if (this.saving()) return;
+        if (this.form().invalid) {
+            this.form().markAllAsTouched();
+            return;
+        }
         const studio = this.studio();
         const rooms = this.form().getRawValue().rooms;
         this.saving.set(true);
