@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
+import { SessionStore } from '@entities/session/model/session.store';
+
 import { AccountLayoutComponent } from './account-layout.component';
 
 @Component({ template: '<h1>Бронирования</h1>', changeDetection: ChangeDetectionStrategy.OnPush })
@@ -27,6 +29,7 @@ describe('AccountLayoutComponent', () => {
                 ]),
             ],
         });
+        TestBed.inject(SessionStore).signIn('client');
     });
 
     it('дочерняя страница — во вложенном outlet, меню общее', async () => {

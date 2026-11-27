@@ -9,13 +9,14 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { Subject, exhaustMap, tap } from 'rxjs';
+import { EMPTY, Subject, catchError, exhaustMap, finalize } from 'rxjs';
 
 import { BOOKING_CONFIG, injectStartHours } from '@features/book-slot/model/booking-config';
 import { BookingDraftStore } from '@features/book-slot/model/booking-draft.store';
 import { createSlotPrice } from '@features/book-slot/model/slot-price';
 
 import { BookingsApi, type NewBooking } from '@entities/booking/api/bookings.api';
+import { SessionStore } from '@entities/session/model/session.store';
 
 import { NotifierService } from '@shared/lib/notify/notifier.service';
 import { PluralPipe } from '@shared/lib/plural/plural.pipe';
@@ -70,6 +71,7 @@ export class BookingPanelComponent {
         this.draft.startHour,
     );
 
+    protected readonly session = inject(SessionStore);
     private readonly bookings = inject(BookingsApi);
     private readonly notifier = inject(NotifierService);
     /** Клики «Отправить заявку» */
@@ -79,14 +81,23 @@ export class BookingPanelComponent {
     constructor() {
         this.submits
             .pipe(
-                tap(() => this.submitting.set(true)),
                 // exhaustMap: пока заявка отправляется, новые клики игнорируются — двойной клик
                 // не создаст две брони. switchMap отменил бы первую, mergeMap отправил бы обе
-                exhaustMap((draft) => this.bookings.create(draft)),
+                exhaustMap((draft) => {
+                    this.submitting.set(true);
+                    return this.bookings.create(draft).pipe(
+                        catchError(() => {
+                            this.notifier.notify(
+                                'Не удалось отправить заявку. Попробуйте ещё раз.',
+                            );
+                            return EMPTY;
+                        }),
+                        finalize(() => this.submitting.set(false)),
+                    );
+                }),
                 takeUntilDestroyed(),
             )
             .subscribe((booking) => {
-                this.submitting.set(false);
                 this.notifier.notify(`Заявка в ${booking.studioName} отправлена`);
             });
     }

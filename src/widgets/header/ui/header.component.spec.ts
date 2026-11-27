@@ -73,6 +73,18 @@ describe('HeaderComponent', () => {
         expect(link(root, 'Владельцу')).toBeUndefined();
     });
 
+    it('при ошибке сервера выход всё равно закрывает локальную сессию', async () => {
+        const session = TestBed.inject(SessionStore);
+        session.signIn('owner');
+        const root = await renderAt('/owner');
+        root.querySelector<HTMLButtonElement>('.sign-out')?.click();
+        TestBed.inject(HttpTestingController)
+            .expectOne('api/auth/logout')
+            .flush(null, { status: 500, statusText: 'Error' });
+        await vi.waitFor(() => expect(TestBed.inject(Router).url).toBe('/'));
+        expect(session.accessToken()).toBeNull();
+    });
+
     it('владелец видит свой раздел, «Выйти» завершает сессию и ведёт на главную', async () => {
         TestBed.inject(SessionStore).signIn('owner');
         const fixture = TestBed.createComponent(HeaderComponent);

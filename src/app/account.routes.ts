@@ -1,6 +1,9 @@
-import type { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, type Routes } from '@angular/router';
 
 import { AccountLayoutComponent } from '@pages/account/ui/account-layout.component';
+
+import { SessionStore } from '@entities/session/model/session.store';
 
 /**
  * Раздел «Личный кабинет»: /account/…
@@ -15,6 +18,11 @@ export const ACCOUNT_ROUTES: Routes = [
             { path: '', pathMatch: 'full', redirectTo: 'bookings' },
             {
                 path: 'bookings',
+                canActivate: [
+                    () =>
+                        inject(SessionStore).role() === 'client' ||
+                        inject(Router).parseUrl('/account/favorites'),
+                ],
                 title: 'Мои бронирования',
                 loadComponent: () =>
                     import('@pages/bookings/ui/bookings-page.component').then(

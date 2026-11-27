@@ -104,6 +104,19 @@ describe('AppComponent', () => {
         expect(harness.routeNativeElement?.querySelector('.page h1')).not.toBeNull();
     });
 
+    it.each(['/account', '/account/bookings'])(
+        'владелец из %s попадает в избранное',
+        async (url) => {
+            TestBed.inject(SessionStore).signIn('owner');
+            const harness = await RouterTestingHarness.create(url);
+            expect(TestBed.inject(Router).url).toBe('/account/favorites');
+            expect(
+                harness.routeNativeElement?.querySelector('a[href="/account/bookings"]'),
+            ).toBeNull();
+            TestBed.inject(HttpTestingController).expectNone('api/bookings');
+        },
+    );
+
     it('старый адрес /bookings ведёт в кабинет', async () => {
         TestBed.inject(SessionStore).signIn('client');
         await RouterTestingHarness.create('/bookings');
