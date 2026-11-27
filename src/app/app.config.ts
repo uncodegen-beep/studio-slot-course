@@ -1,5 +1,6 @@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { type ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { inject, provideAppInitializer } from '@angular/core';
 import {
     PreloadAllModules,
     provideRouter,
@@ -9,8 +10,12 @@ import {
     withViewTransitions,
 } from '@angular/router';
 
+import { catchError, firstValueFrom, of } from 'rxjs';
+
 import { provideBookingConfig } from '@features/book-slot/model/booking-config';
 import { providePricing, withPromoFromQuery } from '@features/book-slot/model/provide-pricing';
+
+import { TokenRefresher } from '@entities/session/api/token-refresher';
 
 import { authInterceptor } from '@shared/api/interceptors/auth.interceptor';
 import {
@@ -29,6 +34,13 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
     providers: [
         provideBrowserGlobalErrorListeners(),
+        provideAppInitializer(() =>
+            firstValueFrom(
+                inject(TokenRefresher)
+                    .refresh()
+                    .pipe(catchError(() => of(null))),
+            ),
+        ),
         // withComponentInputBinding: параметр :id маршрута приходит во вход id() страницы
         // withPreloading: после загрузки приложения ленивые чанки докачиваются в фоне
         provideRouter(

@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 
 import type { Observable } from 'rxjs';
 
-import { SKIP_AUTH } from '@shared/api/interceptors/auth.interceptor';
+import { SKIP_AUTH } from '@shared/api/interceptors/skip-auth';
 
 import type { Session, UserRole } from '../model/session.store';
 
@@ -15,6 +15,13 @@ export class AuthApi {
             'api/auth/demo',
             { role },
             { context: new HttpContext().set(SKIP_AUTH, true) },
+        );
+    }
+    refresh(): Observable<Session> {
+        return this.http.post<Session>(
+            'api/auth/refresh',
+            {},
+            { context: new HttpContext().set(SKIP_AUTH, true), withCredentials: true },
         );
     }
     logout(): Observable<void> {

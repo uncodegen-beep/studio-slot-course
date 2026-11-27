@@ -28,13 +28,22 @@ export class SessionStore {
     readonly accessToken = computed(() => this.current()?.accessToken ?? null);
     readonly isSignedIn = computed(() => this.current() !== null);
     readonly role = computed(() => this.user()?.role ?? null);
+    private version = 0;
+    get sessionVersion(): number {
+        return this.version;
+    }
+    renew(session: Session): void {
+        this.current.set(session);
+    }
     establish(session: Session): void {
+        this.version++;
         this.current.set(session);
     }
     signIn(role: UserRole): void {
         this.establish({ user: demoUser(role), accessToken: crypto.randomUUID() });
     }
     signOut(): void {
+        this.version++;
         this.current.set(null);
     }
 }
