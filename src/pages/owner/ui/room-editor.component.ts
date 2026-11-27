@@ -1,5 +1,5 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
-import { FormArray, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { StudiosApi } from '@entities/studio/api/studios.api';
@@ -34,6 +34,7 @@ import type { Studio } from '@shared/model';
 })
 export class RoomEditorComponent {
     readonly studio = input.required<Studio>();
+    private readonly builder = inject(FormBuilder).nonNullable;
     private readonly api = inject(StudiosApi);
     protected readonly status = signal('');
     protected readonly saving = signal(false);
@@ -44,9 +45,9 @@ export class RoomEditorComponent {
                     (this.studio().rooms ?? []).map(
                         (room) =>
                             new FormGroup({
-                                id: new FormControl(room.id),
-                                name: new FormControl(room.name),
-                                pricePerHour: new FormControl(room.pricePerHour),
+                                id: this.builder.control(room.id),
+                                name: this.builder.control(room.name),
+                                pricePerHour: this.builder.control(room.pricePerHour),
                             }),
                     ),
                 ),
@@ -55,13 +56,7 @@ export class RoomEditorComponent {
     protected save(): void {
         if (this.saving()) return;
         const studio = this.studio();
-        const rooms = this.form()
-            .getRawValue()
-            .rooms.map((room) => ({
-                id: room.id ?? '',
-                name: room.name ?? '',
-                pricePerHour: room.pricePerHour ?? 0,
-            }));
+        const rooms = this.form().getRawValue().rooms;
         this.saving.set(true);
         this.status.set('');
         this.api
