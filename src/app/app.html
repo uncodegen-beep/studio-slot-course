@@ -1,5 +1,5 @@
 <!-- Пока resolver грузит данные, старая страница остаётся на экране — показываем, что переход идёт -->
-@if (navigating()) {
+@if (navigating() || loading.active()) {
     <div
         class="progress"
         role="progressbar"

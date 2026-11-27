@@ -3,8 +3,6 @@ import { Injectable, inject } from '@angular/core';
 
 import type { Observable } from 'rxjs';
 
-import { APP_CONFIG } from '@shared/config/app-config';
-
 import type { Booking } from '../model/booking';
 
 export type NewBooking = Pick<Booking, 'studioName' | 'startsAt' | 'hours' | 'pricePerHour'>;
@@ -13,7 +11,7 @@ export type NewBooking = Pick<Booking, 'studioName' | 'startsAt' | 'hours' | 'pr
 @Injectable({ providedIn: 'root' })
 export class BookingsApi {
     private readonly http = inject(HttpClient);
-    private readonly url = `${inject(APP_CONFIG).apiBaseUrl}/bookings`;
+    private readonly url = 'api/bookings';
 
     list(): Observable<Booking[]> {
         return this.http.get<Booking[]>(this.url);

@@ -9,6 +9,7 @@ import { FooterComponent } from '@widgets/footer/ui/footer.component';
 import { HeaderComponent } from '@widgets/header/ui/header.component';
 import { ToastComponent } from '@widgets/toast/ui/toast.component';
 
+import { GlobalLoading } from '@shared/api/interceptors/http.interceptors';
 import { online$ } from '@shared/lib/network/online';
 
 @Component({
@@ -19,6 +20,7 @@ import { online$ } from '@shared/lib/network/online';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
+    protected readonly loading = inject(GlobalLoading);
     private readonly router = inject(Router);
 
     /** Идёт переход — например, resolver ждёт ответ сервера. Сигнал роутера, без подписок */

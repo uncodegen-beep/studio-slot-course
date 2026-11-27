@@ -1,4 +1,4 @@
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { type ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import {
     PreloadAllModules,
@@ -12,6 +12,11 @@ import {
 import { provideBookingConfig } from '@features/book-slot/model/booking-config';
 import { providePricing, withPromoFromQuery } from '@features/book-slot/model/provide-pricing';
 
+import {
+    apiUrlInterceptor,
+    loadingInterceptor,
+    retryInterceptor,
+} from '@shared/api/interceptors/http.interceptors';
 import { provideAnalytics, withConsoleSink } from '@shared/lib/analytics/provide-analytics';
 import { provideRuLocale } from '@shared/lib/locale/provide-ru-locale';
 import { provideAppTitleStrategy } from '@shared/lib/title/app-title.strategy';
@@ -40,7 +45,10 @@ export const appConfig: ApplicationConfig = {
         // «Страница — StudioSlot» во вкладке браузера
         provideAppTitleStrategy(),
         // HttpClient на fetch — нужен httpResource
-        provideHttpClient(withFetch()),
+        provideHttpClient(
+            withFetch(),
+            withInterceptors([apiUrlInterceptor, loadingInterceptor, retryInterceptor]),
+        ),
         provideRuLocale(),
         // ?promo в адресе включает промо-тариф
         providePricing(withPromoFromQuery()),
